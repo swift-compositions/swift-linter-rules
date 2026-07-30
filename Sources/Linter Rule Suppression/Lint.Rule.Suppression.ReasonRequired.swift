@@ -15,19 +15,19 @@ internal import SwiftSyntax
 /// Requires prose on every well-formed inline suppression directive.
 /// Citation: `[LINT-SUPPRESS-002]`.
 extension Lint.Rule {
-  /// Requires prose on every well-formed inline suppression directive.
-  public static let `suppression reason required` = Lint.Rule(
-    id: "suppression reason required",
-    default: .error,
-    findings: { source, severity in
-      suppressionReasonRequiredFindings(
-        tree: source.tree,
-        file: source.file,
-        converter: source.converter,
-        severity: severity
-      )
-    }
-  )
+    /// Requires prose on every well-formed inline suppression directive.
+    public static let `suppression reason required` = Lint.Rule(
+        id: "suppression reason required",
+        default: .error,
+        findings: { source, severity in
+            suppressionReasonRequiredFindings(
+                tree: source.tree,
+                file: source.file,
+                converter: source.converter,
+                severity: severity
+            )
+        }
+    )
 }
 
 @usableFromInline
@@ -74,37 +74,39 @@ internal func suppressionReasonRequiredFindings(
     var findings: [Diagnostic.Record] = []
     let lines = tree.description.split(separator: "\n", omittingEmptySubsequences: false)
 
-  for comment in comments
-    where suppressionReasonRequiredPrefixes.contains(where: comment.text.hasPrefix)
-  {
-    guard let prefix = suppressionReasonRequiredPrefixes.first(where: comment.text.hasPrefix),
-      comment.text.dropFirst(prefix.count).contains(where: { !$0.isWhitespace })
-    else { continue }
+    for comment in comments where suppressionReasonRequiredPrefixes.contains(where: comment.text.hasPrefix) {
+        guard let prefix = suppressionReasonRequiredPrefixes.first(where: comment.text.hasPrefix),
+              comment.text.dropFirst(prefix.count).contains(where: { !$0.isWhitespace })
+        else { continue }
 
-    // A continuation is immediately associated only when the physical
-    // line directly below the directive is itself a REASON comment.
-    // This excludes blank lines, intervening code (including code with a
-    // trailing comment), and any later REASON that cannot repair an
-    // empty immediate continuation.
-    guard comment.line < lines.count else {
-      findings.append(
-        suppressionReasonRequiredFinding(
-          for: comment, file: file, converter: converter, severity: severity))
-      continue
-    }
+        // A continuation is immediately associated only when the physical
+        // line directly below the directive is itself a REASON comment.
+        // This excludes blank lines, intervening code (including code with a
+        // trailing comment), and any later REASON that cannot repair an
+        // empty immediate continuation.
+        guard comment.line < lines.count else {
+            findings.append(
+                suppressionReasonRequiredFinding(
+                    for: comment, file: file, converter: converter, severity: severity
+                )
+            )
+            continue
+        }
 
-    let continuation = lines[comment.line].drop(while: { $0 == " " || $0 == "\t" })
-    let reasonPrefix = "// REASON:"
-    guard continuation.hasPrefix(reasonPrefix),
-      continuation.dropFirst(reasonPrefix.count).contains(where: { !$0.isWhitespace })
-    else {
-      findings.append(
-        suppressionReasonRequiredFinding(
-          for: comment, file: file, converter: converter, severity: severity))
-      continue
+        let continuation = lines[comment.line].drop(while: { $0 == " " || $0 == "\t" })
+        let reasonPrefix = "// REASON:"
+        guard continuation.hasPrefix(reasonPrefix),
+              continuation.dropFirst(reasonPrefix.count).contains(where: { !$0.isWhitespace })
+        else {
+            findings.append(
+                suppressionReasonRequiredFinding(
+                    for: comment, file: file, converter: converter, severity: severity
+                )
+            )
+            continue
+        }
     }
-  }
-  return findings
+    return findings
 }
 
 private func suppressionReasonRequiredCollect(
@@ -113,19 +115,19 @@ private func suppressionReasonRequiredCollect(
     converter: SourceLocationConverter,
     into comments: inout [SuppressionReasonRequiredComment]
 ) {
-  var cursor = tokenStartPosition
-  for piece in trivia {
-    let position = cursor
-    defer { cursor = cursor.advanced(by: piece.sourceLength.utf8Length) }
-    guard case .lineComment(let text) = piece else { continue }
-    comments.append(
-      SuppressionReasonRequiredComment(
-        text: text,
-        position: position,
-        line: converter.location(for: position).line
-      )
-    )
-  }
+    var cursor = tokenStartPosition
+    for piece in trivia {
+        let position = cursor
+        defer { cursor = cursor.advanced(by: piece.sourceLength.utf8Length) }
+        guard case .lineComment(let text) = piece else { continue }
+        comments.append(
+            SuppressionReasonRequiredComment(
+                text: text,
+                position: position,
+                line: converter.location(for: position).line
+            )
+        )
+    }
 }
 
 private func suppressionReasonRequiredFinding(
@@ -134,16 +136,16 @@ private func suppressionReasonRequiredFinding(
     converter: SourceLocationConverter,
     severity: Diagnostic.Severity
 ) -> Diagnostic.Record {
-  let location = converter.location(for: comment.position)
-  return Diagnostic.Record(
-    location: Source.Location(
-      fileID: file.fileID,
-      filePath: file.filePath,
-      line: location.line,
-      column: location.column
-    ),
-    severity: severity,
-    identifier: "suppression reason required",
-    message: suppressionReasonRequiredMessage
-  )
+    let location = converter.location(for: comment.position)
+    return Diagnostic.Record(
+        location: Source.Location(
+            fileID: file.fileID,
+            filePath: file.filePath,
+            line: location.line,
+            column: location.column
+        ),
+        severity: severity,
+        identifier: "suppression reason required",
+        message: suppressionReasonRequiredMessage
+    )
 }
