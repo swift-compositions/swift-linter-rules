@@ -51,6 +51,10 @@ extension Lint.Rule.Bundle {
         .enable(.`usable from inline internal import`),
         // Suppression pack (rules-pass tail 2026-07-07) — [LINT-SUPPRESS-001]
         .enable(.`malformed suppression directive`),
+        // Advisory severity per coordinator ruling (2026-07-30): error
+        // graduation stays gated on issue #1's controlled-validation
+        // receipt per the graduation discipline.
+        .enable(.`suppression reason required`, severity: .warning),
         // Testing pack
         .enable(.`mock factory zero collision`),
     ]
