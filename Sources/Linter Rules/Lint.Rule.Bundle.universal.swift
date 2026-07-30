@@ -51,6 +51,7 @@ extension Lint.Rule.Bundle {
         .enable(.`usable from inline internal import`),
         // Suppression pack (rules-pass tail 2026-07-07) — [LINT-SUPPRESS-001]
         .enable(.`malformed suppression directive`),
+        .enable(.`suppression reason required`),
         // Testing pack
         .enable(.`mock factory zero collision`),
     ]
