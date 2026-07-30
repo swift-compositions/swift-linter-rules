@@ -13,17 +13,20 @@
 // Foundation-up dogfeed continuation (Thread B). swift-linter-rules is
 // the universal-rules pack — its own Bundle.universal defines the
 // broadest applicable rule set for any package in the ecosystem.
-// Self-lint via path: "." pulls the pack's own product so the bundle is
-// the consumer-facing single source of truth.
+// Self-lint measures against the full institute-layer enforced set,
+// reached via the sibling checkout (swift-institute-linter-rules
+// depends on this package by `url:`, so a `path: "."` self-pin here
+// would put swift-linter-rules in the lint graph twice and close a
+// cycle; the sibling path keeps a single, remote-reached copy).
 
 import Linter
-import Linter_Rules
+import Linter_Institute_Rules
 
 Lint.run(dependencies: [
     .package(
-        path: ".",
-        products: ["Linter Rules"]
+        path: "../swift-institute-linter-rules",
+        products: ["Linter Institute Rules"]
     ),
 ]) {
-    Lint.Rule.Bundle.universal
+    Lint.Rule.Bundle.institute
 }
