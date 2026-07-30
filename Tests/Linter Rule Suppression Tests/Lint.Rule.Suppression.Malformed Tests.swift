@@ -216,6 +216,35 @@ extension Lint.Rule {
         }
 
         @Test
+        func `intervening code or a blank line breaks reason association`() {
+            let source = """
+                // swift-linter:disable:next malformed suppression directive
+                let first = compute()
+                // REASON: this later prose is not associated
+                // swift-linter:disable:next malformed suppression directive
+
+                // REASON: this later prose is not associated either
+                let second = compute()
+                """
+            let parsed = Lint.Source.parsed(from: source, file: "/Sources/X/File.swift")
+            let findings = Lint.Rule.`suppression reason required`.findings(parsed, .error)
+            #expect(findings.count == 2)
+        }
+
+        @Test
+        func `a later reason cannot repair an empty immediate reason`() {
+            let source = """
+                // swift-linter:disable:next malformed suppression directive
+                // REASON:\(String(repeating: " ", count: 3))
+                // REASON: later prose does not override the empty continuation
+                let value = compute()
+                """
+            let parsed = Lint.Source.parsed(from: source, file: "/Sources/X/File.swift")
+            let findings = Lint.Rule.`suppression reason required`.findings(parsed, .error)
+            #expect(findings.count == 1)
+        }
+
+        @Test
         func `reasonless suppression targeting this rule self-fires`() {
             let source = """
                 // swift-linter:disable:next suppression reason required

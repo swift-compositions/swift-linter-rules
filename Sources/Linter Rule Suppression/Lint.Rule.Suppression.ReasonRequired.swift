@@ -70,43 +70,36 @@ internal func suppressionReasonRequiredFindings(
         )
     }
 
-    comments.sort { $0.position < $1.position }
     var findings: [Diagnostic.Record] = []
-    var pending: Swift.Int? = nil
+    let lines = tree.description.split(separator: "\n", omittingEmptySubsequences: false)
 
-    for index in comments.indices {
-        let comment = comments[index]
-        if let prefix = suppressionReasonRequiredPrefixes.first(where: comment.text.hasPrefix),
-           comment.text.dropFirst(prefix.count).contains(where: { !$0.isWhitespace })
-        {
-            if let pending {
-                findings.append(suppressionReasonRequiredFinding(
-                    for: comments[pending], file: file, converter: converter, severity: severity
-                ))
-            }
-            pending = index
-            continue
-        }
+    for comment in comments where suppressionReasonRequiredPrefixes.contains(where: comment.text.hasPrefix) {
+        guard let prefix = suppressionReasonRequiredPrefixes.first(where: comment.text.hasPrefix),
+              comment.text.dropFirst(prefix.count).contains(where: { !$0.isWhitespace })
+        else { continue }
 
-        guard let pendingIndex = pending else { continue }
-        guard comment.text.hasPrefix("// REASON:") else {
+        // A continuation is immediately associated only when the physical
+        // line directly below the directive is itself a REASON comment.
+        // This excludes blank lines, intervening code (including code with a
+        // trailing comment), and any later REASON that cannot repair an
+        // empty immediate continuation.
+        guard comment.line < lines.count else {
             findings.append(suppressionReasonRequiredFinding(
-                for: comments[pendingIndex], file: file, converter: converter, severity: severity
+                for: comment, file: file, converter: converter, severity: severity
             ))
-            pending = nil
             continue
         }
 
-        let prose = comment.text.dropFirst("// REASON:".count)
-        if prose.contains(where: { !$0.isWhitespace }) {
-            pending = nil
+        let continuation = lines[comment.line].drop(while: { $0 == " " || $0 == "\t" })
+        let reasonPrefix = "// REASON:"
+        guard continuation.hasPrefix(reasonPrefix),
+              continuation.dropFirst(reasonPrefix.count).contains(where: { !$0.isWhitespace })
+        else {
+            findings.append(suppressionReasonRequiredFinding(
+                for: comment, file: file, converter: converter, severity: severity
+            ))
+            continue
         }
-    }
-
-    if let pending {
-        findings.append(suppressionReasonRequiredFinding(
-            for: comments[pending], file: file, converter: converter, severity: severity
-        ))
     }
     return findings
 }
