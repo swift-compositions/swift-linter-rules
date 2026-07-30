@@ -76,7 +76,7 @@ internal func suppressionReasonRequiredFindings(
 
     for comment in comments where suppressionReasonRequiredPrefixes.contains(where: comment.text.hasPrefix) {
         guard let prefix = suppressionReasonRequiredPrefixes.first(where: comment.text.hasPrefix),
-              comment.text.dropFirst(prefix.count).contains(where: { !$0.isWhitespace })
+            comment.text.dropFirst(prefix.count).contains(where: { !$0.isWhitespace })
         else { continue }
 
         // A continuation is immediately associated only when the physical
@@ -87,7 +87,10 @@ internal func suppressionReasonRequiredFindings(
         guard comment.line < lines.count else {
             findings.append(
                 suppressionReasonRequiredFinding(
-                    for: comment, file: file, converter: converter, severity: severity
+                    for: comment,
+                    file: file,
+                    converter: converter,
+                    severity: severity
                 )
             )
             continue
@@ -96,11 +99,14 @@ internal func suppressionReasonRequiredFindings(
         let continuation = lines[comment.line].drop(while: { $0 == " " || $0 == "\t" })
         let reasonPrefix = "// REASON:"
         guard continuation.hasPrefix(reasonPrefix),
-              continuation.dropFirst(reasonPrefix.count).contains(where: { !$0.isWhitespace })
+            continuation.dropFirst(reasonPrefix.count).contains(where: { !$0.isWhitespace })
         else {
             findings.append(
                 suppressionReasonRequiredFinding(
-                    for: comment, file: file, converter: converter, severity: severity
+                    for: comment,
+                    file: file,
+                    converter: converter,
+                    severity: severity
                 )
             )
             continue
