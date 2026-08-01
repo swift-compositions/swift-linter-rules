@@ -81,16 +81,17 @@ internal final class IdiomRedundantRefinementVisitor: SyntaxVisitor {
         // leaves[j]. Report at the position of the redundant (refined)
         // leaf — that's the member to delete.
         var reportedPositions: Swift.Set<AbsolutePosition> = []
-        for i in 0..<leaves.count {
-            for j in 0..<leaves.count where i != j {
+        leaves.indices.forEach { i in
+            leaves.indices.forEach { j in
+                guard i != j else { return }
                 let refining = leaves[i].name
                 let refined = leaves[j].name
                 let isRedundant = idiomKnownStdlibRefinements.contains { pair in
                     pair.refining == refining && pair.refined == refined
                 }
-                guard isRedundant else { continue }
+                guard isRedundant else { return }
                 let position = leaves[j].position
-                guard !reportedPositions.contains(position) else { continue }
+                guard !reportedPositions.contains(position) else { return }
                 reportedPositions.insert(position)
                 let location = converter.location(for: position)
                 matches.append(
