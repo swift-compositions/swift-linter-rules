@@ -14,7 +14,7 @@ let result1 = try? throwingCall()
 func bare() throws -> Int { 0 }
 
 // 3. `existential throws` — `throws(any Error)` is existential
-func existential() throws(any Error) -> Int { 0 }
+func existential() throws(any Swift.Error) -> Int { 0 }
 
 // 4. `variable named impl` — local bound as `impl`
 func setup() {
