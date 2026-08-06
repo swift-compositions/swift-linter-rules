@@ -12,6 +12,7 @@
 public import Linter_Primitives
 public import Linter_Rule_Idiom
 public import Linter_Rule_Memory
+public import Linter_Rule_Package
 public import Linter_Rule_ResultBuilder
 public import Linter_Rule_Structure
 public import Linter_Rule_Suppression
@@ -44,10 +45,17 @@ extension Lint.Rule.Bundle {
         .enable(.`unchecked sendable categorization`),
         .enable(.`unchecked sendable noncopyable`),
         .enable(.`unsafe storage visibility`),
+        // Package pack (F9 predicate parity, 2026-08-06) — advisory at
+        // introduction per the standing graduation discipline; mirrors
+        // validate-target-imports.py ([TARGET-IMPORT-EDGE]).
+        .enable(.`target import edge`),
         // ResultBuilder pack
         .enable(.`for loop in result builder`),
         // Structure pack
         .enable(.`inlinable internal access`),
+        // F9 predicate parity (2026-08-06) — advisory at introduction;
+        // mirrors audit-license-header.py (γ-1b Stage 1).
+        .enable(.`license header`),
         .enable(.`usable from inline internal import`),
         // Suppression pack (rules-pass tail 2026-07-07) — [LINT-SUPPRESS-001]
         .enable(.`malformed suppression directive`),

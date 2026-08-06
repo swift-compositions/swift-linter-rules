@@ -58,6 +58,12 @@ let package = Package(
             targets: ["Linter Rule Suppression"]
         ),
 
+        // F9 predicate parity (2026-08-06) — package-manifest edge rules.
+        .library(
+            name: "Linter Rule Package",
+            targets: ["Linter Rule Package"]
+        ),
+
         .library(
             name: "Linter Rules Test Support",
             targets: ["Linter Rules Test Support"]
@@ -135,6 +141,16 @@ let package = Package(
             ]
         ),
 
+        // MARK: - F9 Predicate Parity — Linter Rule Package
+        .target(
+            name: "Linter Rule Package",
+            dependencies: [
+                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
         // MARK: - Universal Bundle (aggregate)
         .target(
             name: "Linter Rules",
@@ -142,6 +158,7 @@ let package = Package(
                 .product(name: "Linter Primitives", package: "swift-linter-primitives"),
                 "Linter Rule Idiom",
                 "Linter Rule Memory",
+                "Linter Rule Package",
                 "Linter Rule ResultBuilder",
                 "Linter Rule Structure",
                 "Linter Rule Suppression",
@@ -204,6 +221,16 @@ let package = Package(
             name: "Linter Rule Idiom Tests",
             dependencies: [
                 "Linter Rule Idiom",
+                "Linter Rules Test Support",
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+
+        // MARK: - F9 Predicate Parity Tests
+        .testTarget(
+            name: "Linter Rule Package Tests",
+            dependencies: [
+                "Linter Rule Package",
                 "Linter Rules Test Support",
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
