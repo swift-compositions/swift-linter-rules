@@ -58,6 +58,12 @@ let package = Package(
             targets: ["Linter Rule Suppression"]
         ),
 
+        // F9 predicate parity (2026-08-06) — package-manifest edge rules.
+        .library(
+            name: "Linter Rule Package",
+            targets: ["Linter Rule Package"]
+        ),
+
         .library(
             name: "Linter Rules Test Support",
             targets: ["Linter Rules Test Support"]
@@ -78,6 +84,7 @@ let package = Package(
         .package(url: "https://github.com/swift-primitives/swift-cardinal-primitives.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-byte-primitives.git", branch: "main"),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "602.0.0"..<"603.0.0"),
+        .package(url: "https://github.com/swift-foundations/swift-file-system.git", branch: "main"),
     ],
     targets: [
         // MARK: - Linter Rule ResultBuilder
@@ -135,6 +142,17 @@ let package = Package(
             ]
         ),
 
+        // MARK: - F9 Predicate Parity — Linter Rule Package
+        .target(
+            name: "Linter Rule Package",
+            dependencies: [
+                .product(name: "Linter Primitives", package: "swift-linter-primitives"),
+                .product(name: "File System", package: "swift-file-system"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
         // MARK: - Universal Bundle (aggregate)
         .target(
             name: "Linter Rules",
@@ -142,6 +160,7 @@ let package = Package(
                 .product(name: "Linter Primitives", package: "swift-linter-primitives"),
                 "Linter Rule Idiom",
                 "Linter Rule Memory",
+                "Linter Rule Package",
                 "Linter Rule ResultBuilder",
                 "Linter Rule Structure",
                 "Linter Rule Suppression",
@@ -205,6 +224,17 @@ let package = Package(
             dependencies: [
                 "Linter Rule Idiom",
                 "Linter Rules Test Support",
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+
+        // MARK: - F9 Predicate Parity Tests
+        .testTarget(
+            name: "Linter Rule Package Tests",
+            dependencies: [
+                "Linter Rule Package",
+                "Linter Rules Test Support",
+                .product(name: "File System", package: "swift-file-system"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),
