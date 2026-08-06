@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - '*'
   pull_request:
     branches:
       - main
@@ -21,16 +19,14 @@ concurrency:
 
 jobs:
   ci:
-    uses: swift-foundations/.github/.github/workflows/swift-ci.yml@main
-    secrets: inherit
+    if: ${{ !github.event.repository.private }}
+    name: ci / matrix
+    uses: swift-institute/.github/.github/workflows/swift-ci.yml@main
+    with:
+      lint-bundle: institute
 
-  # Typed exception (linter-authority repos): on a main push, notify the
-  # central linter-republish pipeline. Retained alongside the canonical
-  # terminal caller; not part of the generated shape.
   notify-linter-republish:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && !github.event.repository.private }}
     uses: swift-institute/.github/.github/workflows/notify-linter-republish.yml@main
     secrets:
-      SWIFT_INSTITUTE_BOT_APP_CLIENT_ID: ${{ secrets.SWIFT_INSTITUTE_BOT_APP_CLIENT_ID }}
-      SWIFT_INSTITUTE_BOT_APP_ID: ${{ secrets.SWIFT_INSTITUTE_BOT_APP_ID }}
       SWIFT_INSTITUTE_BOT_APP_PRIVATE_KEY: ${{ secrets.SWIFT_INSTITUTE_BOT_APP_PRIVATE_KEY }}
