@@ -10,9 +10,18 @@
 // ===----------------------------------------------------------------------===//
 
 public import Linter_Primitives
-internal import File_System
 internal import SwiftParser
 internal import SwiftSyntax
+
+#if canImport(Darwin)
+    internal import Darwin
+#elseif canImport(Glibc)
+    internal import Glibc
+#elseif canImport(Musl)
+    internal import Musl
+#elseif canImport(Android)
+    internal import Android
+#endif
 
 /// F9 predicate parity (2026-08-06) — `[TARGET-IMPORT-EDGE]`: every
 /// module a target's sources `import` (any form) MUST appear in that
@@ -71,7 +80,7 @@ extension Lint.Rule {
 
 /// Toolchain/SDK-supplied modules (the rule's carve) — identical to the
 /// Python's `TOOLCHAIN_MODULES`.
-internal let packageTargetImportEdgeToolchainModules: Swift.Set<Swift.String> = [
+package let packageTargetImportEdgeToolchainModules: Swift.Set<Swift.String> = [
     "Swift", "Testing", "XCTest", "Foundation", "FoundationEssentials",
     "Dispatch", "os", "Darwin", "Glibc", "Musl", "WinSDK", "Android",
     "Observation", "Synchronization", "Builtin", "CRT", "ucrt",
@@ -81,13 +90,13 @@ internal let packageTargetImportEdgeToolchainModules: Swift.Set<Swift.String> = 
 
 /// Directory names never descended into — identical to the Python's
 /// `SKIP_DIRS`.
-internal let packageTargetImportEdgeSkipDirectories: Swift.Set<Swift.String> = [
+package let packageTargetImportEdgeSkipDirectories: Swift.Set<Swift.String> = [
     ".build", ".git", ".swiftpm", ".claude", "node_modules", "checkouts",
 ]
 
 /// Mirror of the Python's `normalize`: module names use `_` where the
 /// target/product name uses spaces or hyphens.
-internal func packageTargetImportEdgeNormalize(_ name: Swift.String) -> Swift.String {
+package func packageTargetImportEdgeNormalize(_ name: Swift.String) -> Swift.String {
     var out = ""
     out.reserveCapacity(name.count)
     for character in name {
@@ -96,227 +105,92 @@ internal func packageTargetImportEdgeNormalize(_ name: Swift.String) -> Swift.St
     return out
 }
 
-// MARK: - Manifest model
-
-/// One target declaration read from a manifest parse.
-internal struct PackageTargetImportEdgeTarget {
-    internal enum Kind {
-        case target
-        case executableTarget
-        case testTarget
-        case macro
-    }
-
-    internal enum Dependency {
-        /// `.target(name: "X")`
-        case target(Swift.String)
-        /// `.product(name: "X", package: ...)`
-        case product(Swift.String)
-        /// `"X"` or `.byName(name: "X")`
-        case byName(Swift.String)
-    }
-
-    internal var name: Swift.String = ""
-    internal var kind: Kind = .target
-    internal var explicitPath: Swift.String?
-    internal var dependencies: [Dependency] = []
-    internal var namePosition: AbsolutePosition = AbsolutePosition(utf8Offset: 0)
-}
-
-/// Everything the rule needs from one manifest parse.
-internal struct PackageTargetImportEdgeManifest {
-    internal var targets: [PackageTargetImportEdgeTarget] = []
-    /// `.library(name:targets:)` products — product name → member target names.
-    internal var products: [Swift.String: Swift.Set<Swift.String>] = [:]
-    /// `.package(url: "...")` declarations.
-    internal var urlDependencies: [Swift.String] = []
-    /// `.package(path: "...")` declarations.
-    internal var pathDependencies: [Swift.String] = []
-}
-
-// MARK: - Manifest visitor
-
-internal final class PackageTargetImportEdgeManifestVisitor: SyntaxVisitor {
-    internal var manifest = PackageTargetImportEdgeManifest()
-
-    internal init() {
-        super.init(viewMode: .sourceAccurate)
-    }
-
-    private func stringLiteralValue(_ expression: ExprSyntax) -> Swift.String? {
-        guard let literal = expression.as(StringLiteralExprSyntax.self) else { return nil }
-        var out = ""
-        for segment in literal.segments {
-            guard let text = segment.as(StringSegmentSyntax.self) else { return nil }
-            out += text.content.text
-        }
-        return out
-    }
-
-    private func argument(_ node: FunctionCallExprSyntax, labeled label: Swift.String) -> ExprSyntax? {
-        for argument in node.arguments where argument.label?.text == label {
-            return argument.expression
-        }
-        return nil
-    }
-
-    private func dependency(from expression: ExprSyntax) -> PackageTargetImportEdgeTarget.Dependency? {
-        if let name = stringLiteralValue(expression) {
-            return .byName(name)
-        }
-        guard let call = expression.as(FunctionCallExprSyntax.self),
-            let member = call.calledExpression.as(MemberAccessExprSyntax.self),
-            let nameExpression = argument(call, labeled: "name"),
-            let name = stringLiteralValue(nameExpression)
-        else { return nil }
-        switch member.declName.baseName.text {
-        case "target": return .target(name)
-        case "product": return .product(name)
-        case "byName": return .byName(name)
-        default: return nil
-        }
-    }
-
-    override internal func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
-        guard let member = node.calledExpression.as(MemberAccessExprSyntax.self) else {
-            return .visitChildren
-        }
-        switch member.declName.baseName.text {
-        case "package":
-            if let expression = argument(node, labeled: "url"),
-                let url = stringLiteralValue(expression)
-            {
-                manifest.urlDependencies.append(url)
-            } else if let expression = argument(node, labeled: "path"),
-                let path = stringLiteralValue(expression)
-            {
-                manifest.pathDependencies.append(path)
-            }
-
-        case "library":
-            if let nameExpression = argument(node, labeled: "name"),
-                let name = stringLiteralValue(nameExpression),
-                let targetsExpression = argument(node, labeled: "targets"),
-                let array = targetsExpression.as(ArrayExprSyntax.self)
-            {
-                var members: Swift.Set<Swift.String> = []
-                for element in array.elements {
-                    if let target = stringLiteralValue(element.expression) {
-                        members.insert(packageTargetImportEdgeNormalize(target))
-                    }
-                }
-                manifest.products[name] = members
-            }
-
-        case "target", "executableTarget", "testTarget", "macro":
-            guard let nameExpression = argument(node, labeled: "name"),
-                let name = stringLiteralValue(nameExpression)
-            else { break }
-            var target = PackageTargetImportEdgeTarget()
-            target.name = name
-            target.namePosition = nameExpression.positionAfterSkippingLeadingTrivia
-            switch member.declName.baseName.text {
-            case "executableTarget": target.kind = .executableTarget
-            case "testTarget": target.kind = .testTarget
-            case "macro": target.kind = .macro
-            default: target.kind = .target
-            }
-            if let pathExpression = argument(node, labeled: "path"),
-                let path = stringLiteralValue(pathExpression)
-            {
-                target.explicitPath = path
-            }
-            if let dependenciesExpression = argument(node, labeled: "dependencies"),
-                let array = dependenciesExpression.as(ArrayExprSyntax.self)
-            {
-                for element in array.elements {
-                    if let dependency = dependency(from: element.expression) {
-                        target.dependencies.append(dependency)
-                    }
-                }
-            }
-            manifest.targets.append(target)
-
-        default:
-            break
-        }
-        return .visitChildren
-    }
-}
-
-// MARK: - Import visitor
-
-internal final class PackageTargetImportEdgeImportVisitor: SyntaxVisitor {
-    /// module → line of first sighting in this file.
-    internal var imports: [Swift.String: Swift.Int] = [:]
-    private let converter: SourceLocationConverter
-
-    internal init(converter: SourceLocationConverter) {
-        self.converter = converter
-        super.init(viewMode: .sourceAccurate)
-    }
-
-    override internal func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
-        guard let first = node.path.first else { return .skipChildren }
-        let module = first.name.text
-        if imports[module] == nil {
-            imports[module] = converter.location(
-                for: node.positionAfterSkippingLeadingTrivia
-            ).line
-        }
-        return .skipChildren
-    }
-}
-
 // MARK: - Filesystem access (read-only)
+//
+// The cross-file predicate this rule mirrors is inherently
+// filesystem-shaped: the Python walks target source directories and
+// reads dependency manifests from disk. The access here is contained,
+// read-only, and POSIX-direct (no filesystem package dependency — the
+// rule pack's graph stays SwiftSyntax + Linter Primitives). On
+// platforms without a POSIX surface the helpers return empty, and the
+// rule under-reports (soft), never false-fires.
 
-/// Reads a UTF-8 text file, or `nil` on any failure. The rule degrades
-/// soft on I/O failure (under-report, never false-fire), mirroring the
-/// Python's `errors="replace"` / `OSError` handling.
-internal func packageTargetImportEdgeReadText(atPath raw: Swift.String) -> Swift.String? {
-    guard let path = try? File.Path(raw) else { return nil }
-    return try? File(path).read.full { (span: Swift.Span<Byte>) -> Swift.String in
+#if canImport(Darwin) || canImport(Glibc) || canImport(Musl) || canImport(Android)
+
+    /// Reads a UTF-8 text file, or `nil` on any failure.
+    ///
+    /// The rule degrades soft on I/O failure (under-report, never
+    /// false-fire), mirroring the Python's `errors="replace"` /
+    /// `OSError` handling.
+    package func packageTargetImportEdgeReadText(atPath raw: Swift.String) -> Swift.String? {
+        guard let handle = unsafe fopen(raw, "rb") else { return nil }
+        defer { _ = unsafe fclose(handle) }
         var bytes: [Swift.UInt8] = []
-        bytes.reserveCapacity(span.count)
-        for index in span.indices {
-            bytes.append(span[index].underlying)
+        var buffer = [Swift.UInt8](repeating: 0, count: 4096)
+        while true {
+            let count = unsafe buffer.withUnsafeMutableBytes { pointer in
+                unsafe fread(pointer.baseAddress, 1, pointer.count, handle)
+            }
+            guard count > 0 else { break }
+            bytes.append(contentsOf: buffer[0..<count])
         }
         return Swift.String(decoding: bytes, as: Swift.UTF8.self)
     }
-}
 
-internal func packageTargetImportEdgeIsDirectory(_ raw: Swift.String) -> Swift.Bool {
-    guard let path = try? File.Path(raw) else { return false }
-    return (try? File.Directory(path).entries()) != nil
-}
+    package func packageTargetImportEdgeIsDirectory(_ raw: Swift.String) -> Swift.Bool {
+        var status = stat()
+        guard unsafe stat(raw, &status) == 0 else { return false }
+        return (status.st_mode & S_IFMT) == S_IFDIR
+    }
 
-internal func packageTargetImportEdgeIsFile(_ raw: Swift.String) -> Swift.Bool {
-    guard let path = try? File.Path(raw) else { return false }
-    return (try? File(path).read.full { (_: Swift.Span<Byte>) -> Swift.Bool in true }) ?? false
-}
+    package func packageTargetImportEdgeIsFile(_ raw: Swift.String) -> Swift.Bool {
+        var status = stat()
+        guard unsafe stat(raw, &status) == 0 else { return false }
+        return (status.st_mode & S_IFMT) == S_IFREG
+    }
+
+    /// The entry names of a directory (sorted, `.`/`..` excluded), or
+    /// empty on any failure.
+    package func packageTargetImportEdgeEntryNames(in directory: Swift.String) -> [Swift.String] {
+        guard let handle = unsafe opendir(directory) else { return [] }
+        defer { _ = unsafe closedir(handle) }
+        var names: [Swift.String] = []
+        while let entry = unsafe readdir(handle) {
+            let name = unsafe withUnsafeBytes(of: entry.pointee.d_name) { pointer in
+                unsafe Swift.String(
+                    decoding: pointer.prefix(while: { $0 != 0 }),
+                    as: Swift.UTF8.self
+                )
+            }
+            if name == "." || name == ".." { continue }
+            names.append(name)
+        }
+        return names.sorted()
+    }
+
+#else
+
+    package func packageTargetImportEdgeReadText(atPath raw: Swift.String) -> Swift.String? { nil }
+    package func packageTargetImportEdgeIsDirectory(_ raw: Swift.String) -> Swift.Bool { false }
+    package func packageTargetImportEdgeIsFile(_ raw: Swift.String) -> Swift.Bool { false }
+    package func packageTargetImportEdgeEntryNames(in directory: Swift.String) -> [Swift.String] {
+        []
+    }
+
+#endif
 
 /// Recursively collects `*.swift` file paths under `directory`,
 /// skipping ``packageTargetImportEdgeSkipDirectories`` — mirror of the
 /// Python's pruned `os.walk`.
-internal func packageTargetImportEdgeSwiftFiles(under directory: Swift.String) -> [Swift.String] {
-    guard let path = try? File.Path(directory) else { return [] }
-    guard let entries = try? File.Directory(path).entries() else { return [] }
+package func packageTargetImportEdgeSwiftFiles(under directory: Swift.String) -> [Swift.String] {
     var out: [Swift.String] = []
-    for entry in entries {
-        let name = Swift.String(lossy: entry.name)
+    for name in packageTargetImportEdgeEntryNames(in: directory) {
         let child = directory + "/" + name
-        switch entry.type {
-        case .directory:
+        if packageTargetImportEdgeIsDirectory(child) {
             guard !packageTargetImportEdgeSkipDirectories.contains(name) else { continue }
             out.append(contentsOf: packageTargetImportEdgeSwiftFiles(under: child))
-
-        case .file:
-            if name.hasSuffix(".swift") {
-                out.append(child)
-            }
-
-        case .symbolicLink, .other:
-            continue
+        } else if packageTargetImportEdgeIsFile(child), name.hasSuffix(".swift") {
+            out.append(child)
         }
     }
     return out.sorted()
@@ -324,7 +198,7 @@ internal func packageTargetImportEdgeSwiftFiles(under directory: Swift.String) -
 
 // MARK: - Findings
 
-internal func packageTargetImportEdgeFindings(
+package func packageTargetImportEdgeFindings(
     source: borrowing Lint.Source.Parsed,
     severity: Diagnostic.Severity
 ) -> [Diagnostic.Record] {
@@ -360,10 +234,9 @@ internal func packageTargetImportEdgeFindings(
         var trimmed = url
         while trimmed.hasSuffix("/") { trimmed.removeLast() }
         let parts = trimmed.split(separator: "/").map(Swift.String.init)
-        guard parts.count >= 2 else { continue }
-        var name = parts[parts.count - 1]
+        let tail = parts.suffix(2)
+        guard tail.count == 2, let organization = tail.first, var name = tail.last else { continue }
         if name.hasSuffix(".git") { name = Swift.String(name.dropLast(4)) }
-        let organization = parts[parts.count - 2]
         let candidate = root + "/../../" + organization + "/" + name + "/Package.swift"
         if packageTargetImportEdgeIsFile(candidate) {
             dependencyManifestPaths.append(candidate)

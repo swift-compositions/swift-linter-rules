@@ -65,11 +65,9 @@ extension Lint.Rule {
 
 /// The line window the header must appear in — identical to the
 /// Python's `HEADER_LINE_LIMIT`.
-@usableFromInline
-internal let structureLicenseHeaderLineLimit: Swift.Int = 30
+package let structureLicenseHeaderLineLimit: Swift.Int = 30
 
-@usableFromInline
-internal let structureLicenseHeaderMessage: Swift.String =
+package let structureLicenseHeaderMessage: Swift.String =
     "[license header]: every `Sources/**/*.swift` file must carry the "
     + "Apache-2.0 license header within its first 30 lines. Add the "
     + "project's standard header block (any spelling containing "
@@ -79,8 +77,7 @@ internal let structureLicenseHeaderMessage: Swift.String =
 /// Mirror of the Python `is_excluded` (inverted): the rule applies only
 /// to `Sources/**/*.swift`, excluding `Tests/**`, `Package.swift`, and
 /// `Package@*.swift`.
-@usableFromInline
-internal func structureLicenseHeaderApplies(toPath path: Swift.String) -> Swift.Bool {
+package func structureLicenseHeaderApplies(toPath path: Swift.String) -> Swift.Bool {
     let parts = path.split(separator: "/").map(Swift.String.init)
     guard let name = parts.last else { return false }
     guard name.hasSuffix(".swift") else { return false }
@@ -93,9 +90,9 @@ internal func structureLicenseHeaderApplies(toPath path: Swift.String) -> Swift.
 
 /// Mirror of the Python `has_apache_header`: case-insensitive substring
 /// `apache` AND `2.0` anywhere in the first 30 lines.
-@usableFromInline
-internal func structureLicenseHeaderIsPresent(in source: Swift.String) -> Swift.Bool {
-    let head = source
+package func structureLicenseHeaderIsPresent(in source: Swift.String) -> Swift.Bool {
+    let head =
+        source
         .split(separator: "\n", omittingEmptySubsequences: false)
         .prefix(structureLicenseHeaderLineLimit)
         .joined(separator: "\n")

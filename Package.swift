@@ -84,7 +84,6 @@ let package = Package(
         .package(url: "https://github.com/swift-primitives/swift-cardinal-primitives.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-byte-primitives.git", branch: "main"),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "602.0.0"..<"603.0.0"),
-        .package(url: "https://github.com/swift-foundations/swift-file-system.git", branch: "main"),
     ],
     targets: [
         // MARK: - Linter Rule ResultBuilder
@@ -147,7 +146,6 @@ let package = Package(
             name: "Linter Rule Package",
             dependencies: [
                 .product(name: "Linter Primitives", package: "swift-linter-primitives"),
-                .product(name: "File System", package: "swift-file-system"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
             ]
@@ -234,7 +232,6 @@ let package = Package(
             dependencies: [
                 "Linter Rule Package",
                 "Linter Rules Test Support",
-                .product(name: "File System", package: "swift-file-system"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),

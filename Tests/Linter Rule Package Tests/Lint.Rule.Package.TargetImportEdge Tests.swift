@@ -9,7 +9,6 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import File_System
 import Linter_Primitives
 import Linter_Rules_Test_Support
 import SwiftParser
@@ -18,61 +17,111 @@ import Testing
 
 @testable import Linter_Rule_Package
 
+#if canImport(Darwin)
+    import Darwin
+#elseif canImport(Glibc)
+    import Glibc
+#elseif canImport(Musl)
+    import Musl
+#elseif canImport(Android)
+    import Android
+#endif
+
 extension Lint.Rule {
     @Suite
     struct `target import edge Tests` {
         @Suite struct Unit {}
         @Suite struct Exemption {}
         @Suite struct `Edge Case` {}
+        @Suite struct Integration {}
     }
 }
 
 extension Lint.Rule.`target import edge Tests` {
     /// A throwaway on-disk package fixture the rule can walk.
+    ///
+    /// All disk
+    /// access is contained POSIX, matching the pack's own reader — no
+    /// filesystem package dependency.
     struct Fixture {
         let root: Swift.String
 
-        init(manifest: Swift.String, files: [Swift.String: Swift.String]) throws {
+        init(manifest: Swift.String, files: [Swift.String: Swift.String]) throws(Failure) {
             var random = Swift.SystemRandomNumberGenerator()
             self.root = "/tmp/linter-rule-package-tests-\(random.next())"
-            try File.Directory(try File.Path(root)).create.recursive()
             try Self.write(manifest, to: root + "/Package.swift")
             for (relative, content) in files {
                 try Self.write(content, to: root + "/" + relative)
             }
         }
+    }
+}
 
-        static func write(_ content: Swift.String, to raw: Swift.String) throws {
-            let path = try File.Path(raw)
-            if let parent = path.parent {
-                try File.Directory(parent).create.recursive()
+extension Lint.Rule.`target import edge Tests`.Fixture {
+    struct Failure: Swift.Error {
+        let reason: Swift.String
+    }
+}
+
+extension Lint.Rule.`target import edge Tests`.Fixture {
+    fileprivate static func makeDirectories(_ raw: Swift.String) throws(Failure) {
+        var prefix = ""
+        for component in raw.split(separator: "/") {
+            prefix += "/" + component
+            guard unsafe mkdir(prefix, 0o755) == 0 || errno == EEXIST else {
+                throw Failure(reason: "mkdir failed: \(prefix)")
             }
-            try File(path).write.atomic(content)
-        }
-
-        func tearDown() {
-            try? File.Directory(try File.Path(root)).delete.recursive()
-        }
-
-        /// Runs the rule against the fixture's manifest.
-        func findings() throws -> [Diagnostic.Record] {
-            let manifestPath = root + "/Package.swift"
-            let text = try File(try File.Path(manifestPath)).read.full {
-                (span: Swift.Span<Byte>) -> Swift.String in
-                var bytes: [Swift.UInt8] = []
-                bytes.reserveCapacity(span.count)
-                for index in span.indices { bytes.append(span[index].underlying) }
-                return Swift.String(decoding: bytes, as: Swift.UTF8.self)
-            }
-            let parsed = Lint.Source.parsed(
-                from: text,
-                file: manifestPath,
-                path: Lint.Source.Path("Package.swift")
-            )
-            return Lint.Rule.`target import edge`.findings(parsed, .warning)
         }
     }
 
+    fileprivate static func write(_ content: Swift.String, to raw: Swift.String) throws(Failure) {
+        if let slash = raw.lastIndex(of: "/") {
+            try makeDirectories(Swift.String(raw[raw.startIndex..<slash]))
+        }
+        guard let handle = unsafe fopen(raw, "wb") else {
+            throw Failure(reason: "fopen failed: \(raw)")
+        }
+        defer { _ = unsafe fclose(handle) }
+        let bytes = [Swift.UInt8](content.utf8)
+        let written = unsafe bytes.withUnsafeBytes { pointer in
+            unsafe fwrite(pointer.baseAddress, 1, pointer.count, handle)
+        }
+        guard written == bytes.count else {
+            throw Failure(reason: "fwrite failed: \(raw)")
+        }
+    }
+
+    fileprivate static func removeRecursively(_ raw: Swift.String) {
+        if packageTargetImportEdgeIsDirectory(raw) {
+            for name in packageTargetImportEdgeEntryNames(in: raw) {
+                removeRecursively(raw + "/" + name)
+            }
+            _ = unsafe rmdir(raw)
+        } else {
+            _ = unsafe unlink(raw)
+        }
+    }
+
+    fileprivate func tearDown() {
+        Self.removeRecursively(root)
+    }
+
+    /// Runs the rule against the fixture's manifest.
+    fileprivate func findings() throws(Failure) -> [Diagnostic.Record] {
+        let manifestPath = root + "/Package.swift"
+        guard let text = packageTargetImportEdgeReadText(atPath: manifestPath) else {
+            throw Failure(reason: "unreadable manifest: \(manifestPath)")
+        }
+        let parsed = Lint.Source.parsed(
+            from: text,
+            file: manifestPath,
+            path: Lint.Source.Path("Package.swift")
+        )
+        return Lint.Rule.`target import edge`.findings(parsed, .warning)
+    }
+}
+
+extension Lint.Rule.`target import edge Tests` {
     static func manifest(targets: Swift.String, dependencies: Swift.String = "") -> Swift.String {
         """
         // swift-tools-version: 6.0
@@ -166,14 +215,14 @@ extension Lint.Rule.`target import edge Tests`.Unit {
             files: [
                 "Sources/A/File.swift": "import Member\n",
                 "dep/Package.swift": """
-                    // swift-tools-version: 6.0
-                    import PackageDescription
-                    let package = Package(
-                        name: "dep",
-                        products: [.library(name: "Lib", targets: ["Member"])],
-                        targets: [.target(name: "Member")]
-                    )
-                    """,
+                // swift-tools-version: 6.0
+                import PackageDescription
+                let package = Package(
+                    name: "dep",
+                    products: [.library(name: "Lib", targets: ["Member"])],
+                    targets: [.target(name: "Member")]
+                )
+                """,
             ]
         )
         defer { fixture.tearDown() }
@@ -192,14 +241,14 @@ extension Lint.Rule.`target import edge Tests`.Unit {
             files: [
                 "Sources/A/File.swift": "import Rogue\n",
                 "dep/Package.swift": """
-                    // swift-tools-version: 6.0
-                    import PackageDescription
-                    let package = Package(
-                        name: "dep",
-                        products: [.library(name: "Lib", targets: ["Member"])],
-                        targets: [.target(name: "Member")]
-                    )
-                    """,
+                // swift-tools-version: 6.0
+                import PackageDescription
+                let package = Package(
+                    name: "dep",
+                    products: [.library(name: "Lib", targets: ["Member"])],
+                    targets: [.target(name: "Member")]
+                )
+                """,
             ]
         )
         defer { fixture.tearDown() }
@@ -255,12 +304,12 @@ extension Lint.Rule.`target import edge Tests`.Exemption {
             ),
             files: [
                 "Sources/A/File.swift": """
-                    import Foundation
-                    import Dispatch
-                    public import Testing
-                    internal import Synchronization
-                    import _Concurrency
-                    """
+                import Foundation
+                import Dispatch
+                public import Testing
+                internal import Synchronization
+                import _Concurrency
+                """
             ]
         )
         defer { fixture.tearDown() }
@@ -320,10 +369,10 @@ extension Lint.Rule.`target import edge Tests`.`Edge Case` {
             ),
             files: [
                 "Sources/A/File.swift": """
-                    // import Undeclared
-                    /* import AlsoUndeclared */
-                    let note = "see https://example.com//import Undeclared"
-                    """
+                // import Undeclared
+                /* import AlsoUndeclared */
+                let note = "see https://example.com//import Undeclared"
+                """
             ]
         )
         defer { fixture.tearDown() }
@@ -340,9 +389,9 @@ extension Lint.Rule.`target import edge Tests`.`Edge Case` {
             ),
             files: [
                 "Sources/A/File.swift": """
-                    @_spi(Internal) public import UndeclaredOne
-                    internal import struct UndeclaredTwo.Inner
-                    """
+                @_spi(Internal) public import UndeclaredOne
+                internal import struct UndeclaredTwo.Inner
+                """
             ]
         )
         defer { fixture.tearDown() }

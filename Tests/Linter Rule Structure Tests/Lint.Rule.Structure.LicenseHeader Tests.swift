@@ -23,6 +23,7 @@ extension Lint.Rule {
         @Suite struct Unit {}
         @Suite struct Exemption {}
         @Suite struct `Edge Case` {}
+        @Suite struct Integration {}
     }
 }
 
