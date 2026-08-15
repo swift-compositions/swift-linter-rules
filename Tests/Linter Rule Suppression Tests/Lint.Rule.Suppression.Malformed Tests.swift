@@ -26,7 +26,10 @@ extension Lint.Rule {
 }
 
 extension Lint.Rule.`malformed suppression directive Tests` {
-    static func findings(in source: String, file: String = "/Sources/X/File.swift") -> [Diagnostic.Record] {
+    static func findings(
+        in source: String,
+        file: String = "/Sources/X/File.swift"
+    ) -> [Diagnostic.Record] {
         let parsed = Lint.Source.parsed(from: source, file: file)
         return Lint.Rule.`malformed suppression directive`.findings(parsed, .warning)
     }

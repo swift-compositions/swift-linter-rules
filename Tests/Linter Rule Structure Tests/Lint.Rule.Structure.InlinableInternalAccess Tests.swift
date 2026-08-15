@@ -26,7 +26,10 @@ extension Lint.Rule {
 }
 
 extension Lint.Rule.`inlinable internal access Tests` {
-    static func findings(in source: String, file: String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
+    static func findings(
+        in source: String,
+        file: String = "Sources/X/Test.swift"
+    ) -> [Diagnostic.Record] {
         let parsed = Lint.Source.parsed(from: source, file: file)
         return Lint.Rule.`inlinable internal access`.findings(parsed, .warning)
     }

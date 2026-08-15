@@ -25,7 +25,10 @@ extension Lint.Rule {
 }
 
 extension Lint.Rule.`unchecked sendable noncopyable Tests` {
-    static func findings(in source: Swift.String, file: Swift.String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
+    static func findings(
+        in source: Swift.String,
+        file: Swift.String = "Sources/X/Test.swift"
+    ) -> [Diagnostic.Record] {
         let parsed = Lint.Source.parsed(from: source, file: file)
         return Lint.Rule.`unchecked sendable noncopyable`.findings(parsed, .warning)
     }

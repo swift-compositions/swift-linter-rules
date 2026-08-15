@@ -338,7 +338,10 @@ extension Lint.Rule.`for loop in result builder Tests`.Severity {
         let source = """
             let a = Array<Int> { for i in 0..<10 { i } }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source, severity: .error)
+        let findings = Lint.Rule.`for loop in result builder Tests`.findings(
+            in: source,
+            severity: .error
+        )
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].severity == .error)
