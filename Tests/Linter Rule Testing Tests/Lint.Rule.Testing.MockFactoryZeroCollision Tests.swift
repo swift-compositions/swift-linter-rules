@@ -30,7 +30,10 @@ extension Lint.Rule.`mock factory zero collision Tests` {
     // Test fixtures must therefore live under a `/Tests/` path or the rule
     // short-circuits before inspecting the AST. The leading slash is
     // required: the visitor checks `filePath.contains("/Tests/")`.
-    static func findings(in source: String, file: String = "/Tests/X/Test.swift") -> [Diagnostic.Record] {
+    static func findings(
+        in source: String,
+        file: String = "/Tests/X/Test.swift"
+    ) -> [Diagnostic.Record] {
         let parsed = Lint.Source.parsed(from: source, file: file)
         return Lint.Rule.`mock factory zero collision`.findings(parsed, .warning)
     }

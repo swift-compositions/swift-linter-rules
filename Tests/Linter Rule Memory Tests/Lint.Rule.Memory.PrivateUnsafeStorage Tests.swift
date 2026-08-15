@@ -25,7 +25,10 @@ extension Lint.Rule {
 }
 
 extension Lint.Rule.`unsafe storage visibility Tests` {
-    static func findings(in source: Swift.String, file: Swift.String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
+    static func findings(
+        in source: Swift.String,
+        file: Swift.String = "Sources/X/Test.swift"
+    ) -> [Diagnostic.Record] {
         let parsed = Lint.Source.parsed(from: source, file: file)
         return Lint.Rule.`unsafe storage visibility`.findings(parsed, .warning)
     }

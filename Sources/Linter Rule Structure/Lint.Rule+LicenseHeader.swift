@@ -40,7 +40,8 @@ extension Lint.Rule {
         // discipline — promote to `.error` only after fleet validation.
         default: .warning,
         findings: { source, severity in
-            guard structureLicenseHeaderApplies(toPath: Swift.String(describing: source.path)) else {
+            guard structureLicenseHeaderApplies(toPath: Swift.String(describing: source.path))
+            else {
                 return []
             }
             guard !structureLicenseHeaderIsPresent(in: source.tree.description) else {

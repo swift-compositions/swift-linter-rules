@@ -29,7 +29,9 @@ internal import SwiftSyntax
 /// Tilde-prefixed `~Copyable` is excluded — only the *positive* form
 /// trips this predicate. The `Swift.Copyable` qualified form is
 /// recognized when the base identifier is the bare token `Swift`.
-internal func memoryWhereClauseHasPositiveCopyable(_ clause: GenericWhereClauseSyntax?) -> Swift.Bool {
+internal func memoryWhereClauseHasPositiveCopyable(
+    _ clause: GenericWhereClauseSyntax?
+) -> Swift.Bool {
     guard let clause else { return false }
     for requirement in clause.requirements {
         guard let conformance = requirement.requirement.as(ConformanceRequirementSyntax.self) else {

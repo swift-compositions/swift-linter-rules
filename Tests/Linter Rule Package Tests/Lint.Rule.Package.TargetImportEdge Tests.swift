@@ -339,7 +339,8 @@ extension Lint.Rule.`target import edge Tests`.Exemption {
                 targets: """
                     .target(name: "A", dependencies: [.product(name: "Mystery", package: "nowhere")]),
                     """,
-                dependencies: #".package(url: "https://github.com/no-such-org-f9/nowhere.git", branch: "main")"#
+                dependencies:
+                    #".package(url: "https://github.com/no-such-org-f9/nowhere.git", branch: "main")"#
             ),
             files: ["Sources/A/File.swift": "import CouldBeAnything\n"]
         )

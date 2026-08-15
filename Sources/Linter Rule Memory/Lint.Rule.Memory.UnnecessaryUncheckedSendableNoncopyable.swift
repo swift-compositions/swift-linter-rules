@@ -69,7 +69,9 @@ internal final class MemoryUnnecessaryUncheckedSendableNoncopyableVisitor: Synta
         return false
     }
 
-    private func uncheckedSendablePosition(_ inheritanceClause: InheritanceClauseSyntax) -> AbsolutePosition? {
+    private func uncheckedSendablePosition(
+        _ inheritanceClause: InheritanceClauseSyntax
+    ) -> AbsolutePosition? {
         for inherited in inheritanceClause.inheritedTypes {
             guard let attributed = inherited.type.as(AttributedTypeSyntax.self) else { continue }
             var hasUnchecked = false

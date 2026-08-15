@@ -120,7 +120,9 @@ internal final class MemoryPrivateUnsafeStorageVisitor: SyntaxVisitor {
         for binding in node.bindings {
             guard let typeAnnotation = binding.typeAnnotation else { continue }
             if memoryPrivateUnsafeStorageIsUnsafePointerType(typeAnnotation.type) {
-                let location = converter.location(for: binding.pattern.positionAfterSkippingLeadingTrivia)
+                let location = converter.location(
+                    for: binding.pattern.positionAfterSkippingLeadingTrivia
+                )
                 matches.append(
                     Diagnostic.Record(
                         location: Source.Location(

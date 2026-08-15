@@ -74,7 +74,8 @@ internal func suppressionReasonRequiredFindings(
     var findings: [Diagnostic.Record] = []
     let lines = tree.description.split(separator: "\n", omittingEmptySubsequences: false)
 
-    for comment in comments where suppressionReasonRequiredPrefixes.contains(where: comment.text.hasPrefix) {
+    for comment in comments
+    where suppressionReasonRequiredPrefixes.contains(where: comment.text.hasPrefix) {
         guard let prefix = suppressionReasonRequiredPrefixes.first(where: comment.text.hasPrefix),
             comment.text.dropFirst(prefix.count).contains(where: { !$0.isWhitespace })
         else { continue }
