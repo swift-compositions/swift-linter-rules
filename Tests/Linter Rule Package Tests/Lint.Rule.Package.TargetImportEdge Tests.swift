@@ -79,7 +79,10 @@ import Testing
             }
         }
 
-        fileprivate static func write(_ content: Swift.String, to raw: Swift.String) throws(Failure) {
+        fileprivate static func write(
+            _ content: Swift.String,
+            to raw: Swift.String
+        ) throws(Failure) {
             if let slash = raw.lastIndex(of: "/") {
                 try makeDirectories(Swift.String(raw[raw.startIndex..<slash]))
             }
@@ -127,7 +130,10 @@ import Testing
     }
 
     extension Lint.Rule.`target import edge Tests` {
-        static func manifest(targets: Swift.String, dependencies: Swift.String = "") -> Swift.String {
+        static func manifest(
+            targets: Swift.String,
+            dependencies: Swift.String = ""
+        ) -> Swift.String {
             """
             // swift-tools-version: 6.0
             import PackageDescription
