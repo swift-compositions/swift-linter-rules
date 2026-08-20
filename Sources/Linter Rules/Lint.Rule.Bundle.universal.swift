@@ -10,13 +10,13 @@
 // ===----------------------------------------------------------------------===//
 
 public import Linter_Primitives
-public import Linter_Rule_Idiom
-public import Linter_Rule_Memory
-public import Linter_Rule_Package
-public import Linter_Rule_ResultBuilder
-public import Linter_Rule_Structure
-public import Linter_Rule_Suppression
-public import Linter_Rule_Testing
+import Linter_Rule_Idiom
+import Linter_Rule_Memory
+import Linter_Rule_Package
+import Linter_Rule_ResultBuilder
+import Linter_Rule_Structure
+import Linter_Rule_Suppression
+import Linter_Rule_Testing
 
 /// Universal-tier rule bundle.
 ///

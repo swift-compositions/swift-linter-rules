@@ -128,7 +128,7 @@ package func packageTargetImportEdgeNormalize(_ name: Swift.String) -> Swift.Str
         var bytes: [Swift.UInt8] = []
         var buffer = [Swift.UInt8](repeating: 0, count: 4096)
         while true {
-            let count = unsafe buffer.withUnsafeMutableBytes { pointer in
+            let count = buffer.withUnsafeMutableBytes { pointer in
                 unsafe fread(pointer.baseAddress, 1, pointer.count, handle)
             }
             guard count > 0 else { break }
