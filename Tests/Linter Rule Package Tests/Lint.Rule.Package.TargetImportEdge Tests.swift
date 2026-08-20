@@ -135,7 +135,7 @@ import Testing
             dependencies: Swift.String = ""
         ) -> Swift.String {
             """
-            // swift-tools-version: 6.0
+            // swift-tools-version: 6.4
             import PackageDescription
 
             let package = Package(
@@ -226,7 +226,7 @@ import Testing
                 files: [
                     "Sources/A/File.swift": "import Member\n",
                     "dep/Package.swift": """
-                    // swift-tools-version: 6.0
+                    // swift-tools-version: 6.4
                     import PackageDescription
                     let package = Package(
                         name: "dep",
@@ -252,7 +252,7 @@ import Testing
                 files: [
                     "Sources/A/File.swift": "import Rogue\n",
                     "dep/Package.swift": """
-                    // swift-tools-version: 6.0
+                    // swift-tools-version: 6.4
                     import PackageDescription
                     let package = Package(
                         name: "dep",
