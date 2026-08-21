@@ -1,24 +1,8 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter-rules open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter-rules project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 public import Linter_Primitives
 internal import SwiftSyntax
 
-/// Wave 2b finalization (2026-05-10) — public stored properties of
-/// unsafe pointer types MUST be `private` / `internal`, or annotated
-/// `@unsafe` to mark them as deliberate escape hatches.
-///
-/// Citation: `[MEM-SAFE-023]` (memory-safety skill, safety-isolation.md).
 extension Lint.Rule {
-    /// Flags a public stored unsafe-pointer property lacking `private`/`internal`/`@unsafe`.
+
     public static let `unsafe storage visibility` = Lint.Rule(
         id: "unsafe storage visibility",
         default: .warning,

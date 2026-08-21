@@ -1,14 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter-rules open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter-rules project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Linter_Primitives
 import Linter_Rules_Test_Support
 import SwiftParser
@@ -98,10 +87,7 @@ extension Lint.Rule.`inlinable internal access Tests`.Unit {
 
     @Test
     func `inlinable internal init in public type is flagged`() {
-        // Amendment §A6: the enclosing type must be `public` (or
-        // `package`) for the `package` init upgrade to be legal, so the
-        // rule fires here; an internal enclosing type is now exempt (see
-        // the §A6 Edge Case suite).
+
         let source = """
             public struct S {
                 @inlinable
@@ -151,12 +137,7 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
 
     @Test
     func `inlinable func flagged message prescribes package not usableFromInline pairing`() {
-        // Amendment §A6 verdict 2: the func/var message is aligned with
-        // the init message — it prescribes the `package` upgrade and
-        // drops the former "@usableFromInline (preferred...)" guidance
-        // (which Swift rejects on an `@inlinable` decl as "has no
-        // effect"). It must NOT tell the author to pair with
-        // `@usableFromInline`.
+
         let source = """
             @inlinable
             func foo() {}
@@ -168,7 +149,7 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
             #expect(message.contains("`package`"))
             #expect(message.contains("has no effect"))
             #expect(!message.contains("pair the attribute with `@usableFromInline`"))
-            // The compiler-illegal exemption and suppress channel are named.
+
             #expect(message.contains("compiler-illegal"))
             #expect(message.contains("swift-linter:disable:next"))
         }
@@ -187,14 +168,8 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
     }
 }
 
-// MARK: - Amendment §A6 (2026-07-09) — compiler-illegal-upgrade exemption
-
 extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
-    /// Variant A, `@usableFromInline` enclosing type — the
-    /// swift-async-primitives shape.
-    ///
-    /// A member cannot be widened past its
-    /// enclosing type's access, so `package` is compiler-illegal here.
+
     @Test
     func `A6 variant A: member in usableFromInline struct is exempt`() {
         let source = """
@@ -208,7 +183,6 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
         #expect(findings.isEmpty)
     }
 
-    /// Variant A, internal-default enclosing type.
     @Test
     func `A6 variant A: member in internal struct is exempt`() {
         let source = """
@@ -221,7 +195,6 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
         #expect(findings.isEmpty)
     }
 
-    /// Variant A, internal-default enclosing type — property variant.
     @Test
     func `A6 variant A: var in internal struct is exempt`() {
         let source = """
@@ -234,9 +207,6 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
         #expect(findings.isEmpty)
     }
 
-    /// Variant B — the memory-small shape: an `@inlinable init` in a
-    /// `public` type whose parameter type resolves in the same file to a
-    /// `@usableFromInline` (below-`package`) declaration.
     @Test
     func `A6 variant B: init with same-file usableFromInline param type is exempt`() {
         let source = """
@@ -252,7 +222,6 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
         #expect(findings.isEmpty)
     }
 
-    /// Variant B, internal-default same-file param type.
     @Test
     func `A6 variant B: init with same-file internal param type is exempt`() {
         let source = """
@@ -269,8 +238,7 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
 }
 
 extension Lint.Rule.`inlinable internal access Tests`.Unit {
-    /// Still fires: a member of a `public` type — the `package` upgrade
-    /// is legal, so the exemption does not apply.
+
     @Test
     func `A6 still fires: member in public struct`() {
         let source = """
@@ -283,10 +251,6 @@ extension Lint.Rule.`inlinable internal access Tests`.Unit {
         #expect(findings.count == 1)
     }
 
-    /// Still fires: an `@inlinable init` in a `public` type whose
-    /// parameter type is NOT declared in this file (cross-file), so it
-    /// cannot be resolved as below-`package` and the conservative
-    /// default is to fire.
     @Test
     func `A6 still fires: init with cross-file param type`() {
         let source = """

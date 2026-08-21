@@ -1,14 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Linter_Primitives
 import Linter_Rules_Test_Support
 import SwiftParser
@@ -40,8 +29,6 @@ extension Lint.Rule.`for loop in result builder Tests` {
         return rule.findings(parsed, severity)
     }
 }
-
-// MARK: - Positive cases (rule fires)
 
 extension Lint.Rule.`for loop in result builder Tests`.`Positive Cases` {
     @Test
@@ -111,13 +98,10 @@ extension Lint.Rule.`for loop in result builder Tests`.`Positive Cases` {
             }
             """
         let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
-        // Single emission per builder closure with at least one for-loop.
-        // Detector finds first for-loop and skips children — only one finding.
+
         #expect(findings.count == 1)
     }
 }
-
-// MARK: - Negative cases (rule does NOT fire)
 
 extension Lint.Rule.`for loop in result builder Tests`.`Negative Cases` {
     @Test
@@ -171,8 +155,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Negative Cases` {
 
     @Test
     func `For-loop in nested closure NOT inside outer builder is NOT flagged`() {
-        // The for-loop is inside `someFunction { ... }`, which is NOT in the
-        // allowlist. The outer Array body has no for-loop directly.
+
         let source = """
             let a = Array<Int> {
                 someFunction {
@@ -186,8 +169,6 @@ extension Lint.Rule.`for loop in result builder Tests`.`Negative Cases` {
         #expect(findings.isEmpty)
     }
 }
-
-// MARK: - Callee identifier extraction
 
 extension Lint.Rule.`for loop in result builder Tests`.`Callee Patterns` {
     @Test
@@ -258,8 +239,6 @@ extension Lint.Rule.`for loop in result builder Tests`.`Callee Patterns` {
     }
 }
 
-// MARK: - Edge cases
-
 extension Lint.Rule.`for loop in result builder Tests`.`Edge Cases` {
     @Test
     func `Empty file produces no findings`() {
@@ -297,11 +276,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Edge Cases` {
 
     @Test
     func `Nested Array builders both with for-loops are both flagged`() {
-        // Outer Array builder body contains an inner Array builder body.
-        // Both are in the allowlist; but the OUTER detector skips nested
-        // closures, so it only sees the for-loop in the OUTER closure
-        // (which is empty here). The INNER builder's for-loop is detected
-        // when the visitor reaches the inner FunctionCallExprSyntax.
+
         let source = """
             let a = Array<[Int]> {
                 for i in 0..<3 { i }
@@ -316,7 +291,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Edge Cases` {
 
     @Test
     func `Allowlisted callee without trailing closure is NOT flagged`() {
-        // Array(repeating:count:) — no closure, no body to inspect.
+
         let source = """
             let a = Array(repeating: 0, count: 10)
             """
@@ -324,8 +299,6 @@ extension Lint.Rule.`for loop in result builder Tests`.`Edge Cases` {
         #expect(findings.isEmpty)
     }
 }
-
-// MARK: - Severity / configuration
 
 extension Lint.Rule.`for loop in result builder Tests`.Severity {
     @Test
@@ -348,8 +321,6 @@ extension Lint.Rule.`for loop in result builder Tests`.Severity {
         }
     }
 }
-
-// MARK: - Allowlist extensibility
 
 extension Lint.Rule.`for loop in result builder Tests`.Allowlist {
     @Test

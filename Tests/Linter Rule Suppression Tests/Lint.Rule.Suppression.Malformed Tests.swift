@@ -1,14 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter-rules open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter-rules project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Linter_Primitives
 import Linter_Rules_Test_Support
 import SwiftParser
@@ -34,8 +23,6 @@ extension Lint.Rule.`malformed suppression directive Tests` {
         return Lint.Rule.`malformed suppression directive`.findings(parsed, .warning)
     }
 }
-
-// MARK: - Unit: malformed forms MUST fire
 
 extension Lint.Rule.`malformed suppression directive Tests`.Unit {
     @Test
@@ -70,7 +57,7 @@ extension Lint.Rule.`malformed suppression directive Tests`.Unit {
 
     @Test
     func `whitespace-only rule id after next is flagged`() {
-        // Trailing space present so the honored prefix matches, but the id is empty.
+
         let source =
             "// swift-linter:disable:next \nlet value = compute()"
         let findings = Lint.Rule.`malformed suppression directive Tests`.findings(in: source)
@@ -97,8 +84,6 @@ extension Lint.Rule.`malformed suppression directive Tests`.Unit {
         #expect(findings.count == 1)
     }
 }
-
-// MARK: - Edge Case: well-formed / out-of-scope MUST NOT fire
 
 extension Lint.Rule.`malformed suppression directive Tests`.`Edge Case` {
     @Test
@@ -132,8 +117,7 @@ extension Lint.Rule.`malformed suppression directive Tests`.`Edge Case` {
 
     @Test
     func `swiftlint block form is out of scope`() {
-        // This is exactly the swift-spm-standard 285f46a^ shape — owned by
-        // SwiftLint's superfluous_disable_command / blanket_disable_command.
+
         let source = """
             // swiftlint:disable no_foundation_import_warning typed_throws_required
             let value = compute()
@@ -155,8 +139,7 @@ extension Lint.Rule.`malformed suppression directive Tests`.`Edge Case` {
 
     @Test
     func `doc comment mention is not scanned`() {
-        // `///` is a docLineComment, not a lineComment — the engine scanner
-        // (and this rule) skip it, matching Lint.Suppression.scan.
+
         let source = """
             /// swift-linter:disable:next unchecked call site
             let value = compute()
@@ -165,8 +148,6 @@ extension Lint.Rule.`malformed suppression directive Tests`.`Edge Case` {
         #expect(findings.isEmpty)
     }
 }
-
-// MARK: - Reason compliance
 
 extension Lint.Rule {
     @Suite

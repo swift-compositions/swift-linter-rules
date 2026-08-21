@@ -1,25 +1,8 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter-rules open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter-rules project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 public import Linter_Primitives
 internal import SwiftSyntax
 
-/// Wave 2b finalization (2026-05-10) — `~Copyable` types whose stored
-/// surface is Sendable-by-construction MUST use plain `Sendable`, not
-/// `@unchecked Sendable`.
-///
-/// Citation: `[MEM-SEND-004]` (memory-safety skill, concurrency.md).
 extension Lint.Rule {
-    /// Flags `@unchecked Sendable` on a `~Copyable` type whose stored surface is
-    /// Sendable-by-construction.
+
     public static let `unchecked sendable noncopyable` = Lint.Rule(
         id: "unchecked sendable noncopyable",
         default: .warning,

@@ -1,14 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter-rules open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter-rules project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Linter_Primitives
 import Linter_Rules_Test_Support
 import SwiftParser
@@ -113,12 +102,6 @@ extension Lint.Rule.`redundant refinement Tests`.Unit {
         #expect(findings.count == 2)
     }
 
-    // MARK: - Expanded-table coverage (sourced from symbol-graph-conformance-oracle)
-    //
-    // The 110 additional refinements added in the 2026-05-13 table
-    // expansion cover protocol families the hand-curated table omitted.
-    // The tests below sample five of those families.
-
     @Test
     func `OptionSet ampersand SetAlgebra is flagged via expanded table`() {
         let source = "struct S: OptionSet & SetAlgebra { var rawValue: Int = 0 }"
@@ -142,7 +125,7 @@ extension Lint.Rule.`redundant refinement Tests`.Unit {
 
     @Test
     func `FixedWidthInteger ampersand Numeric is flagged via expanded table`() {
-        // FixedWidthInteger refines Numeric transitively via BinaryInteger.
+
         let source = "func f<I: FixedWidthInteger & Numeric>(_ i: I) {}"
         let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)
@@ -161,7 +144,7 @@ extension Lint.Rule.`redundant refinement Tests`.Unit {
 extension Lint.Rule.`redundant refinement Tests`.`Edge Case` {
     @Test
     func `unrelated composition Error ampersand Hashable is NOT flagged`() {
-        // Neither Error→Hashable nor Hashable→Error is in the table.
+
         let source = "func f<T: Error & Hashable>(_ t: T) {}"
         let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
         #expect(findings.isEmpty)
@@ -169,8 +152,7 @@ extension Lint.Rule.`redundant refinement Tests`.`Edge Case` {
 
     @Test
     func `non-Copyable suppression with Sendable is NOT flagged`() {
-        // ~Copyable is a suppression marker, not a protocol — must not
-        // shadow a refinement table entry.
+
         let source = "struct S: ~Copyable & Sendable {}"
         let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
         #expect(findings.isEmpty)
@@ -192,10 +174,7 @@ extension Lint.Rule.`redundant refinement Tests`.`Edge Case` {
 
     @Test
     func `three-way composition with one redundant pair flags once`() {
-        // Comparable refines Equatable. Hashable refines Equatable. The
-        // redundant member is Equatable; it should be reported exactly
-        // once even though two pairs of refinement-table entries match
-        // its position.
+
         let source = "func f<T: Comparable & Hashable & Equatable>(_ t: T) {}"
         let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)

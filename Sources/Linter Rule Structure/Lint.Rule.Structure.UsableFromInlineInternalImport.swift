@@ -1,23 +1,8 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter-rules open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter-rules project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 public import Linter_Primitives
 internal import SwiftSyntax
 
-/// Wave 4 (mechanization-program) — file pairs `@usableFromInline` with
-/// `internal import` of a module whose types the inline body references.
-///
-/// Citation: `[PATTERN-055]` (implementation skill, patterns.md).
 extension Lint.Rule {
-    /// Flags an `@usableFromInline` decl paired with an `internal import` it reaches into.
+
     public static let `usable from inline internal import` = Lint.Rule(
         id: "usable from inline internal import",
         default: .warning,
@@ -46,17 +31,7 @@ internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisit
     let severity: Diagnostic.Severity
     let converter: SourceLocationConverter
     var matches: [Diagnostic.Record] = []
-    /// Token texts collected from every `@usableFromInline`-annotated
-    /// declaration's subtree.
-    ///
-    /// The collection happens at the
-    /// declaration level (not the attribute level) so that the type
-    /// annotation, initializer, and body all contribute their
-    /// identifier references — the rule's principled scope is
-    /// "@usableFromInline body actually reaches into the
-    /// internally-imported module," which means any identifier
-    /// anywhere in the annotated decl that matches the imported
-    /// module's leaf name.
+
     var usableFromInlineReferencedNames: Swift.Set<Swift.String> = []
     var internalImportModules: [StructureUsableFromInlineInternalImportModule] = []
 
@@ -67,12 +42,6 @@ internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisit
         super.init(viewMode: .sourceAccurate)
     }
 
-    /// Returns true if `attributes` carries the `@usableFromInline`
-    /// attribute.
-    ///
-    /// Walks the attribute list looking for an attribute
-    /// whose identifier name (or its trimmed description) is
-    /// `usableFromInline`.
     private func hasUsableFromInlineAttribute(_ attributes: AttributeListSyntax) -> Swift.Bool {
         for attribute in attributes {
             guard let attr = attribute.as(AttributeSyntax.self) else { continue }
@@ -88,20 +57,6 @@ internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisit
         return false
     }
 
-    /// Walks the subtree of `node` and collects every identifier-shaped
-    /// token text into `usableFromInlineReferencedNames`.
-    ///
-    /// Used to
-    /// build the syntactic-reach set: the rule fires per
-    /// internal-import only when the imported module's leaf name is
-    /// present in this set — the `@usableFromInline` body
-    /// syntactically references the module, qualified or as a leaf
-    /// identifier coincidentally matching the module name.
-    ///
-    /// Token-kind filter: `.identifier` covers type names, decl
-    /// references, member-access bases, and function names. Keyword
-    /// tokens and operator tokens are skipped (they cannot resolve
-    /// to module-imported identifiers).
     private func collectIdentifierTexts(in node: some SyntaxProtocol) {
         for token in node.tokens(viewMode: .sourceAccurate) {
             if case .identifier(let text) = token.tokenKind {
@@ -164,29 +119,12 @@ internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisit
         return .visitChildren
     }
 
-    /// Returns the leaf module name of an `import M` (or
-    /// `import A.B.M`) declaration.
-    ///
-    /// Submodule imports are uncommon
-    /// in the ecosystem but the leaf-name semantics match the
-    /// inheritance-clause walk used elsewhere — both bare and
-    /// dotted forms collapse to the trailing component, which is
-    /// the name a consumer would write to reach into the module.
     private func importDeclLeafModuleName(_ node: ImportDeclSyntax) -> Swift.String {
         let path = node.path
         guard let last = path.last else { return "" }
         return last.name.text
     }
 
-    /// Tightened recognizer (Thread C, A6): fires per
-    /// `internal import` only when its leaf module name appears in
-    /// the `@usableFromInline` decls' identifier-reference set.
-    ///
-    /// The prior recognizer fired on co-presence of any
-    /// `@usableFromInline` annotation + any `internal import`,
-    /// which over-fires on rule-pack files whose `@usableFromInline`
-    /// constants are plain `Swift.String` messages with no
-    /// SwiftSyntax reach.
     func finalize() {
         for module in internalImportModules {
             guard usableFromInlineReferencedNames.contains(module.leafName) else {

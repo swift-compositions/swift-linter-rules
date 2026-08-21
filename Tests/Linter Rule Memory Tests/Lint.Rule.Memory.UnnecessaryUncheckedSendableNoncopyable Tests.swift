@@ -1,14 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter-rules open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter-rules project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Linter_Primitives
 import Linter_Rules_Test_Support
 import SwiftParser
@@ -55,7 +44,7 @@ extension Lint.Rule.`unchecked sendable noncopyable Tests`.Unit {
 
     @Test
     func `copyable struct with unchecked Sendable is not flagged here`() {
-        // Out of scope for this rule — covered by UncheckedSendableCategorized.
+
         let source = """
             final class Foo: @unchecked Sendable {}
             """
@@ -74,9 +63,7 @@ extension Lint.Rule.`unchecked sendable noncopyable Tests`.Unit {
 
     @Test
     func `noncopyable struct with unsafe unchecked Sendable is still flagged (drop unchecked)`() {
-        // The rule's signal is "noncopyable struct + unchecked Sendable"
-        // — even with @unsafe, the @unchecked is unnecessary because the
-        // compiler synthesizes Sendable for noncopyable structs.
+
         let source = """
             struct Arena: ~Copyable, @unsafe @unchecked Sendable {}
             """

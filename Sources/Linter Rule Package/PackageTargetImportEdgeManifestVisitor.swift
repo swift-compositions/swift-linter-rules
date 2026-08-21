@@ -1,20 +1,5 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter-rules open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter-rules project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 package import SwiftSyntax
 
-/// Collects the target-import-edge rule's manifest facts from a
-/// `Package.swift` parse: targets with their declared dependencies,
-/// `.library` products, and `.package(url:)`/`.package(path:)`
-/// declarations.
 package final class PackageTargetImportEdgeManifestVisitor: SyntaxVisitor {
     package var manifest = PackageTargetImportEdgeManifest()
 

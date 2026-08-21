@@ -1,14 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter-rules open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter-rules project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Linter_Primitives
 import Linter_Rules_Test_Support
 import SwiftParser
@@ -25,11 +14,7 @@ extension Lint.Rule {
 }
 
 extension Lint.Rule.`mock factory zero collision Tests` {
-    // The `mock factory zero collision` rule is scope-limited to file paths
-    // containing `/Tests/` (mock-factory hygiene only matters in test code).
-    // Test fixtures must therefore live under a `/Tests/` path or the rule
-    // short-circuits before inspecting the AST. The leading slash is
-    // required: the visitor checks `filePath.contains("/Tests/")`.
+
     static func findings(
         in source: String,
         file: String = "/Tests/X/Test.swift"

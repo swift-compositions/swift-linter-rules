@@ -1,34 +1,8 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter-rules open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter-rules project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 public import Linter_Primitives
 internal import SwiftSyntax
 
-/// 2026-05-13 BREAKING revision — flags `@unchecked Sendable`
-/// conformances that pair `@unsafe` on the same conformance clause
-/// (a deviation from Swift convention per SE-0458). The Sendable
-/// conformance carries `@unchecked` alone; `@unsafe` lives on the
-/// type/extension declaration when memory-safety unsafety is fundamental
-/// to the type's identity, or on individual methods/properties per
-/// SE-0458 — never on the Sendable protocol slot.
-///
-/// Citation: `[MEM-SAFE-024]` (memory-safety skill, safety-isolation.md);
-/// `swift-institute/Research/safe-unsafe-attribute-and-unchecked-sendable-best-practices.md`
-/// v1.1.0.
-///
-/// Originally added 2026-05-10 (Wave 2b finalization Batch 4) flagging
-/// `@unchecked Sendable` WITHOUT `@unsafe`; inverted 2026-05-13 to flag
-/// `@unchecked Sendable` WITH `@unsafe` on the same conformance clause.
 extension Lint.Rule {
-    /// Flags `@unchecked Sendable` paired with `@unsafe` on the same conformance clause.
+
     public static let `unchecked sendable categorization` = Lint.Rule(
         id: "unchecked sendable categorization",
         default: .warning,
@@ -72,10 +46,7 @@ internal final class MemoryUncheckedSendableCategorizedVisitor: SyntaxVisitor {
     }
 
     private func hasUnsafeAttributeOnInherited(_ inherited: InheritedTypeSyntax) -> Bool {
-        // Per current Swift syntax, inherited types in the conformance
-        // list don't carry attribute lists individually — attributes on
-        // the conformance live at the AttributedTypeSyntax wrapping the
-        // type. Check that.
+
         if let attributed = inherited.type.as(AttributedTypeSyntax.self) {
             for attribute in attributed.attributes {
                 guard let attr = attribute.as(AttributeSyntax.self) else { continue }
@@ -118,9 +89,7 @@ internal final class MemoryUncheckedSendableCategorizedVisitor: SyntaxVisitor {
         for inherited in inheritanceClause.inheritedTypes {
             guard isSendableInherited(inherited) else { continue }
             guard hasUncheckedAttribute(inherited) else { continue }
-            // Inverted 2026-05-13: flag when @unsafe IS paired with @unchecked
-            // on the same conformance clause (deviation from Swift convention
-            // per SE-0458). Previously: flag when @unsafe was absent.
+
             guard hasUnsafeAttributeOnInherited(inherited) else { continue }
             let location = converter.location(for: inherited.positionAfterSkippingLeadingTrivia)
             matches.append(

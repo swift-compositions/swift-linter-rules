@@ -1,14 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter-rules open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter-rules project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Linter_Primitives
 import Linter_Rules_Test_Support
 import SwiftParser
@@ -74,7 +63,7 @@ extension Lint.Rule.`license header Tests`.Unit {
 
     @Test
     func `spelling variants are accepted`() {
-        // Mirrors the Python's forgiving substring detection.
+
         for line in [
             "// Apache License, Version 2.0",
             "// Apache-2.0",
@@ -137,8 +126,7 @@ extension Lint.Rule.`license header Tests`.Exemption {
 
     @Test
     func `paths outside Sources are exempt`() {
-        // The Python anchors `parts[0] == "Sources"` at the package
-        // root; the rule mirrors that anchor at the run root.
+
         let findings = Lint.Rule.`license header Tests`.findings(
             in: "func helper() -> Int { 0 }",
             path: "Plugins/Example/Example.swift"

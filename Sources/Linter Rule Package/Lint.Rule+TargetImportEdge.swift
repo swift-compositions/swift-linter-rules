@@ -1,14 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter-rules open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter-rules project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 public import Linter_Primitives
 internal import SwiftParser
 internal import SwiftSyntax
@@ -23,52 +12,11 @@ internal import SwiftSyntax
     internal import Android
 #endif
 
-/// F9 predicate parity (2026-08-06) — `[TARGET-IMPORT-EDGE]`: every
-/// module a target's sources `import` (any form) MUST appear in that
-/// target's `dependencies:` in `Package.swift`, as a same-package
-/// target dependency or a cross-package product dependency. Excepted:
-/// the target's own module and toolchain/SDK-supplied modules. An
-/// import satisfied only transitively is an undeclared build edge —
-/// whether the target compiles becomes a build-plan scheduling race.
-///
-/// Mirrors the incumbent Python surface
-/// `swift-institute/.github/.github/scripts/validate-target-imports.py`:
-///
-/// - The rule evaluates when the linted file is a `Package.swift`; the
-///   package root is the manifest's on-disk directory. Findings anchor
-///   at the offending target's `name:` in the manifest and name the
-///   importing source `file:line` in the message (the single-file rule
-///   shape has no other location to attach cross-file findings to —
-///   deliberate deviation from the Python's per-source TSV rows).
-/// - Manifest facts come from a SwiftSyntax parse of the manifest
-///   (targets, per-target `target`/`product`/`byName` dependencies,
-///   `.package(url:)`/`.package(path:)` declarations, `.library`
-///   products) rather than `swift package dump-package` — a lint rule
-///   spawns no subprocess. Deviation: computed manifest values the
-///   declarative parse cannot see are not resolved; such targets
-///   simply contribute no findings (under-report, never false-fire).
-/// - Allowed set per target = own module ∪ same-package target deps
-///   (normalized names) ∪ declared product deps' member modules (dep
-///   manifests resolved locally: path deps on disk, url deps via the
-///   `<root>/../../<org>/<name>` checkout layout — same resolution as
-///   the Python) ∪ the toolchain set below. `byName` deps resolve to a
-///   same-package target first, else to a like-named product of any
-///   declared dep.
-/// - Unresolvable dep manifests degrade soft: their products' member
-///   modules are unknown, so the whole run under-reports (no findings)
-///   rather than false-firing — identical to the Python's soft mode.
-/// - Imports are read from a SwiftParser parse of each target source
-///   file (first dotted component of every `import` declaration, all
-///   scoped/attributed forms). Deviation: parser-accurate versus the
-///   Python's line regex; comments and strings never match.
-///
-/// Citation: swift-institute/.github#358 transaction F9.
 extension Lint.Rule {
-    /// Flags a target whose sources import a module without a declared manifest dependency edge (mirror of validate-target-imports.py, [TARGET-IMPORT-EDGE]).
+
     public static let `target import edge` = Lint.Rule(
         id: "target import edge",
-        // ADVISORY at introduction per the standing graduation
-        // discipline — promote to `.error` only after fleet validation.
+
         default: .warning,
         findings: { source, severity in
             packageTargetImportEdgeFindings(source: source, severity: severity)
@@ -76,10 +24,6 @@ extension Lint.Rule {
     )
 }
 
-// MARK: - Toolchain carve
-
-/// Toolchain/SDK-supplied modules (the rule's carve) — identical to the
-/// Python's `TOOLCHAIN_MODULES`.
 package let packageTargetImportEdgeToolchainModules: Swift.Set<Swift.String> = [
     "Swift", "Testing", "XCTest", "Foundation", "FoundationEssentials",
     "Dispatch", "os", "Darwin", "Glibc", "Musl", "WinSDK", "Android",
@@ -88,14 +32,10 @@ package let packageTargetImportEdgeToolchainModules: Swift.Set<Swift.String> = [
     "StringProcessing", "CoreFoundation", "ObjectiveC", "simd", "Accelerate",
 ]
 
-/// Directory names never descended into — identical to the Python's
-/// `SKIP_DIRS`.
 package let packageTargetImportEdgeSkipDirectories: Swift.Set<Swift.String> = [
     ".build", ".git", ".swiftpm", ".claude", "node_modules", "checkouts",
 ]
 
-/// Mirror of the Python's `normalize`: module names use `_` where the
-/// target/product name uses spaces or hyphens.
 package func packageTargetImportEdgeNormalize(_ name: Swift.String) -> Swift.String {
     var out = ""
     out.reserveCapacity(name.count)
@@ -105,23 +45,8 @@ package func packageTargetImportEdgeNormalize(_ name: Swift.String) -> Swift.Str
     return out
 }
 
-// MARK: - Filesystem access (read-only)
-//
-// The cross-file predicate this rule mirrors is inherently
-// filesystem-shaped: the Python walks target source directories and
-// reads dependency manifests from disk. The access here is contained,
-// read-only, and POSIX-direct (no filesystem package dependency — the
-// rule pack's graph stays SwiftSyntax + Linter Primitives). On
-// platforms without a POSIX surface the helpers return empty, and the
-// rule under-reports (soft), never false-fires.
-
 #if canImport(Darwin) || canImport(Glibc) || canImport(Musl) || canImport(Android)
 
-    /// Reads a UTF-8 text file, or `nil` on any failure.
-    ///
-    /// The rule degrades soft on I/O failure (under-report, never
-    /// false-fire), mirroring the Python's `errors="replace"` /
-    /// `OSError` handling.
     package func packageTargetImportEdgeReadText(atPath raw: Swift.String) -> Swift.String? {
         guard let handle = unsafe fopen(raw, "rb") else { return nil }
         defer { _ = unsafe fclose(handle) }
@@ -149,8 +74,6 @@ package func packageTargetImportEdgeNormalize(_ name: Swift.String) -> Swift.Str
         return (status.st_mode & S_IFMT) == S_IFREG
     }
 
-    /// The entry names of a directory (sorted, `.`/`..` excluded), or
-    /// empty on any failure.
     package func packageTargetImportEdgeEntryNames(in directory: Swift.String) -> [Swift.String] {
         guard let handle = unsafe opendir(directory) else { return [] }
         defer { _ = unsafe closedir(handle) }
@@ -179,9 +102,6 @@ package func packageTargetImportEdgeNormalize(_ name: Swift.String) -> Swift.Str
 
 #endif
 
-/// Recursively collects `*.swift` file paths under `directory`,
-/// skipping ``packageTargetImportEdgeSkipDirectories`` — mirror of the
-/// Python's pruned `os.walk`.
 package func packageTargetImportEdgeSwiftFiles(under directory: Swift.String) -> [Swift.String] {
     var out: [Swift.String] = []
     for name in packageTargetImportEdgeEntryNames(in: directory) {
@@ -196,19 +116,14 @@ package func packageTargetImportEdgeSwiftFiles(under directory: Swift.String) ->
     return out.sorted()
 }
 
-// MARK: - Findings
-
 package func packageTargetImportEdgeFindings(
     source: borrowing Lint.Source.Parsed,
     severity: Diagnostic.Severity
 ) -> [Diagnostic.Record] {
-    // Gate: the rule evaluates on `Package.swift` parses only.
+
     let runPath = Swift.String(describing: source.path)
     guard runPath == "Package.swift" || runPath.hasSuffix("/Package.swift") else { return [] }
 
-    // Package root: the manifest's on-disk directory. Without a
-    // resolvable root the cross-file predicate cannot be evaluated;
-    // degrade soft.
     let filePath = source.file.filePath
     guard filePath.hasSuffix("/Package.swift") else { return [] }
     let root = Swift.String(filePath.dropLast("/Package.swift".count))
@@ -218,9 +133,6 @@ package func packageTargetImportEdgeFindings(
     visitor.walk(source.tree)
     let manifest = visitor.manifest
 
-    // Resolve dependency manifests locally — path deps on disk, url
-    // deps via the `<root>/../../<org>/<name>` checkout layout (mirror
-    // of the Python's `local_dep_manifests`).
     var dependencyManifestPaths: [Swift.String] = []
     var resolvedCount = 0
     for relative in manifest.pathDependencies {
@@ -244,11 +156,9 @@ package func packageTargetImportEdgeFindings(
         }
     }
     let declaredCount = manifest.pathDependencies.count + manifest.urlDependencies.count
-    // Deps not resolvable locally → soft mode (under-report), identical
-    // to the Python's `unresolvable_deps` flag.
+
     let unresolvableDependencies = declaredCount > resolvedCount
 
-    // Product name → member module names, across every resolved dep.
     var dependencyProducts: [Swift.String: Swift.Set<Swift.String>] = [:]
     for manifestPath in dependencyManifestPaths {
         guard let text = packageTargetImportEdgeReadText(atPath: manifestPath) else { continue }
@@ -283,7 +193,7 @@ package func packageTargetImportEdgeFindings(
                 if let members = dependencyProducts[name] {
                     allowed.formUnion(members)
                 } else {
-                    // Unresolved product: soft — accept its own name.
+
                     allowed.insert(packageTargetImportEdgeNormalize(name))
                 }
 
@@ -299,8 +209,6 @@ package func packageTargetImportEdgeFindings(
             }
         }
 
-        // module → (relative file, line) — first sighting wins, mirror
-        // of the Python's `imports_of`.
         var sightings: [Swift.String: (Swift.String, Swift.Int)] = [:]
         for swiftFile in packageTargetImportEdgeSwiftFiles(under: sourceDirectory) {
             guard let text = packageTargetImportEdgeReadText(atPath: swiftFile) else { continue }
@@ -322,7 +230,7 @@ package func packageTargetImportEdgeFindings(
             if packageTargetImportEdgeToolchainModules.contains(module) { continue }
             if module.hasPrefix("_") { continue }
             if allowed.contains(module) { continue }
-            if unresolvableDependencies { continue }  // soft mode
+            if unresolvableDependencies { continue }
             let location = source.converter.location(for: target.namePosition)
             records.append(
                 Diagnostic.Record(

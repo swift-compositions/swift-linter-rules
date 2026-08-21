@@ -1,21 +1,8 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter-rules open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter-rules project authors
-// Licensed under Apache License 2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 public import Linter_Primitives
 internal import SwiftSyntax
 
-/// Requires prose on every well-formed inline suppression directive.
-/// Citation: `[LINT-SUPPRESS-002]`.
 extension Lint.Rule {
-    /// Requires prose on every well-formed inline suppression directive.
+
     public static let `suppression reason required` = Lint.Rule(
         id: "suppression reason required",
         default: .error,
@@ -80,11 +67,6 @@ internal func suppressionReasonRequiredFindings(
             comment.text.dropFirst(prefix.count).contains(where: { !$0.isWhitespace })
         else { continue }
 
-        // A continuation is immediately associated only when the physical
-        // line directly below the directive is itself a REASON comment.
-        // This excludes blank lines, intervening code (including code with a
-        // trailing comment), and any later REASON that cannot repair an
-        // empty immediate continuation.
         guard comment.line < lines.count else {
             findings.append(
                 suppressionReasonRequiredFinding(

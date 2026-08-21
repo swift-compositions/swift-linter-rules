@@ -1,64 +1,12 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 public import Linter_Primitives
 internal import SwiftSyntax
 
-/// `for loop in result builder` — `for`-in-loop appearing directly inside the
-/// trailing closure of a known result-builder constructor (Array, Set,
-/// Dictionary, Buffer.Linear, Stack, Heap, Tree.Binary, etc.).
-///
-/// Under SE-0289's transform, every iteration of a `for` loop in a result-
-/// builder body materializes a fresh `[Element]` via `buildExpression`,
-/// then accumulates them into `[[Element]]` for `buildArray.flatMap`.
-/// The cost is O(N) heap allocations + O(N) flatMap. At N=1000, this is
-/// ~44× slower than the imperative `var a: [E] = []; for i in 0..<N {
-/// a.append(i) }` pattern.
-///
-/// The fix is to write the sequence directly: the institute's result
-/// builders ship a `buildExpression<S: Sequence>(_:)` overload (Option G
-/// in `result-builder-performance-optimization.md` v2.0.0) that uses the
-/// optimized `Array.init(_ sequence:)` path. At N=100, this is 0.13× of
-/// imperative — i.e., the builder is 8× FASTER than the imperative form.
-///
-/// **Detection** is purely structural and heuristic-based: the rule
-/// matches `FunctionCallExpr` whose callee identifier (after stripping
-/// generic-argument clauses and joining member-access chains with `.`)
-/// matches an allowlist of known institute Builder types, AND whose
-/// trailing closure body contains a `ForInStmt` not nested inside another
-/// closure.
-///
-/// The default allowlist covers the 13 institute Round-1/Round-2 Builders
-/// + 5 standard-library-extensions Builders. Consumers extend it via the
-/// `Lint.Rule.\`for loop in result builder\`(allowlist:)` factory.
-///
-/// **Exemption**: `// swift-linter:disable:next for loop in result builder`
-/// with a `// REASON: <citation>` continuation. Per institute discipline,
-/// the regex-evasion pattern (paren-wrap, typename-swap) is forbidden —
-/// escalate to supervisor at typed-system bottom-out sites.
-///
-/// References:
-/// - `swift-institute/Research/result-builder-performance-optimization.md`
-///   (DECISION v2.0.0).
-/// - `swift-institute/Experiments/result-builder-perf/` (12-case empirical
-///   acceptance suite, 8/12 PASS post-fix).
 extension Lint.Rule {
-    /// Flags a `for`-in loop inside a result-builder body (materializes a fresh array per
-    /// iteration).
+
     public static let `for loop in result builder` = Lint.Rule.`for loop in result builder`(
         allowlist: resultBuilderForLoopDefaultAllowlist
     )
 
-    /// Factory for a `for loop in result builder` rule with a custom
-    /// allowlist of builder-type identifiers.
     public static func `for loop in result builder`(
         allowlist: Set<Swift.String>
     ) -> Lint.Rule {
@@ -79,14 +27,8 @@ extension Lint.Rule {
     }
 }
 
-/// Default allowlist for `Lint.Rule.\`for loop in result builder\``:
-/// 13 institute Round-1/Round-2 Builders + 5 standard-library-extensions
-/// Builders.
-///
-/// Stored as canonical dotted identifiers
-/// ("Buffer.Linear", "Tree.N", and similar).
 public let resultBuilderForLoopDefaultAllowlist: Set<Swift.String> = [
-    // Standard Library Extensions builders
+
     "Array",
     "Swift.Array",
     "ContiguousArray",
@@ -97,7 +39,7 @@ public let resultBuilderForLoopDefaultAllowlist: Set<Swift.String> = [
     "Swift.Set",
     "Dictionary",
     "Swift.Dictionary",
-    // Institute Round-1 / Round-2 builders
+
     "Buffer.Linear",
     "Buffer.Ring",
     "List.Linked",
@@ -152,13 +94,13 @@ internal final class ResultBuilderForLoopVisitor: SyntaxVisitor {
         guard allowlist.contains(identifier) else {
             return .visitChildren
         }
-        // Inspect the trailing closure first (the canonical Builder shape)
+
         if let trailing = node.trailingClosure,
             Self.containsForInStmt(in: trailing.statements)
         {
             emit(at: trailing.leftBrace.positionAfterSkippingLeadingTrivia)
         }
-        // Inspect any non-trailing argument that's a closure literal
+
         for argument in node.arguments {
             if let closure = argument.expression.as(ClosureExprSyntax.self),
                 Self.containsForInStmt(in: closure.statements)
@@ -186,13 +128,6 @@ internal final class ResultBuilderForLoopVisitor: SyntaxVisitor {
         )
     }
 
-    /// Walks the closure's statement list, returning `true` if any
-    /// `ForInStmt` is present at the closure's own scope or in nested
-    /// non-closure scopes (inside an `if` or `switch`, for example).
-    ///
-    /// Nested
-    /// closures (which may belong to different builder contexts or be
-    /// regular Swift) are skipped.
     @usableFromInline
     static func containsForInStmt(in statements: CodeBlockItemListSyntax) -> Bool {
         let detector = ResultBuilderForLoopForInDetector()
@@ -200,9 +135,6 @@ internal final class ResultBuilderForLoopVisitor: SyntaxVisitor {
         return detector.found
     }
 
-    /// Extracts the dotted callee identifier from a call's
-    /// `calledExpression`, stripping generic-argument clauses and
-    /// joining member-access chains with `.`.
     @usableFromInline
     static func calleeIdentifier(of expression: ExprSyntax) -> Swift.String? {
         if let memberAccess = expression.as(MemberAccessExprSyntax.self) {

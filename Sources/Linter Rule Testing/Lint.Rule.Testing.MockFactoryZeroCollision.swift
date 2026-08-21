@@ -1,21 +1,8 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter-rules open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter-rules project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 public import Linter_Primitives
 internal import SwiftSyntax
 
-/// Mock factories on pointer-wrapping `BitwiseCopyable` types MUST
-/// offset tag input by at least 1. Citation: `[TEST-028]`.
 extension Lint.Rule {
-    /// Flags a mock factory `unsafeBitCast` that fails to offset its tag input.
+
     public static let `mock factory zero collision` = Lint.Rule(
         id: "mock factory zero collision",
         default: .warning,
@@ -65,23 +52,12 @@ internal final class TestingMockFactoryZeroCollisionVisitor: SyntaxVisitor {
         return true
     }
 
-    /// The rule targets mock-factory hygiene: tag-pointer collision with
-    /// `Optional<T>.none` only occurs when the bitcast source is a small
-    /// integer literal / variable being cast to a pointer-wrapping
-    /// `BitwiseCopyable` type.
-    ///
-    /// Function references being reshaped
-    /// (for example, `unsafeBitCast(Type.init(arrayLiteral:) as ..., to: ...)`)
-    /// have no such collision shape.
     private func firstArgumentLooksLikeIntegerTag(_ argument: LabeledExprSyntax) -> Swift.Bool {
-        // Reject function-reference forms (the swift-tagged Tagged+Literals
-        // case): `Underlying.init(arrayLiteral:) as (...) -> Underlying`.
-        // These are AsExprSyntax wrapping a member-access of `init`.
+
         if argument.expression.is(AsExprSyntax.self) {
             return false
         }
-        // Reject member-access expressions (function references like
-        // `Foo.method` or `Type.init`).
+
         if argument.expression.is(MemberAccessExprSyntax.self) {
             return false
         }
@@ -89,9 +65,7 @@ internal final class TestingMockFactoryZeroCollisionVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
-        // Scope-limit: the rule targets mock-factory hygiene in test
-        // code. Source-tree paths don't host mock factories — firing
-        // there is rule-scope leakage.
+
         if !source.filePath.contains("/Tests/") {
             return .visitChildren
         }

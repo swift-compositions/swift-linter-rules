@@ -1,14 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter-rules open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter-rules project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Linter_Primitives
 import Linter_Rules_Test_Support
 import SwiftParser
@@ -35,11 +24,7 @@ extension Lint.Rule.`usable from inline internal import Tests` {
 extension Lint.Rule.`usable from inline internal import Tests`.Unit {
     @Test
     func `usableFromInline plus internal import is flagged`() {
-        // The `@usableFromInline` body must syntactically reach into
-        // the internally-imported module (post-86ec63d recognizer
-        // tightening): `OtherModule.Foo` in the return type carries
-        // the `OtherModule` leaf-name identifier token that the
-        // visitor collects, so the recognizer fires on the import.
+
         let source = """
             internal import OtherModule
 
@@ -56,10 +41,7 @@ extension Lint.Rule.`usable from inline internal import Tests`.Unit {
 
     @Test
     func `multiple internal imports each flagged when usableFromInline present`() {
-        // Both `ModuleA` and `ModuleB` must appear as identifier
-        // tokens inside the `@usableFromInline` decl — the recognizer
-        // fires per internal-import whose leaf name is in the
-        // reference set. Two parameter type annotations supply both.
+
         let source = """
             internal import ModuleA
             internal import ModuleB

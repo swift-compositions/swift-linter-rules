@@ -1,14 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-linter-rules open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-linter-rules project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Linter_Primitives
 import Linter_Rules_Test_Support
 import SwiftParser
@@ -27,10 +16,6 @@ import Testing
     import Android
 #endif
 
-// REASON: the rule's own filesystem predicate is POSIX-gated at the source —
-// its helpers return empty on platforms without a POSIX surface, so the rule
-// is a no-op there. This suite's on-disk fixture writer is gated on the same
-// predicate rather than reimplemented per platform.
 #if canImport(Darwin) || canImport(Glibc) || canImport(Musl) || canImport(Android)
     extension Lint.Rule {
         @Suite
@@ -43,11 +28,7 @@ import Testing
     }
 
     extension Lint.Rule.`target import edge Tests` {
-        /// A throwaway on-disk package fixture the rule can walk.
-        ///
-        /// All disk
-        /// access is contained POSIX, matching the pack's own reader — no
-        /// filesystem package dependency.
+
         struct Fixture {
             let root: Swift.String
 
@@ -114,7 +95,6 @@ import Testing
             Self.removeRecursively(root)
         }
 
-        /// Runs the rule against the fixture's manifest.
         fileprivate func findings() throws(Failure) -> [Diagnostic.Record] {
             let manifestPath = root + "/Package.swift"
             guard let text = packageTargetImportEdgeReadText(atPath: manifestPath) else {
@@ -343,8 +323,7 @@ import Testing
 
         @Test
         func `unresolvable declared dependency degrades soft`() throws {
-            // A url dep with no local checkout → the run under-reports
-            // rather than false-firing (the Python's soft mode).
+
             let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
                 manifest: Lint.Rule.`target import edge Tests`.manifest(
                     targets: """
