@@ -7,7 +7,7 @@ extension Lint.Rule {
         id: "inlinable internal access",
 
         default: .error,
-        findings: { source, severity in
+        observe: Lint.Rule.measured { source, severity in
             let visitor = StructureInlinableInternalAccessVisitor(
                 source: source.file,
                 severity: severity,

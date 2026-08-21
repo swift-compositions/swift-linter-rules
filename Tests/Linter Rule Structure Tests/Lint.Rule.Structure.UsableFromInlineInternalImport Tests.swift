@@ -17,7 +17,7 @@ extension Lint.Rule {
 extension Lint.Rule.`usable from inline internal import Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
         let parsed = Lint.Source.parsed(from: source, file: file)
-        return Lint.Rule.`usable from inline internal import`.findings(parsed, .warning)
+        return Lint.Rule.`usable from inline internal import`.observe(parsed, .warning).findings
     }
 }
 

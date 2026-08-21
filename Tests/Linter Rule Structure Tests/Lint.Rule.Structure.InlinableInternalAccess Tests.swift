@@ -20,7 +20,7 @@ extension Lint.Rule.`inlinable internal access Tests` {
         file: String = "Sources/X/Test.swift"
     ) -> [Diagnostic.Record] {
         let parsed = Lint.Source.parsed(from: source, file: file)
-        return Lint.Rule.`inlinable internal access`.findings(parsed, .warning)
+        return Lint.Rule.`inlinable internal access`.observe(parsed, .warning).findings
     }
 }
 

@@ -6,7 +6,7 @@ extension Lint.Rule {
     public static let `mock factory zero collision` = Lint.Rule(
         id: "mock factory zero collision",
         default: .warning,
-        findings: { source, severity in
+        observe: Lint.Rule.measured { source, severity in
             let visitor = TestingMockFactoryZeroCollisionVisitor(
                 source: source.file,
                 severity: severity,

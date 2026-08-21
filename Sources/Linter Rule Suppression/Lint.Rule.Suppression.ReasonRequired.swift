@@ -6,7 +6,7 @@ extension Lint.Rule {
     public static let `suppression reason required` = Lint.Rule(
         id: "suppression reason required",
         default: .error,
-        findings: { source, severity in
+        observe: Lint.Rule.measured { source, severity in
             suppressionReasonRequiredFindings(
                 tree: source.tree,
                 file: source.file,

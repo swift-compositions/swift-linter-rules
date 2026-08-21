@@ -6,7 +6,7 @@ extension Lint.Rule {
     public static let `malformed suppression directive` = Lint.Rule(
         id: "malformed suppression directive",
         default: .warning,
-        findings: { source, severity in
+        observe: Lint.Rule.measured { source, severity in
             malformedSuppressionDirectiveFindings(
                 tree: source.tree,
                 file: source.file,

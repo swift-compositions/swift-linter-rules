@@ -20,7 +20,7 @@ extension Lint.Rule.`malformed suppression directive Tests` {
         file: String = "/Sources/X/File.swift"
     ) -> [Diagnostic.Record] {
         let parsed = Lint.Source.parsed(from: source, file: file)
-        return Lint.Rule.`malformed suppression directive`.findings(parsed, .warning)
+        return Lint.Rule.`malformed suppression directive`.observe(parsed, .warning).findings
     }
 }
 
@@ -160,7 +160,7 @@ extension Lint.Rule {
                 let value = compute()
                 """
             let parsed = Lint.Source.parsed(from: source, file: "/Sources/X/File.swift")
-            let findings = Lint.Rule.`suppression reason required`.findings(parsed, .error)
+            let findings = Lint.Rule.`suppression reason required`.observe(parsed, .error).findings
             #expect(findings.isEmpty)
         }
 
@@ -171,7 +171,7 @@ extension Lint.Rule {
                 // REASON: the line is a controlled fixture
                 """
             let parsed = Lint.Source.parsed(from: source, file: "/Sources/X/File.swift")
-            let findings = Lint.Rule.`suppression reason required`.findings(parsed, .error)
+            let findings = Lint.Rule.`suppression reason required`.observe(parsed, .error).findings
             #expect(findings.isEmpty)
         }
 
@@ -183,7 +183,7 @@ extension Lint.Rule {
                 let second = compute() // swift-linter:disable:line malformed suppression directive
                 """
             let parsed = Lint.Source.parsed(from: source, file: "/Sources/X/File.swift")
-            let findings = Lint.Rule.`suppression reason required`.findings(parsed, .error)
+            let findings = Lint.Rule.`suppression reason required`.observe(parsed, .error).findings
             #expect(findings.count == 2)
         }
 
@@ -195,7 +195,7 @@ extension Lint.Rule {
                 let value = compute()
                 """
             let parsed = Lint.Source.parsed(from: source, file: "/Sources/X/File.swift")
-            let findings = Lint.Rule.`suppression reason required`.findings(parsed, .error)
+            let findings = Lint.Rule.`suppression reason required`.observe(parsed, .error).findings
             #expect(findings.count == 1)
         }
 
@@ -211,7 +211,7 @@ extension Lint.Rule {
                 let second = compute()
                 """
             let parsed = Lint.Source.parsed(from: source, file: "/Sources/X/File.swift")
-            let findings = Lint.Rule.`suppression reason required`.findings(parsed, .error)
+            let findings = Lint.Rule.`suppression reason required`.observe(parsed, .error).findings
             #expect(findings.count == 2)
         }
 
@@ -224,7 +224,7 @@ extension Lint.Rule {
                 let value = compute()
                 """
             let parsed = Lint.Source.parsed(from: source, file: "/Sources/X/File.swift")
-            let findings = Lint.Rule.`suppression reason required`.findings(parsed, .error)
+            let findings = Lint.Rule.`suppression reason required`.observe(parsed, .error).findings
             #expect(findings.count == 1)
         }
 
@@ -235,7 +235,7 @@ extension Lint.Rule {
                 let value = compute()
                 """
             let parsed = Lint.Source.parsed(from: source, file: "/Sources/X/File.swift")
-            let findings = Lint.Rule.`suppression reason required`.findings(parsed, .error)
+            let findings = Lint.Rule.`suppression reason required`.observe(parsed, .error).findings
             #expect(findings.count == 1)
             #expect(findings.first?.identifier == "suppression reason required")
         }

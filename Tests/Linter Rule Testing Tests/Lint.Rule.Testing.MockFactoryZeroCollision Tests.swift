@@ -20,7 +20,7 @@ extension Lint.Rule.`mock factory zero collision Tests` {
         file: String = "/Tests/X/Test.swift"
     ) -> [Diagnostic.Record] {
         let parsed = Lint.Source.parsed(from: source, file: file)
-        return Lint.Rule.`mock factory zero collision`.findings(parsed, .warning)
+        return Lint.Rule.`mock factory zero collision`.observe(parsed, .warning).findings
     }
 }
 

@@ -26,7 +26,7 @@ extension Lint.Rule.`for loop in result builder Tests` {
         file: Swift.String = "test.swift"
     ) -> [Diagnostic.Record] {
         let parsed = Lint.Source.parsed(from: source, file: file)
-        return rule.findings(parsed, severity)
+        return rule.observe(parsed, severity).findings
     }
 }
 

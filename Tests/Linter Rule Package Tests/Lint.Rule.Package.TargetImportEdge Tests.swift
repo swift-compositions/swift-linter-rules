@@ -105,7 +105,7 @@ import Testing
                 file: manifestPath,
                 path: Lint.Source.Path("Package.swift")
             )
-            return Lint.Rule.`target import edge`.findings(parsed, .warning)
+            return Lint.Rule.`target import edge`.observe(parsed, .warning).findings
         }
     }
 
@@ -345,7 +345,7 @@ import Testing
                 file: "Sources/A/File.swift",
                 path: Lint.Source.Path("Sources/A/File.swift")
             )
-            #expect(Lint.Rule.`target import edge`.findings(parsed, .warning).isEmpty)
+            #expect(Lint.Rule.`target import edge`.observe(parsed, .warning).findings.isEmpty)
         }
     }
 

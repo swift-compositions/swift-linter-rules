@@ -6,7 +6,7 @@ extension Lint.Rule {
     public static let `unchecked sendable noncopyable` = Lint.Rule(
         id: "unchecked sendable noncopyable",
         default: .warning,
-        findings: { source, severity in
+        observe: Lint.Rule.measured { source, severity in
             let visitor = MemoryUnnecessaryUncheckedSendableNoncopyableVisitor(
                 source: source.file,
                 severity: severity,

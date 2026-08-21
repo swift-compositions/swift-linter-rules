@@ -13,7 +13,7 @@ extension Lint.Rule {
         Lint.Rule(
             id: "for loop in result builder",
             default: .warning,
-            findings: { source, severity in
+            observe: Lint.Rule.measured { source, severity in
                 let visitor = ResultBuilderForLoopVisitor(
                     source: source.file,
                     severity: severity,

@@ -6,7 +6,7 @@ extension Lint.Rule {
     public static let `usable from inline internal import` = Lint.Rule(
         id: "usable from inline internal import",
         default: .warning,
-        findings: { source, severity in
+        observe: Lint.Rule.measured { source, severity in
             let visitor = StructureUsableFromInlineInternalImportVisitor(
                 source: source.file,
                 severity: severity,

@@ -18,7 +18,7 @@ extension Lint.Rule {
         id: "target import edge",
 
         default: .warning,
-        findings: { source, severity in
+        observe: Lint.Rule.measured { source, severity in
             packageTargetImportEdgeFindings(source: source, severity: severity)
         }
     )

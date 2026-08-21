@@ -23,7 +23,6 @@ extension Lint.Rule.Bundle {
 
         .enable(.`inlinable internal access`),
 
-        .enable(.`license header`),
         .enable(.`usable from inline internal import`),
 
         .enable(.`malformed suppression directive`),

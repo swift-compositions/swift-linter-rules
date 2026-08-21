@@ -6,7 +6,7 @@ extension Lint.Rule {
     public static let `redundant refinement` = Lint.Rule(
         id: "redundant refinement",
         default: .warning,
-        findings: { source, severity in
+        observe: Lint.Rule.measured { source, severity in
             let visitor = IdiomRedundantRefinementVisitor(
                 source: source.file,
                 severity: severity,
