@@ -1,19 +1,21 @@
+public import Cardinal_Primitives
+public import Linter_Primitives
+
 extension Lint.License {
 
-    public struct Header: Sendable, Equatable {
+  public struct Header: Sendable, Equatable {
 
-        public let startLine: Swift.Int
+    public let start: Cardinal
 
-        public let lineCount: Swift.Int
+    public let count: Cardinal
 
-        public let text: Swift.String
+    public let text: Swift.String
 
-        @inlinable
-        public init(startLine: Swift.Int, lineCount: Swift.Int, text: Swift.String) {
-            self.startLine = startLine
-            self.lineCount = lineCount
-            self.text = text
-        }
+    @inlinable
+    public init(start: Cardinal, count: Cardinal, text: Swift.String) {
+      self.start = start
+      self.count = count
+      self.text = text
     }
+  }
 }
-public import Linter_Primitives

@@ -7,7 +7,7 @@ extension Lint.Rule {
         id: "malformed suppression directive",
         default: .warning,
         observe: Lint.Rule.measured { source, severity in
-            malformedSuppressionDirectiveFindings(
+            malformed(
                 tree: source.tree,
                 file: source.file,
                 converter: source.converter,
@@ -18,7 +18,7 @@ extension Lint.Rule {
 }
 
 @usableFromInline
-internal let malformedSuppressionDirectiveMessage: Swift.String =
+internal let `malformed suppression directive message`: Swift.String =
     "[malformed suppression directive] [LINT-SUPPRESS-001]: this `swift-linter:` "
     + "suppression directive does not match the engine grammar and is silently "
     + "ignored — the finding it targets is NOT suppressed. Use "
@@ -29,7 +29,7 @@ internal let malformedSuppressionDirectiveMessage: Swift.String =
 private let malformedSuppressionDisableNextPrefix = "// swift-linter:disable:next "
 private let malformedSuppressionDisableLinePrefix = "// swift-linter:disable:line "
 
-internal func malformedSuppressionDirectiveFindings(
+internal func malformed(
     tree: SourceFileSyntax,
     file: Source.File,
     converter: SourceLocationConverter,
@@ -72,7 +72,7 @@ private func scanTriviaForMalformedDirectives(
         defer { cursor = cursor.advanced(by: pieceLength.utf8Length) }
 
         guard case .lineComment(let text) = piece else { continue }
-        guard directiveIsMalformed(text) else { continue }
+        guard isMalformedDirective(text) else { continue }
 
         let location = converter.location(for: pieceStart)
         matches.append(
@@ -85,13 +85,13 @@ private func scanTriviaForMalformedDirectives(
                 ),
                 severity: severity,
                 identifier: "malformed suppression directive",
-                message: malformedSuppressionDirectiveMessage
+                message: `malformed suppression directive message`
             )
         )
     }
 }
 
-internal func directiveIsMalformed(_ text: Swift.String) -> Swift.Bool {
+internal func isMalformedDirective(_ text: Swift.String) -> Swift.Bool {
     guard text.hasPrefix("//") else { return false }
     var rest = text.dropFirst(2)
     while let first = rest.first, first == " " { rest = rest.dropFirst() }

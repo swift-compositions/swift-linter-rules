@@ -7,7 +7,7 @@ extension Lint.Rule {
         id: "suppression reason required",
         default: .error,
         observe: Lint.Rule.measured { source, severity in
-            suppressionReasonRequiredFindings(
+            reasonless(
                 tree: source.tree,
                 file: source.file,
                 converter: source.converter,
@@ -18,7 +18,7 @@ extension Lint.Rule {
 }
 
 @usableFromInline
-internal let suppressionReasonRequiredMessage: Swift.String =
+internal let `suppression reason required message`: Swift.String =
     "[suppression reason required] [LINT-SUPPRESS-002]: every "
     + "`swift-linter:disable:next` or `swift-linter:disable:line` directive "
     + "must have an immediately associated `// REASON:` continuation with "
@@ -29,19 +29,13 @@ private let suppressionReasonRequiredPrefixes = [
     "// swift-linter:disable:line ",
 ]
 
-private struct SuppressionReasonRequiredComment {
-    let text: Swift.String
-    let position: AbsolutePosition
-    let line: Swift.Int
-}
-
-internal func suppressionReasonRequiredFindings(
+internal func reasonless(
     tree: SourceFileSyntax,
     file: Source.File,
     converter: SourceLocationConverter,
     severity: Diagnostic.Severity
 ) -> [Diagnostic.Record] {
-    var comments: [SuppressionReasonRequiredComment] = []
+    var comments: [(text: Swift.String, position: AbsolutePosition, line: Swift.Int)] = []
 
     for token in tree.tokens(viewMode: .sourceAccurate) {
         suppressionReasonRequiredCollect(
@@ -102,7 +96,7 @@ private func suppressionReasonRequiredCollect(
     _ trivia: Trivia,
     tokenStartPosition: AbsolutePosition,
     converter: SourceLocationConverter,
-    into comments: inout [SuppressionReasonRequiredComment]
+    into comments: inout [(text: Swift.String, position: AbsolutePosition, line: Swift.Int)]
 ) {
     var cursor = tokenStartPosition
     for piece in trivia {
@@ -110,17 +104,13 @@ private func suppressionReasonRequiredCollect(
         defer { cursor = cursor.advanced(by: piece.sourceLength.utf8Length) }
         guard case .lineComment(let text) = piece else { continue }
         comments.append(
-            SuppressionReasonRequiredComment(
-                text: text,
-                position: position,
-                line: converter.location(for: position).line
-            )
+            (text, position, converter.location(for: position).line)
         )
     }
 }
 
 private func suppressionReasonRequiredFinding(
-    for comment: SuppressionReasonRequiredComment,
+    for comment: (text: Swift.String, position: AbsolutePosition, line: Swift.Int),
     file: Source.File,
     converter: SourceLocationConverter,
     severity: Diagnostic.Severity
@@ -135,6 +125,6 @@ private func suppressionReasonRequiredFinding(
         ),
         severity: severity,
         identifier: "suppression reason required",
-        message: suppressionReasonRequiredMessage
+        message: `suppression reason required message`
     )
 }
