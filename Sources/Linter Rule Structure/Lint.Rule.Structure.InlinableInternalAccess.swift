@@ -7,6 +7,17 @@ extension Lint.Rule {
     id: "inlinable internal access",
 
     default: .error,
+    controls: [
+      .init(
+        id: "inlinable internal access internal function",
+        source: """
+          @inlinable
+          func helper() {}
+          """,
+        path: "Controls/InlinableInternalAccess.swift",
+        expectation: .findings(1)
+      )
+    ],
     observe: Lint.Rule.measured { source, severity in
       let visitor = StructureInlinableInternalAccessVisitor(
         source: source.file,

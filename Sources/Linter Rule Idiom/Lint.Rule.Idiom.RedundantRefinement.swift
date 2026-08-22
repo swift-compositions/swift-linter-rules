@@ -6,6 +6,14 @@ extension Lint.Rule {
   public static let `redundant refinement` = Lint.Rule(
     id: "redundant refinement",
     default: .warning,
+    controls: [
+      .init(
+        id: "redundant refinement error sendable",
+        source: "func f<E: Error & Sendable>(_ error: E) {}",
+        path: "Controls/RedundantRefinement.swift",
+        expectation: .findings(1)
+      )
+    ],
     observe: Lint.Rule.measured { source, severity in
       let visitor = IdiomRedundantRefinementVisitor(
         source: source.file,
@@ -53,17 +61,17 @@ internal final class IdiomRedundantRefinementVisitor: SyntaxVisitor {
     }
 
     var reportedPositions: Swift.Set<AbsolutePosition> = []
-    leaves.indices.forEach { i in
-      leaves.indices.forEach { j in
-        guard i != j else { return }
+    for i in leaves.indices {
+      for j in leaves.indices {
+        guard i != j else { continue }
         let refining = leaves[i].name
         let refined = leaves[j].name
         let isRedundant = refinements.contains { pair in
           pair.refining == refining && pair.refined == refined
         }
-        guard isRedundant else { return }
+        guard isRedundant else { continue }
         let position = leaves[j].position
-        guard !reportedPositions.contains(position) else { return }
+        guard !reportedPositions.contains(position) else { continue }
         reportedPositions.insert(position)
         let location = converter.location(for: position)
         matches.append(

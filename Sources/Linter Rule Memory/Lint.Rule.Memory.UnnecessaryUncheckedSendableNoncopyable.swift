@@ -6,6 +6,14 @@ extension Lint.Rule {
   public static let `unchecked sendable noncopyable` = Lint.Rule(
     id: "unchecked sendable noncopyable",
     default: .warning,
+    controls: [
+      .init(
+        id: "unchecked sendable noncopyable unchecked conformance",
+        source: "struct Reader: ~Copyable, @unchecked Sendable {}",
+        path: "Controls/UncheckedSendableNoncopyable.swift",
+        expectation: .findings(1)
+      )
+    ],
     observe: Lint.Rule.measured { source, severity in
       let visitor = MemoryUnnecessaryUncheckedSendableNoncopyableVisitor(
         source: source.file,

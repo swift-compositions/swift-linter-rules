@@ -6,6 +6,14 @@ extension Lint.Rule {
   public static let `mock factory zero collision` = Lint.Rule(
     id: "mock factory zero collision",
     default: .warning,
+    controls: [
+      .init(
+        id: "mock factory zero collision bare tag",
+        source: "let value = unsafeBitCast(tag, to: UnownedJob.self)",
+        path: "/Controls/Tests/MockFactoryZeroCollision.swift",
+        expectation: .findings(1)
+      )
+    ],
     observe: Lint.Rule.measured { source, severity in
       let visitor = TestingMockFactoryZeroCollisionVisitor(
         source: source.file,

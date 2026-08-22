@@ -1,5 +1,6 @@
+public import Linter_Primitives
+
 extension Lint {
 
-    public enum License {}
+  public enum License {}
 }
-public import Linter_Primitives

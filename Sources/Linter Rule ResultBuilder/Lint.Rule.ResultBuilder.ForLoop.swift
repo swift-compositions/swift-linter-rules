@@ -13,6 +13,20 @@ extension Lint.Rule {
     Lint.Rule(
       id: "for loop in result builder",
       default: .warning,
+      controls: [
+        .init(
+          id: "for loop in result builder array",
+          source: """
+            let values = Array<Int> {
+              for value in 0..<100 {
+                value
+              }
+            }
+            """,
+          path: "Controls/ForLoopInResultBuilder.swift",
+          expectation: .findings(1)
+        )
+      ],
       observe: Lint.Rule.measured { source, severity in
         let visitor = ResultBuilderForLoopVisitor(
           source: source.file,

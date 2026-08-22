@@ -6,6 +6,14 @@ extension Lint.Rule {
   public static let `unchecked sendable categorization` = Lint.Rule(
     id: "unchecked sendable categorization",
     default: .warning,
+    controls: [
+      .init(
+        id: "unchecked sendable categorization unsafe conformance",
+        source: "final class Fixture: @unsafe @unchecked Sendable {}",
+        path: "Controls/UncheckedSendableCategorization.swift",
+        expectation: .findings(1)
+      )
+    ],
     observe: Lint.Rule.measured { source, severity in
       let visitor = MemoryUncheckedSendableCategorizedVisitor(
         source: source.file,

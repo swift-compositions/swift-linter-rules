@@ -9,26 +9,26 @@ import Linter_Rule_Testing
 
 extension Lint.Rule.Bundle {
 
-    public static let universal: [Lint.Rule.Configuration] = [
+  public static let universal: [Lint.Rule.Configuration] = [
 
-        .enable(.`redundant refinement`),
+    .enable(.`redundant refinement`),
 
-        .enable(.`unchecked sendable categorization`),
-        .enable(.`unchecked sendable noncopyable`),
-        .enable(.`unsafe storage visibility`),
+    .enable(.`unchecked sendable categorization`),
+    .enable(.`unchecked sendable noncopyable`),
+    .enable(.`unsafe storage visibility`),
 
-        .enable(.`target import edge`),
+    .enable(.`target import edge`),
 
-        .enable(.`for loop in result builder`),
+    .enable(.`for loop in result builder`),
 
-        .enable(.`inlinable internal access`),
+    .enable(.`inlinable internal access`),
 
-        .enable(.`usable from inline internal import`),
+    .enable(.`usable from inline internal import`),
 
-        .enable(.`malformed suppression directive`),
+    .enable(.`malformed suppression directive`),
 
-        .enable(.`suppression reason required`, severity: .warning),
+    .enable(.`suppression reason required`, severity: .warning),
 
-        .enable(.`mock factory zero collision`),
-    ]
+    .enable(.`mock factory zero collision`),
+  ]
 }
