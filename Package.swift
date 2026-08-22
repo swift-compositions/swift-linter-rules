@@ -165,6 +165,7 @@ let package = Package(
       dependencies: [
         .target(name: "Linter Rule Structure"),
         .target(name: "Linter Rules Test Support"),
+        .product(name: "Linter Primitives", package: "swift-linter-primitives"),
         .product(name: "SwiftParser", package: "swift-syntax"),
       ]
     ),
