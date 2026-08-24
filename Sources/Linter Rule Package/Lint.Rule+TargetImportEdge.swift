@@ -20,7 +20,7 @@ extension Lint.Rule {
     default: .warning,
     controls: [
       .init(
-        id: "target import edge undeclared import",
+        id: "target import edge absent materialized sources",
         source: """
           import PackageDescription
 
@@ -30,7 +30,7 @@ extension Lint.Rule {
           )
           """,
         path: "/Controls/TargetImportEdge/Package.swift",
-        expectation: .findings(1)
+        expectation: .clean
       )
     ],
     observe: Lint.Rule.measured { source, severity in
