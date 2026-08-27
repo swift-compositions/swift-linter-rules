@@ -1,5 +1,5 @@
-public import Cardinal_Primitives
-public import Linter_Primitives
+public import Cardinal
+public import Linter
 
 extension Lint.License {
 

@@ -3,8 +3,8 @@
 ![Development Status](https://img.shields.io/badge/status-active--development-blue.svg)
 
 Catalog of SwiftSyntax-based AST lint rules consumable by
-[`swift-linter`](https://github.com/swift-foundations/swift-linter) or any
-third-party tool that imports the `Linter Primitives` protocol surface.
+[`swift-linter`](https://github.com/swift-compositions/swift-linter) or any
+third-party tool that imports the `Linter` protocol surface.
 Each rule ships as its own SwiftPM library product so consumers activate
 exactly the rules they want.
 
@@ -16,7 +16,7 @@ active:
 
 ```swift
 // Lint/Package.swift
-.package(url: "https://github.com/swift-foundations/swift-linter-rules.git", branch: "main"),
+.package(url: "https://github.com/swift-compositions/swift-linter-rules.git", branch: "main"),
 ```
 
 > Pre-1.0: no version tags yet. APIs may change; pin a commit for reproducible builds.
@@ -42,7 +42,7 @@ the activated rules against your sources.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/swift-foundations/swift-linter-rules.git", branch: "main"),
+    .package(url: "https://github.com/swift-compositions/swift-linter-rules.git", branch: "main"),
 ]
 ```
 
@@ -86,13 +86,13 @@ predicate, the source patterns it covers, and the convention it enforces.
 
 Every rule pack — institute-canonical or third-party — implements the
 same protocol surface from
-[`swift-linter-primitives`](https://github.com/swift-primitives/swift-linter-primitives).
+[`swift-linter`](https://github.com/swift-molecules/swift-linter).
 A minimal third-party rule pack is one library product with a type
 conforming to `Lint.Rule.Protocol`:
 
 ```swift
 // Sources/MyRule/MyRule.swift
-public import Linter_Primitives
+public import Linter
 internal import SwiftSyntax
 
 extension Lint.Rule {
@@ -137,7 +137,7 @@ activation mechanism.
 
 ## Consumers
 
-- [`swift-linter`](https://github.com/swift-foundations/swift-linter) —
+- [`swift-linter`](https://github.com/swift-compositions/swift-linter) —
   the CLI driver and reporter shell.
 - Any third-party tooling that wants the same rule predicates without the
   swift-linter executable (the predicates are pure functions over a

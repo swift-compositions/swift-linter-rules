@@ -1,7 +1,7 @@
 # .github/metadata.yaml
 description: "A catalog of per-rule-activatable SwiftSyntax lint rule packs for swift-linter."
 topics:
-  - foundations
+  - compositions
   - linter
   - swift-syntax
 homepage: "https://swift-institute.org"

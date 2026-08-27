@@ -1,1 +1,1 @@
-@_exported public import Linter_Primitives_Test_Support
+@_exported public import Linter_Test_Support

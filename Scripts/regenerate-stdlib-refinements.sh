@@ -28,14 +28,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LINTER_RULES_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# The experiment package lives at swift-foundations/swift-json/Experiments/.
+# The experiment package lives at swift-compositions/swift-json/Experiments/.
 # Resolve via sibling-package convention.
 WORKSPACE_ROOT="$(cd "${LINTER_RULES_ROOT}/../.." && pwd)"
-EXPERIMENT_DIR="${WORKSPACE_ROOT}/swift-foundations/swift-json/Experiments/symbol-graph-conformance-oracle"
+EXPERIMENT_DIR="${WORKSPACE_ROOT}/swift-compositions/swift-json/Experiments/symbol-graph-conformance-oracle"
 
 if [[ ! -d "${EXPERIMENT_DIR}" ]]; then
     echo "error: experiment package not found at ${EXPERIMENT_DIR}" >&2
-    echo "       expected sibling-package layout under swift-foundations/" >&2
+    echo "       expected sibling-package layout under swift-compositions/" >&2
     exit 1
 fi
 

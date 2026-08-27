@@ -1,5 +1,5 @@
-public import Byte_Primitives
-public import Linter_Primitives
+public import Byte
+public import Linter
 import SwiftParser
 import SwiftSyntax
 
