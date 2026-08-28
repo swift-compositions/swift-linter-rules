@@ -165,6 +165,26 @@ import Testing
     }
 
     @Test
+    func `target dependency is not materialized as a target declaration`() throws {
+      let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
+        manifest: Lint.Rule.`target import edge Tests`.manifest(
+          targets: """
+            .target(name: "A", dependencies: [.target(name: "B")]),
+            .target(name: "B"),
+            """
+        ),
+        files: [
+          "Sources/A/File.swift": "import B\n",
+          "Sources/B/File.swift": "import A\n",
+        ]
+      )
+      defer { fixture.tearDown() }
+      let findings = try fixture.findings()
+      #expect(findings.count == 1)
+      #expect(findings.first?.message.contains("target 'B' imports 'A'") == true)
+    }
+
+    @Test
     func `bare-string byName dependency resolves to a same-package target`() throws {
       let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
         manifest: Lint.Rule.`target import edge Tests`.manifest(

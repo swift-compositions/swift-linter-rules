@@ -105,6 +105,11 @@ package final class PackageTargetImportEdgeManifestVisitor: SyntaxVisitor {
         }
       }
       manifest.targets.append(target)
+      // The dependency array contains calls with the same member spelling,
+      // e.g. `.target(name: "Dependency")`. We have already parsed those
+      // expressions above; descending into them would incorrectly register
+      // each dependency as another package target.
+      return .skipChildren
 
     default:
       break
