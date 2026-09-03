@@ -61,9 +61,9 @@ let package = Package(
     .package(
       url: "https://github.com/swift-molecules/swift-linter.git", branch: "main"),
     .package(
-      url: "https://github.com/swift-molecules/swift-cardinal.git", branch: "main"),
-    .package(url: "https://github.com/swift-molecules/swift-byte.git", branch: "main"),
-    .package(url: "https://github.com/swiftlang/swift-syntax.git", "602.0.0"..<"603.0.0"),
+      url: "https://github.com/swift-atoms/swift-cardinal", branch: "main"),
+    .package(url: "https://github.com/swift-atoms/swift-byte", branch: "main"),
+    .package(url: "https://github.com/swiftlang/swift-syntax.git", "603.0.2"..<"604.0.0"),
   ],
   targets: [
 
