@@ -1,4 +1,4 @@
-import Linter
+import Lint
 import Linter_Rules_Test_Support
 import SwiftParser
 import SwiftSyntax

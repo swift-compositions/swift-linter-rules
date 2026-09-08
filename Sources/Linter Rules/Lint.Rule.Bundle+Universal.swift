@@ -1,4 +1,4 @@
-public import Linter
+public import Lint
 import Linter_Rule_Idiom
 import Linter_Rule_Memory
 import Linter_Rule_Package

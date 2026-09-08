@@ -1,5 +1,5 @@
 public import Byte
-public import Linter
+public import Lint
 import SwiftParser
 import SwiftSyntax
 

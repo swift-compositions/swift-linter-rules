@@ -59,7 +59,7 @@ let package = Package(
   ],
   dependencies: [
     .package(
-      url: "https://github.com/swift-molecules/swift-linter.git", branch: "main"),
+      url: "https://github.com/swift-molecules/swift-lint.git", branch: "main"),
     .package(
       url: "https://github.com/swift-atoms/swift-cardinal", branch: "main"),
     .package(url: "https://github.com/swift-atoms/swift-byte", branch: "main"),
@@ -70,7 +70,7 @@ let package = Package(
     .target(
       name: "Linter Rule ResultBuilder",
       dependencies: [
-        .product(name: "Linter", package: "swift-linter"),
+        .product(name: "Lint", package: "swift-lint"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
       ]
     ),
@@ -78,7 +78,7 @@ let package = Package(
     .target(
       name: "Linter Rule Structure",
       dependencies: [
-        .product(name: "Linter", package: "swift-linter"),
+        .product(name: "Lint", package: "swift-lint"),
         .product(name: "Cardinal", package: "swift-cardinal"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
       ]
@@ -87,7 +87,7 @@ let package = Package(
     .target(
       name: "Linter Rule Memory",
       dependencies: [
-        .product(name: "Linter", package: "swift-linter"),
+        .product(name: "Lint", package: "swift-lint"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
       ]
     ),
@@ -95,7 +95,7 @@ let package = Package(
     .target(
       name: "Linter Rule Testing",
       dependencies: [
-        .product(name: "Linter", package: "swift-linter"),
+        .product(name: "Lint", package: "swift-lint"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
       ]
     ),
@@ -103,7 +103,7 @@ let package = Package(
     .target(
       name: "Linter Rule Idiom",
       dependencies: [
-        .product(name: "Linter", package: "swift-linter"),
+        .product(name: "Lint", package: "swift-lint"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
       ]
     ),
@@ -111,7 +111,7 @@ let package = Package(
     .target(
       name: "Linter Rule Suppression",
       dependencies: [
-        .product(name: "Linter", package: "swift-linter"),
+        .product(name: "Lint", package: "swift-lint"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
       ]
     ),
@@ -119,7 +119,7 @@ let package = Package(
     .target(
       name: "Linter Rule Package",
       dependencies: [
-        .product(name: "Linter", package: "swift-linter"),
+        .product(name: "Lint", package: "swift-lint"),
         .product(name: "SwiftParser", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
       ]
@@ -128,7 +128,7 @@ let package = Package(
     .target(
       name: "Linter Rules",
       dependencies: [
-        .product(name: "Linter", package: "swift-linter"),
+        .product(name: "Lint", package: "swift-lint"),
         .target(name: "Linter Rule Idiom"),
         .target(name: "Linter Rule Memory"),
         .target(name: "Linter Rule Package"),
@@ -143,7 +143,7 @@ let package = Package(
       name: "Linter Rules Test Support",
       dependencies: [
 
-        .product(name: "Linter Test Support", package: "swift-linter"),
+        .product(name: "Lint Test Support", package: "swift-lint"),
         .product(name: "Byte", package: "swift-byte"),
         .product(name: "SwiftParser", package: "swift-syntax"),
         .product(name: "SwiftSyntax", package: "swift-syntax"),
@@ -165,7 +165,7 @@ let package = Package(
       dependencies: [
         .target(name: "Linter Rule Structure"),
         .target(name: "Linter Rules Test Support"),
-        .product(name: "Linter", package: "swift-linter"),
+        .product(name: "Lint", package: "swift-lint"),
         .product(name: "SwiftParser", package: "swift-syntax"),
       ]
     ),

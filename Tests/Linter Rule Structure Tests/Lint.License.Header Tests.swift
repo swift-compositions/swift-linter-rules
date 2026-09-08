@@ -1,4 +1,4 @@
-import Linter
+import Lint
 import Linter_Rule_Structure
 import Testing
 

@@ -1,4 +1,4 @@
-public import Linter
+public import Lint
 internal import SwiftSyntax
 
 extension Lint.Rule {
