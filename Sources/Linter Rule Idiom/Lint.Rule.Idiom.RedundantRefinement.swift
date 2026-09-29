@@ -28,9 +28,9 @@ extension Lint.Rule {
 
 @usableFromInline
 internal func redundancy(
-  refining: Swift.String,
-  refined: Swift.String
-) -> Swift.String {
+  refining: Swift::String,
+  refined: Swift::String
+) -> Swift::String {
   "[redundant refinement] [API-IMPL-024]: "
     + "`\(refining) & \(refined)` — `\(refining)` already refines `\(refined)` "
     + "in the standard library. The `& \(refined)` half is redundant; "
@@ -53,14 +53,14 @@ internal final class IdiomRedundantRefinementVisitor: SyntaxVisitor {
 
   override func visit(_ node: CompositionTypeSyntax) -> SyntaxVisitorContinueKind {
 
-    var leaves: [(name: Swift.String, position: AbsolutePosition)] = []
+    var leaves: [(name: Swift::String, position: AbsolutePosition)] = []
     for element in node.elements {
       if let name = leafName(of: element.type) {
         leaves.append((name, element.type.positionAfterSkippingLeadingTrivia))
       }
     }
 
-    var reportedPositions: Swift.Set<AbsolutePosition> = []
+    var reportedPositions: Swift::Set<AbsolutePosition> = []
     for i in leaves.indices {
       for j in leaves.indices {
         guard i != j else { continue }
@@ -95,7 +95,7 @@ internal final class IdiomRedundantRefinementVisitor: SyntaxVisitor {
     return .visitChildren
   }
 
-  private func leafName(of type: TypeSyntax) -> Swift.String? {
+  private func leafName(of type: TypeSyntax) -> Swift::String? {
     if let identifier = type.as(IdentifierTypeSyntax.self) {
       return identifier.name.text
     }

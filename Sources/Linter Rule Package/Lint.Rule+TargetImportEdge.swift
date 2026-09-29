@@ -39,7 +39,7 @@ extension Lint.Rule {
   )
 }
 
-package let packageTargetImportEdgeToolchainModules: Swift.Set<Swift.String> = [
+package let packageTargetImportEdgeToolchainModules: Swift::Set<Swift::String> = [
   "Swift", "Testing", "XCTest", "Foundation", "FoundationEssentials",
   "Dispatch", "os", "Darwin", "Glibc", "Musl", "WinSDK", "Android",
   "Observation", "Synchronization", "Builtin", "CRT", "ucrt",
@@ -47,11 +47,11 @@ package let packageTargetImportEdgeToolchainModules: Swift.Set<Swift.String> = [
   "StringProcessing", "CoreFoundation", "ObjectiveC", "simd", "Accelerate",
 ]
 
-package let packageTargetImportEdgeSkipDirectories: Swift.Set<Swift.String> = [
+package let packageTargetImportEdgeSkipDirectories: Swift::Set<Swift::String> = [
   ".build", ".git", ".swiftpm", ".claude", "node_modules", "checkouts",
 ]
 
-package func packageTargetImportEdgeNormalize(_ name: Swift.String) -> Swift.String {
+package func packageTargetImportEdgeNormalize(_ name: Swift::String) -> Swift::String {
   var out = ""
   out.reserveCapacity(name.count)
   for character in name {
@@ -62,11 +62,11 @@ package func packageTargetImportEdgeNormalize(_ name: Swift.String) -> Swift.Str
 
 #if canImport(Darwin) || canImport(Glibc) || canImport(Musl) || canImport(Android)
 
-  package func packageTargetImportEdgeReadText(atPath raw: Swift.String) -> Swift.String? {
+  package func packageTargetImportEdgeReadText(atPath raw: Swift::String) -> Swift::String? {
     guard let handle = unsafe fopen(raw, "rb") else { return nil }
     defer { _ = unsafe fclose(handle) }
-    var bytes: [Swift.UInt8] = []
-    var buffer = [Swift.UInt8](repeating: 0, count: 4096)
+    var bytes: [Swift::UInt8] = []
+    var buffer = [Swift::UInt8](repeating: 0, count: 4096)
     while true {
       let count = buffer.withUnsafeMutableBytes { pointer in
         unsafe fread(pointer.baseAddress, 1, pointer.count, handle)
@@ -74,30 +74,30 @@ package func packageTargetImportEdgeNormalize(_ name: Swift.String) -> Swift.Str
       guard count > 0 else { break }
       bytes.append(contentsOf: buffer[0..<count])
     }
-    return Swift.String(decoding: bytes, as: Swift.UTF8.self)
+    return Swift::String(decoding: bytes, as: Swift::UTF8.self)
   }
 
-  package func packageTargetImportEdgeIsDirectory(_ raw: Swift.String) -> Swift.Bool {
+  package func packageTargetImportEdgeIsDirectory(_ raw: Swift::String) -> Swift::Bool {
     var status = stat()
     guard unsafe stat(raw, &status) == 0 else { return false }
     return (status.st_mode & S_IFMT) == S_IFDIR
   }
 
-  package func packageTargetImportEdgeIsFile(_ raw: Swift.String) -> Swift.Bool {
+  package func packageTargetImportEdgeIsFile(_ raw: Swift::String) -> Swift::Bool {
     var status = stat()
     guard unsafe stat(raw, &status) == 0 else { return false }
     return (status.st_mode & S_IFMT) == S_IFREG
   }
 
-  package func packageTargetImportEdgeEntryNames(in directory: Swift.String) -> [Swift.String] {
+  package func packageTargetImportEdgeEntryNames(in directory: Swift::String) -> [Swift::String] {
     guard let handle = unsafe opendir(directory) else { return [] }
     defer { _ = unsafe closedir(handle) }
-    var names: [Swift.String] = []
+    var names: [Swift::String] = []
     while let entry = unsafe readdir(handle) {
       let name = unsafe withUnsafeBytes(of: entry.pointee.d_name) { pointer in
-        unsafe Swift.String(
+        unsafe Swift::String(
           decoding: pointer.prefix(while: { $0 != 0 }),
-          as: Swift.UTF8.self
+          as: Swift::UTF8.self
         )
       }
       if name == "." || name == ".." { continue }
@@ -108,17 +108,17 @@ package func packageTargetImportEdgeNormalize(_ name: Swift.String) -> Swift.Str
 
 #else
 
-  package func packageTargetImportEdgeReadText(atPath raw: Swift.String) -> Swift.String? { nil }
-  package func packageTargetImportEdgeIsDirectory(_ raw: Swift.String) -> Swift.Bool { false }
-  package func packageTargetImportEdgeIsFile(_ raw: Swift.String) -> Swift.Bool { false }
-  package func packageTargetImportEdgeEntryNames(in directory: Swift.String) -> [Swift.String] {
+  package func packageTargetImportEdgeReadText(atPath raw: Swift::String) -> Swift::String? { nil }
+  package func packageTargetImportEdgeIsDirectory(_ raw: Swift::String) -> Swift::Bool { false }
+  package func packageTargetImportEdgeIsFile(_ raw: Swift::String) -> Swift::Bool { false }
+  package func packageTargetImportEdgeEntryNames(in directory: Swift::String) -> [Swift::String] {
     []
   }
 
 #endif
 
-package func packageTargetImportEdgeSwiftFiles(under directory: Swift.String) -> [Swift.String] {
-  var out: [Swift.String] = []
+package func packageTargetImportEdgeSwiftFiles(under directory: Swift::String) -> [Swift::String] {
+  var out: [Swift::String] = []
   for name in packageTargetImportEdgeEntryNames(in: directory) {
     let child = directory + "/" + name
     if packageTargetImportEdgeIsDirectory(child) {
@@ -136,19 +136,19 @@ package func packageTargetImportEdgeFindings(
   severity: Diagnostic.Severity
 ) -> [Diagnostic.Record] {
 
-  let runPath = Swift.String(describing: source.path)
+  let runPath = Swift::String(describing: source.path)
   guard runPath == "Package.swift" || runPath.hasSuffix("/Package.swift") else { return [] }
 
   let filePath = source.file.filePath
   guard filePath.hasSuffix("/Package.swift") else { return [] }
-  let root = Swift.String(filePath.dropLast("/Package.swift".count))
+  let root = Swift::String(filePath.dropLast("/Package.swift".count))
   guard packageTargetImportEdgeIsDirectory(root) else { return [] }
 
   let visitor = PackageTargetImportEdgeManifestVisitor()
   visitor.walk(source.tree)
   let manifest = visitor.manifest
 
-  var dependencyManifestPaths: [Swift.String] = []
+  var dependencyManifestPaths: [Swift::String] = []
   var resolvedCount = 0
   for relative in manifest.pathDependencies {
     let candidate = root + "/" + relative + "/Package.swift"
@@ -160,10 +160,10 @@ package func packageTargetImportEdgeFindings(
   for url in manifest.urlDependencies {
     var trimmed = url
     while trimmed.hasSuffix("/") { trimmed.removeLast() }
-    let parts = trimmed.split(separator: "/").map(Swift.String.init)
+    let parts = trimmed.split(separator: "/").map(Swift::String.init)
     let tail = parts.suffix(2)
     guard tail.count == 2, let organization = tail.first, var name = tail.last else { continue }
-    if name.hasSuffix(".git") { name = Swift.String(name.dropLast(4)) }
+    if name.hasSuffix(".git") { name = Swift::String(name.dropLast(4)) }
     let candidate = root + "/../../" + organization + "/" + name + "/Package.swift"
     if packageTargetImportEdgeIsFile(candidate) {
       dependencyManifestPaths.append(candidate)
@@ -174,7 +174,7 @@ package func packageTargetImportEdgeFindings(
 
   let unresolvableDependencies = declaredCount > resolvedCount
 
-  var dependencyProducts: [Swift.String: Swift.Set<Swift.String>] = [:]
+  var dependencyProducts: [Swift::String: Swift::Set<Swift::String>] = [:]
   for manifestPath in dependencyManifestPaths {
     guard let text = packageTargetImportEdgeReadText(atPath: manifestPath) else { continue }
     let tree = Parser.parse(source: text)
@@ -185,11 +185,11 @@ package func packageTargetImportEdgeFindings(
     }
   }
 
-  let samePackageTargets = Swift.Set(manifest.targets.map(\.name))
+  let samePackageTargets = Swift::Set(manifest.targets.map(\.name))
   var records: [Diagnostic.Record] = []
 
   for target in manifest.targets {
-    let sourceDirectory: Swift.String
+    let sourceDirectory: Swift::String
     if let explicit = target.explicitPath {
       sourceDirectory = root + "/" + explicit
     } else {
@@ -198,7 +198,7 @@ package func packageTargetImportEdgeFindings(
     }
     guard packageTargetImportEdgeIsDirectory(sourceDirectory) else { continue }
 
-    var allowed: Swift.Set<Swift.String> = [packageTargetImportEdgeNormalize(target.name)]
+    var allowed: Swift::Set<Swift::String> = [packageTargetImportEdgeNormalize(target.name)]
     for dependency in target.dependencies {
       switch dependency {
       case .target(let name):
@@ -224,7 +224,7 @@ package func packageTargetImportEdgeFindings(
       }
     }
 
-    var sightings: [Swift.String: (Swift.String, Swift.Int)] = [:]
+    var sightings: [Swift::String: (Swift::String, Swift::Int)] = [:]
     for swiftFile in packageTargetImportEdgeSwiftFiles(under: sourceDirectory) {
       guard let text = packageTargetImportEdgeReadText(atPath: swiftFile) else { continue }
       let tree = Parser.parse(source: text)
@@ -233,7 +233,7 @@ package func packageTargetImportEdgeFindings(
       importVisitor.walk(tree)
       var relative = swiftFile
       if relative.hasPrefix(root + "/") {
-        relative = Swift.String(relative.dropFirst(root.count + 1))
+        relative = Swift::String(relative.dropFirst(root.count + 1))
       }
       for (module, line) in importVisitor.imports where sightings[module] == nil {
         sightings[module] = (relative, line)

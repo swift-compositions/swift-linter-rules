@@ -27,7 +27,7 @@ extension Lint.Rule {
 }
 
 @usableFromInline
-internal let `mock factory zero collision message`: Swift.String =
+internal let `mock factory zero collision message`: Swift::String =
   "[mock factory zero collision] [TEST-028]: `unsafeBitCast(tag, to: T.self)` "
   + "for pointer-wrapping `BitwiseCopyable` `T` collides with `Optional<T>.none` "
   + "when `tag == 0`. Offset: `unsafeBitCast(tag &+ 1, to: T.self)`."
@@ -45,14 +45,14 @@ internal final class TestingMockFactoryZeroCollisionVisitor: SyntaxVisitor {
     super.init(viewMode: .sourceAccurate)
   }
 
-  private func isUnsafeBitCast(_ expr: ExprSyntax) -> Swift.Bool {
+  private func isUnsafeBitCast(_ expr: ExprSyntax) -> Swift::Bool {
     if let identifier = expr.as(DeclReferenceExprSyntax.self) {
       return identifier.baseName.text == "unsafeBitCast"
     }
     return false
   }
 
-  private func firstArgumentLooksRaw(_ argument: LabeledExprSyntax) -> Swift.Bool {
+  private func firstArgumentLooksRaw(_ argument: LabeledExprSyntax) -> Swift::Bool {
     let text = argument.expression.trimmedDescription
     if text.contains("&+") || text.contains("+ 1") || text.contains(" + ") {
       return false
@@ -60,7 +60,7 @@ internal final class TestingMockFactoryZeroCollisionVisitor: SyntaxVisitor {
     return true
   }
 
-  private func firstArgumentLooksLikeIntegerTag(_ argument: LabeledExprSyntax) -> Swift.Bool {
+  private func firstArgumentLooksLikeIntegerTag(_ argument: LabeledExprSyntax) -> Swift::Bool {
 
     if argument.expression.is(AsExprSyntax.self) {
       return false

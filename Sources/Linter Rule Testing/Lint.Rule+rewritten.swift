@@ -2,7 +2,7 @@ public import Lint
 
 extension Lint.Rule {
 
-  public func rewritten(_ source: borrowing Lint.Source.Parsed) -> Swift.String? {
+  public func rewritten(_ source: borrowing Lint.Source.Parsed) -> Swift::String? {
     guard
       case .edits(let edits) = repair(source),
       edits.count == 1,

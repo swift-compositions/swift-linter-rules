@@ -17,8 +17,8 @@ extension Lint.Rule {
 
 extension Lint.Rule.`unchecked sendable categorization Tests` {
   static func findings(
-    in source: Swift.String,
-    file: Swift.String = "Sources/X/Test.swift"
+    in source: Swift::String,
+    file: Swift::String = "Sources/X/Test.swift"
   ) -> [Diagnostic.Record] {
     let parsed = Lint.Source.parsed(from: source, file: file)
     return Lint.Rule.`unchecked sendable categorization`.observe(parsed, .warning).findings

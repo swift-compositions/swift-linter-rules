@@ -32,7 +32,7 @@ extension Lint.Rule {
 }
 
 @usableFromInline
-internal let `usable from inline internal import message`: Swift.String =
+internal let `usable from inline internal import message`: Swift::String =
   "[usable from inline internal import] [PATTERN-055]: file pairs "
   + "`@usableFromInline` with `internal import` of a referenced module. "
   + "Swift rejects `@usableFromInline` bodies that reach identifiers in "
@@ -45,7 +45,7 @@ internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisit
   let converter: SourceLocationConverter
   var matches: [Diagnostic.Record] = []
 
-  var references: Swift.Set<Swift.String> = []
+  var references: Swift::Set<Swift::String> = []
   var modules: [Module] = []
 
   init(source: Source.File, severity: Diagnostic.Severity, converter: SourceLocationConverter) {
@@ -55,7 +55,7 @@ internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisit
     super.init(viewMode: .sourceAccurate)
   }
 
-  private func hasUsableFromInlineAttribute(_ attributes: AttributeListSyntax) -> Swift.Bool {
+  private func hasUsableFromInlineAttribute(_ attributes: AttributeListSyntax) -> Swift::Bool {
     for attribute in attributes {
       guard let attr = attribute.as(AttributeSyntax.self) else { continue }
       if let identifier = attr.attributeName.as(IdentifierTypeSyntax.self),
@@ -114,7 +114,7 @@ internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisit
   }
 
   override func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
-    var isInternal: Swift.Bool = false
+    var isInternal: Swift::Bool = false
     for modifier in node.modifiers {
       if case .keyword(.internal) = modifier.name.tokenKind {
         isInternal = true
@@ -132,7 +132,7 @@ internal final class StructureUsableFromInlineInternalImportVisitor: SyntaxVisit
     return .visitChildren
   }
 
-  private func importDeclLeafModuleName(_ node: ImportDeclSyntax) -> Swift.String {
+  private func importDeclLeafModuleName(_ node: ImportDeclSyntax) -> Swift::String {
     let path = node.path
     guard let last = path.last else { return "" }
     return last.name.text

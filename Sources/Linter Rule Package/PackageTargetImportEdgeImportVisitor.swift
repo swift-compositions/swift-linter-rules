@@ -2,7 +2,7 @@ package import SwiftSyntax
 
 package final class PackageTargetImportEdgeImportVisitor: SyntaxVisitor {
 
-  package var imports: [Swift.String: Swift.Int] = [:]
+  package var imports: [Swift::String: Swift::Int] = [:]
   private let converter: SourceLocationConverter
 
   package init(converter: SourceLocationConverter) {

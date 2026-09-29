@@ -29,7 +29,7 @@ extension Lint.Rule {
 }
 
 @usableFromInline
-internal let `suppression reason required message`: Swift.String =
+internal let `suppression reason required message`: Swift::String =
   "[suppression reason required] [LINT-SUPPRESS-002]: every "
   + "`swift-linter:disable:next` or `swift-linter:disable:line` directive "
   + "must have an immediately associated `// REASON:` continuation with "
@@ -46,7 +46,7 @@ internal func reasonless(
   converter: SourceLocationConverter,
   severity: Diagnostic.Severity
 ) -> [Diagnostic.Record] {
-  var comments: [(text: Swift.String, position: AbsolutePosition, line: Swift.Int)] = []
+  var comments: [(text: Swift::String, position: AbsolutePosition, line: Swift::Int)] = []
 
   for token in tree.tokens(viewMode: .sourceAccurate) {
     suppressionReasonRequiredCollect(
@@ -107,7 +107,7 @@ private func suppressionReasonRequiredCollect(
   _ trivia: Trivia,
   tokenStartPosition: AbsolutePosition,
   converter: SourceLocationConverter,
-  into comments: inout [(text: Swift.String, position: AbsolutePosition, line: Swift.Int)]
+  into comments: inout [(text: Swift::String, position: AbsolutePosition, line: Swift::Int)]
 ) {
   var cursor = tokenStartPosition
   for piece in trivia {
@@ -121,7 +121,7 @@ private func suppressionReasonRequiredCollect(
 }
 
 private func suppressionReasonRequiredFinding(
-  for comment: (text: Swift.String, position: AbsolutePosition, line: Swift.Int),
+  for comment: (text: Swift::String, position: AbsolutePosition, line: Swift::Int),
   file: Source.File,
   converter: SourceLocationConverter,
   severity: Diagnostic.Severity

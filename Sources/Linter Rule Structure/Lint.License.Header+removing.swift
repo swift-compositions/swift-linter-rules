@@ -3,12 +3,12 @@ public import Lint
 
 extension Lint.License.Header {
 
-  public func removing(from source: Swift.String) -> Swift.String? {
+  public func removing(from source: Swift::String) -> Swift::String? {
     let lines = source.split(separator: "\n", omittingEmptySubsequences: false)
     guard start + count <= Cardinal(UInt(lines.count)) else {
       return nil
     }
-    var result = Swift.Array(lines.prefix(start))
+    var result = Swift::Array(lines.prefix(start))
     var suffix = lines.dropFirst(start + count)
     while suffix.first?.drop(while: { $0 == " " || $0 == "\t" }).isEmpty == true {
       suffix = suffix.dropFirst()

@@ -2,7 +2,7 @@ internal import SwiftSyntax
 
 internal func hasPositiveCopyable(
   _ clause: GenericWhereClauseSyntax?
-) -> Swift.Bool {
+) -> Swift::Bool {
   guard let clause else { return false }
   for requirement in clause.requirements {
     guard let conformance = requirement.requirement.as(ConformanceRequirementSyntax.self) else {
@@ -15,7 +15,7 @@ internal func hasPositiveCopyable(
   return false
 }
 
-internal func isPositiveCopyableMentioned(_ type: TypeSyntax) -> Swift.Bool {
+internal func isPositiveCopyableMentioned(_ type: TypeSyntax) -> Swift::Bool {
   if let identifier = type.as(IdentifierTypeSyntax.self),
     identifier.name.text == "Copyable"
   {

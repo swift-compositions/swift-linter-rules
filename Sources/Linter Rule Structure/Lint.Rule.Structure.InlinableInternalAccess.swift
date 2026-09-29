@@ -31,7 +31,7 @@ extension Lint.Rule {
 }
 
 @usableFromInline
-internal let `inlinable internal access exemption suffix`: Swift.String =
+internal let `inlinable internal access exemption suffix`: Swift::String =
   " (The rule does not fire when the enclosing type is itself below "
   + "`package` access, since there the `package` upgrade is "
   + "compiler-illegal.) For a legitimate remaining site, suppress with "
@@ -39,7 +39,7 @@ internal let `inlinable internal access exemption suffix`: Swift.String =
   + "`// REASON:` continuation."
 
 @usableFromInline
-internal let `inlinable internal access message`: Swift.String =
+internal let `inlinable internal access message`: Swift::String =
   "[inlinable internal access] [PATTERN-052]: `@inlinable` cross-module access "
   + "requires non-`internal` visibility. Upgrade to `package` (preferred for "
   + "impl-only surface) or `public` — do NOT add `@usableFromInline`, which "
@@ -47,7 +47,7 @@ internal let `inlinable internal access message`: Swift.String =
   + `inlinable internal access exemption suffix`
 
 @usableFromInline
-internal let `inlinable internal access initializer message`: Swift.String =
+internal let `inlinable internal access initializer message`: Swift::String =
   "[inlinable internal access] [PATTERN-052]: `@inlinable` cross-module access "
   + "requires non-`internal` visibility. For initializers, prefer `package init` "
   + "— Swift rejects `@usableFromInline` on `@inlinable init` as `has no "
@@ -68,7 +68,7 @@ private func structureTypeIsPackageUpgradable(_ modifiers: DeclModifierListSynta
   return false
 }
 
-private func structureSimpleTypeName(_ type: TypeSyntax) -> Swift.String? {
+private func structureSimpleTypeName(_ type: TypeSyntax) -> Swift::String? {
   if let optional = type.as(OptionalTypeSyntax.self) {
     return structureSimpleTypeName(optional.wrappedType)
   }
@@ -86,7 +86,7 @@ private func structureSimpleTypeName(_ type: TypeSyntax) -> Swift.String? {
 
 private func structureCollectNonUpgradableTypeNames(
   _ node: Syntax,
-  into names: inout Swift.Set<Swift.String>
+  into names: inout Swift::Set<Swift::String>
 ) {
   func record(_ identifier: TokenSyntax, _ modifiers: DeclModifierListSyntax) {
     if !structureTypeIsPackageUpgradable(modifiers) {
@@ -117,7 +117,7 @@ internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
   let converter: SourceLocationConverter
   var matches: [Diagnostic.Record] = []
 
-  private var nonUpgradableTypeNames: Swift.Set<Swift.String>?
+  private var nonUpgradableTypeNames: Swift::Set<Swift::String>?
 
   init(source: Source.File, severity: Diagnostic.Severity, converter: SourceLocationConverter) {
     self.source = source
@@ -126,9 +126,9 @@ internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
     super.init(viewMode: .sourceAccurate)
   }
 
-  private func nonUpgradableNames(from node: some SyntaxProtocol) -> Swift.Set<Swift.String> {
+  private func nonUpgradableNames(from node: some SyntaxProtocol) -> Swift::Set<Swift::String> {
     if let cached = nonUpgradableTypeNames { return cached }
-    var names: Swift.Set<Swift.String> = []
+    var names: Swift::Set<Swift::String> = []
     structureCollectNonUpgradableTypeNames(node.root, into: &names)
     nonUpgradableTypeNames = names
     return names
@@ -200,7 +200,7 @@ internal final class StructureInlinableInternalAccessVisitor: SyntaxVisitor {
     return false
   }
 
-  private func emit(at position: AbsolutePosition, message: Swift.String) {
+  private func emit(at position: AbsolutePosition, message: Swift::String) {
     let location = converter.location(for: position)
     matches.append(
       Diagnostic.Record(

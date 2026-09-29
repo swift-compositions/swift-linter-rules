@@ -6,10 +6,10 @@ import SwiftSyntax
 extension Lint.Source {
 
   public static func parsed(
-    from source: Swift.String,
-    file: Swift.String = "test.swift",
+    from source: Swift::String,
+    file: Swift::String = "test.swift",
     path: Lint.Source.Path? = nil,
-    types: Swift.Set<Swift.String> = []
+    types: Swift::Set<Swift::String> = []
   ) -> Lint.Source.Parsed {
     let tree = Parser.parse(source: source)
     let converter = SourceLocationConverter(fileName: file, tree: tree)

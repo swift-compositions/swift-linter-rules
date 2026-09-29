@@ -23,10 +23,10 @@ extension Lint.Rule {
 
 extension Lint.Rule.`for loop in result builder Tests` {
   static func findings(
-    in source: Swift.String,
+    in source: Swift::String,
     rule: Lint.Rule = Lint.Rule.`for loop in result builder`,
     severity: Diagnostic.Severity = .warning,
-    file: Swift.String = "test.swift"
+    file: Swift::String = "test.swift"
   ) -> [Diagnostic.Record] {
     let parsed = Lint.Source.parsed(from: source, file: file)
     return rule.observe(parsed, severity).findings

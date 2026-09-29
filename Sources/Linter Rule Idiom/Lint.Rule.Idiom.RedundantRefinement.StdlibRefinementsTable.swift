@@ -1,5 +1,5 @@
 @usableFromInline
-internal let refinements: [(refining: Swift.String, refined: Swift.String)] = [
+internal let refinements: [(refining: Swift::String, refined: Swift::String)] = [
   ("AdditiveArithmetic", "Equatable"),
   ("BidirectionalCollection", "Collection"),
   ("BidirectionalCollection", "Sequence"),

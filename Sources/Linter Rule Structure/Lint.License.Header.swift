@@ -9,10 +9,10 @@ extension Lint.License {
 
     public let count: Cardinal
 
-    public let text: Swift.String
+    public let text: Swift::String
 
     @inlinable
-    public init(start: Cardinal, count: Cardinal, text: Swift.String) {
+    public init(start: Cardinal, count: Cardinal, text: Swift::String) {
       self.start = start
       self.count = count
       self.text = text

@@ -8,7 +8,7 @@ extension Lint.Rule {
   )
 
   public static func `for loop in result builder`(
-    allowlist: Set<Swift.String>
+    allowlist: Set<Swift::String>
   ) -> Lint.Rule {
     Lint.Rule(
       id: "for loop in result builder",
@@ -41,7 +41,7 @@ extension Lint.Rule {
   }
 }
 
-public let `result builder for loop default allowlist`: Set<Swift.String> = [
+public let `result builder for loop default allowlist`: Set<Swift::String> = [
 
   "Array",
   "Swift.Array",
@@ -70,7 +70,7 @@ public let `result builder for loop default allowlist`: Set<Swift.String> = [
 ]
 
 @usableFromInline
-internal let `result builder for loop message`: Swift.String =
+internal let `result builder for loop message`: Swift::String =
   "[for loop in result builder] [PATTERN-063]: "
   + "`for`-loop in result-builder body materializes a fresh [Element] per "
   + "iteration (12-44x slower than imperative under SE-0289). Write the sequence "
@@ -84,14 +84,14 @@ internal let `result builder for loop message`: Swift.String =
 internal final class ResultBuilderForLoopVisitor: SyntaxVisitor {
   let source: Source.File
   let severity: Diagnostic.Severity
-  let allowlist: Set<Swift.String>
+  let allowlist: Set<Swift::String>
   let converter: SourceLocationConverter
   var matches: [Diagnostic.Record] = []
 
   init(
     source: Source.File,
     severity: Diagnostic.Severity,
-    allowlist: Set<Swift.String>,
+    allowlist: Set<Swift::String>,
     converter: SourceLocationConverter
   ) {
     self.source = source
@@ -150,7 +150,7 @@ internal final class ResultBuilderForLoopVisitor: SyntaxVisitor {
   }
 
   @usableFromInline
-  static func callee(of expression: ExprSyntax) -> Swift.String? {
+  static func callee(of expression: ExprSyntax) -> Swift::String? {
     if let memberAccess = expression.as(MemberAccessExprSyntax.self) {
       guard let base = memberAccess.base else {
         return nil

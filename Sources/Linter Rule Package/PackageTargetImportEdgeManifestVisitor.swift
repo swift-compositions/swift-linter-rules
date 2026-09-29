@@ -7,7 +7,7 @@ package final class PackageTargetImportEdgeManifestVisitor: SyntaxVisitor {
     super.init(viewMode: .sourceAccurate)
   }
 
-  private func stringLiteralValue(_ expression: ExprSyntax) -> Swift.String? {
+  private func stringLiteralValue(_ expression: ExprSyntax) -> Swift::String? {
     guard let literal = expression.as(StringLiteralExprSyntax.self) else { return nil }
     var out = ""
     for segment in literal.segments {
@@ -19,7 +19,7 @@ package final class PackageTargetImportEdgeManifestVisitor: SyntaxVisitor {
 
   private func argument(
     _ node: FunctionCallExprSyntax,
-    labeled label: Swift.String
+    labeled label: Swift::String
   ) -> ExprSyntax? {
     for argument in node.arguments where argument.label?.text == label {
       return argument.expression
@@ -68,7 +68,7 @@ package final class PackageTargetImportEdgeManifestVisitor: SyntaxVisitor {
         let targetsExpression = argument(node, labeled: "targets"),
         let array = targetsExpression.as(ArrayExprSyntax.self)
       {
-        var members: Swift.Set<Swift.String> = []
+        var members: Swift::Set<Swift::String> = []
         for element in array.elements {
           if let target = stringLiteralValue(element.expression) {
             members.insert(packageTargetImportEdgeNormalize(target))

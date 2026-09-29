@@ -29,7 +29,7 @@ extension Lint.Rule {
 }
 
 @usableFromInline
-internal let `malformed suppression directive message`: Swift.String =
+internal let `malformed suppression directive message`: Swift::String =
   "[malformed suppression directive] [LINT-SUPPRESS-001]: this `swift-linter:` "
   + "suppression directive does not match the engine grammar and is silently "
   + "ignored — the finding it targets is NOT suppressed. Use "
@@ -102,7 +102,7 @@ private func scanTriviaForMalformedDirectives(
   }
 }
 
-internal func isMalformedDirective(_ text: Swift.String) -> Swift.Bool {
+internal func isMalformedDirective(_ text: Swift::String) -> Swift::Bool {
   guard text.hasPrefix("//") else { return false }
   var rest = text.dropFirst(2)
   while let first = rest.first, first == " " { rest = rest.dropFirst() }

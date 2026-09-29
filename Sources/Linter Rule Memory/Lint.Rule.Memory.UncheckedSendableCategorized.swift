@@ -27,7 +27,7 @@ extension Lint.Rule {
 }
 
 @usableFromInline
-internal let `unchecked sendable categorization message`: Swift.String =
+internal let `unchecked sendable categorization message`: Swift::String =
   "[unchecked sendable categorization] [MEM-SAFE-024]: `@unchecked Sendable` "
   + "MUST NOT be paired with `@unsafe` on the same conformance clause. Per "
   + "SE-0458, `@unsafe` is scoped to the four memory-safety dimensions "

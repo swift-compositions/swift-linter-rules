@@ -3,10 +3,10 @@ public import Lint
 
 extension Lint.License.Header {
 
-  public static func recognize(in source: Swift.String) -> Recognition {
+  public static func recognize(in source: Swift::String) -> Recognition {
     let lines = source.split(separator: "\n", omittingEmptySubsequences: false)
-    var blocks: [(start: Swift.Int, lines: [Swift.Substring])] = []
-    var current: (start: Swift.Int, lines: [Swift.Substring])?
+    var blocks: [(start: Swift::Int, lines: [Swift::Substring])] = []
+    var current: (start: Swift::Int, lines: [Swift::Substring])?
     var reachedCode = false
     var laterLicenseMarker = false
 

@@ -30,10 +30,10 @@ import Testing
   extension Lint.Rule.`target import edge Tests` {
 
     struct Fixture {
-      let root: Swift.String
+      let root: Swift::String
 
-      init(manifest: Swift.String, files: [Swift.String: Swift.String]) throws(Failure) {
-        var random = Swift.SystemRandomNumberGenerator()
+      init(manifest: Swift::String, files: [Swift::String: Swift::String]) throws(Failure) {
+        var random = Swift::SystemRandomNumberGenerator()
         self.root = "/tmp/linter-rule-package-tests-\(random.next())"
         try Self.write(manifest, to: root + "/Package.swift")
         for (relative, content) in files {
@@ -44,13 +44,13 @@ import Testing
   }
 
   extension Lint.Rule.`target import edge Tests`.Fixture {
-    struct Failure: Swift.Error {
-      let reason: Swift.String
+    struct Failure: Swift::Error {
+      let reason: Swift::String
     }
   }
 
   extension Lint.Rule.`target import edge Tests`.Fixture {
-    fileprivate static func makeDirectories(_ raw: Swift.String) throws(Failure) {
+    fileprivate static func makeDirectories(_ raw: Swift::String) throws(Failure) {
       var prefix = ""
       for component in raw.split(separator: "/") {
         prefix += "/" + component
@@ -61,18 +61,18 @@ import Testing
     }
 
     fileprivate static func write(
-      _ content: Swift.String,
-      to raw: Swift.String
+      _ content: Swift::String,
+      to raw: Swift::String
     ) throws(Failure) {
       if let slash = raw.lastIndex(of: "/") {
-        try makeDirectories(Swift.String(raw[raw.startIndex..<slash]))
+        try makeDirectories(Swift::String(raw[raw.startIndex..<slash]))
       }
       guard let handle = unsafe fopen(raw, "wb") else {
         throw Failure(reason: "fopen failed: \(raw)")
       }
       defer { _ = unsafe fclose(handle) }
-      let bytes = [Swift.UInt8](content.utf8)
-      let written = unsafe bytes.withUnsafeBytes { pointer in
+      let bytes = [Swift::UInt8](content.utf8)
+      let written = bytes.withUnsafeBytes { pointer in
         unsafe fwrite(pointer.baseAddress, 1, pointer.count, handle)
       }
       guard written == bytes.count else {
@@ -80,7 +80,7 @@ import Testing
       }
     }
 
-    fileprivate static func removeRecursively(_ raw: Swift.String) {
+    fileprivate static func removeRecursively(_ raw: Swift::String) {
       if packageTargetImportEdgeIsDirectory(raw) {
         for name in packageTargetImportEdgeEntryNames(in: raw) {
           removeRecursively(raw + "/" + name)
@@ -111,9 +111,9 @@ import Testing
 
   extension Lint.Rule.`target import edge Tests` {
     static func manifest(
-      targets: Swift.String,
-      dependencies: Swift.String = ""
-    ) -> Swift.String {
+      targets: Swift::String,
+      dependencies: Swift::String = ""
+    ) -> Swift::String {
       """
       // swift-tools-version: 6.4
       import PackageDescription

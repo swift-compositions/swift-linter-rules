@@ -27,7 +27,7 @@ extension Lint.Rule {
 }
 
 @usableFromInline
-internal let `unchecked sendable noncopyable message`: Swift.String =
+internal let `unchecked sendable noncopyable message`: Swift::String =
   "[unchecked sendable noncopyable] [MEM-SEND-004]: `~Copyable` "
   + "structs whose stored properties are all `Sendable` MUST use plain `Sendable`. "
   + "The compiler synthesises and checks `Sendable` for `~Copyable` structs the "

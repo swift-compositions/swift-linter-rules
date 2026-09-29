@@ -31,7 +31,7 @@ extension Lint.Rule {
 }
 
 @usableFromInline
-internal let `unsafe storage visibility message`: Swift.String =
+internal let `unsafe storage visibility message`: Swift::String =
   "[unsafe storage visibility] [MEM-SAFE-023]: public stored properties of unsafe "
   + "pointer types MUST be `private` / `internal`, or annotated `@unsafe` to "
   + "signal a deliberate escape hatch. Public pointer storage on an Escapable "
@@ -39,7 +39,7 @@ internal let `unsafe storage visibility message`: Swift.String =
   + "exposing a `Span` view; reserve `@unsafe` for explicit escape hatches."
 
 @usableFromInline
-internal let `unsafe pointer types`: Swift.Set<Swift.String> = [
+internal let `unsafe pointer types`: Swift::Set<Swift::String> = [
   "UnsafePointer",
   "UnsafeMutablePointer",
   "UnsafeRawPointer",
