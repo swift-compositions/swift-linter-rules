@@ -17,7 +17,7 @@ extension Lint.Source {
     let id = manager.register(
       fileID: file,
       filePath: file,
-      content: source.utf8.map(Byte.init)
+      content: [Byte](utf8: source)
     )
     return Self.Parsed(
       file: manager.file(for: id),
