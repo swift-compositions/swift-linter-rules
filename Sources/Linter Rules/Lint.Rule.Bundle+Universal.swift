@@ -25,7 +25,7 @@ extension Lint.Rule.Bundle {
 
     .enable(.`usable from inline internal import`),
 
-    .enable(.`malformed suppression directive`),
+    .enable(.`malformed suppression directive`, severity: .error),
 
     .enable(.`suppression reason required`, severity: .warning),
 
