@@ -21,7 +21,7 @@ extension Lint.Rule.Bundle {
 
     .enable(.`for loop in result builder`),
 
-    .enable(.`inlinable internal access`),
+    .enable(.`inlinable internal access`, severity: .warning),
 
     .enable(.`usable from inline internal import`),
 
