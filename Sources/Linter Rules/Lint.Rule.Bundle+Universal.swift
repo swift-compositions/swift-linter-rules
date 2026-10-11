@@ -27,7 +27,7 @@ extension Lint.Rule.Bundle {
 
     .enable(.`malformed suppression directive`, severity: .error),
 
-    .enable(.`suppression reason required`, severity: .warning),
+    .enable(.`suppression reason required`, severity: .error),
 
     .enable(.`mock factory zero collision`),
   ]
