@@ -12,7 +12,37 @@ extension Lint.Rule {
         source: "let value = unsafeBitCast(tag, to: UnownedJob.self)",
         path: "/Controls/Tests/MockFactoryZeroCollision.swift",
         expectation: .findings(1)
-      )
+      ),
+      .init(
+        id: "mock factory zero collision offset tag",
+        source: "let value = unsafeBitCast(tag &+ 1, to: UnownedJob.self)",
+        path: "/Controls/Tests/MockFactoryZeroCollision.swift",
+        expectation: .clean
+      ),
+      .init(
+        id: "mock factory zero collision decoder to integer",
+        source: "extension UnownedJob { var tag: Int { unsafe unsafeBitCast(self, to: Int.self) &- 1 } }",
+        path: "/Controls/Tests/MockFactoryZeroCollision.swift",
+        expectation: .clean
+      ),
+      .init(
+        id: "mock factory zero collision bare tag to integer",
+        source: "let value = unsafeBitCast(tag, to: UInt.self)",
+        path: "/Controls/Tests/MockFactoryZeroCollision.swift",
+        expectation: .clean
+      ),
+      .init(
+        id: "mock factory zero collision coerced function pointer",
+        source: "action.handler = unsafeBitCast(handler as @convention(c) (Int32) -> Void, to: type(of: action.handler))",
+        path: "/Controls/Tests/MockFactoryZeroCollision.swift",
+        expectation: .clean
+      ),
+      .init(
+        id: "mock factory zero collision outside tests",
+        source: "let value = unsafeBitCast(tag, to: UnownedJob.self)",
+        path: "/Controls/Sources/MockFactoryZeroCollision.swift",
+        expectation: .clean
+      ),
     ],
     observe: Lint.Rule.measured { source, severity in
       let visitor = TestingMockFactoryZeroCollisionVisitor(
@@ -66,10 +96,33 @@ internal final class TestingMockFactoryZeroCollisionVisitor: SyntaxVisitor {
       return false
     }
 
+    if let sequence = argument.expression.as(SequenceExprSyntax.self),
+      sequence.elements.contains(where: { $0.is(UnresolvedAsExprSyntax.self) })
+    {
+      return false
+    }
+
+    if argument.expression.as(DeclReferenceExprSyntax.self)?.baseName.tokenKind == .keyword(.self) {
+      return false
+    }
+
     if argument.expression.is(MemberAccessExprSyntax.self) {
       return false
     }
     return true
+  }
+
+  private static let integerTypeNames: Swift::Set<Swift::String> = [
+    "Int", "UInt", "Int8", "UInt8", "Int16", "UInt16", "Int32", "UInt32", "Int64", "UInt64",
+  ]
+
+  private func targetIsIntegerType(_ node: FunctionCallExprSyntax) -> Swift::Bool {
+    guard let target = node.arguments.first(where: { $0.label?.text == "to" }),
+      let metatype = target.expression.as(MemberAccessExprSyntax.self),
+      metatype.declName.baseName.tokenKind == .keyword(.self),
+      let base = metatype.base?.as(DeclReferenceExprSyntax.self)
+    else { return false }
+    return Self.integerTypeNames.contains(base.baseName.text)
   }
 
   override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
@@ -81,6 +134,7 @@ internal final class TestingMockFactoryZeroCollisionVisitor: SyntaxVisitor {
     guard let firstArgument = node.arguments.first else { return .visitChildren }
     guard firstArgumentLooksRaw(firstArgument) else { return .visitChildren }
     guard firstArgumentLooksLikeIntegerTag(firstArgument) else { return .visitChildren }
+    guard !targetIsIntegerType(node) else { return .visitChildren }
     let location = converter.location(for: node.positionAfterSkippingLeadingTrivia)
     matches.append(
       Diagnostic.Record(
