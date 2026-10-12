@@ -9,7 +9,8 @@ extension Lint.Source {
     from source: Swift::String,
     file: Swift::String = "test.swift",
     path: Lint.Source.Path? = nil,
-    types: Swift::Set<Swift::String> = []
+    types: Swift::Set<Swift::String> = [],
+    index: Lint.Source.Index? = nil
   ) -> Lint.Source.Parsed {
     let tree = Parser.parse(source: source)
     let converter = SourceLocationConverter(fileName: file, tree: tree)
@@ -24,7 +25,8 @@ extension Lint.Source {
       path: path ?? Self.Path(file),
       tree: tree,
       converter: converter,
-      types: types
+      types: types,
+      index: index ?? .collect(from: tree)
     )
   }
 }

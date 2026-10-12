@@ -29,6 +29,6 @@ extension Lint.Rule.Bundle {
 
     .enable(.`suppression reason required`, severity: .error),
 
-    .enable(.`mock factory zero collision`),
+    .enable(.`mock factory zero collision`, severity: .error),
   ]
 }
