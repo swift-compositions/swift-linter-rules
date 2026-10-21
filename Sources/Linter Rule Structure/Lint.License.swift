@@ -2,5 +2,5 @@ public import Lint
 
 extension Lint {
 
-  public enum License {}
+    public enum License {}
 }
