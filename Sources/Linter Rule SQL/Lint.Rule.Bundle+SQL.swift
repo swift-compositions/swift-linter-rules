@@ -7,6 +7,9 @@ extension Lint.Rule.Bundle {
       .enable(.`sql label`),
       .enable(.`sql string`),
       .enable(.`sql registry`(exceptions: exceptions)),
+      .enable(.`sql fragment`),
+      .enable(.`sql edge`),
+      .enable(.`grdb import`),
     ]
   }
 }

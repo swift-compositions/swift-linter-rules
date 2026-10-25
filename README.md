@@ -81,6 +81,9 @@ Each pack ships as its own SwiftPM product. Activate per-rule via the
 | `Linter Rule SQL` | `` `sql label` `` | Call arguments labelled `sql:` |
 | `Linter Rule SQL` | `` `sql string` `` | String literals whose trimmed text begins with an SQL statement keyword (upper-case, or any case with an SQL clause word); a direct `#sql` argument is exempt |
 | `Linter Rule SQL` | `` `sql registry` `` | `#sql` sites outside a `… Schema` target that are not listed in `Lint.SQL.Exceptions`, stale entries, and reasons without a one-line text or a required `swift-compositions/swift-sql#<n>` link (it checks that a reason is present, not that it is sound) |
+| `Linter Rule SQL` | `` `sql fragment` `` | `#sql` outside a `… Schema` target that is a whole statement, names a table or column by a quoted identifier, or interpolates nothing |
+| `Linter Rule SQL` | `` `sql edge` `` | `fetchAll`, `fetchOne`, `fetchCount`, `fetchSet`, `fetchCursor` or `execute` in a library target outside a database's `read`/`write`/`writeWithoutTransaction`/`withRollback`/`observe` closure or a `FetchKeyRequest`'s `fetch(_:)` (swift-institute/Issues#177) |
+| `Linter Rule SQL` | `` `grdb import` `` | `import GRDB` in any form, and manifest strings naming the GRDB.swift package; enable everywhere except swift-sqlite |
 | `Linter Rule SwiftUI` | `` `with animation` `` | `withAnimation` in `View` conformers and their extensions |
 | `Linter Rule SwiftUI` | `` `animation modifier` `` | `.animation(_:value:)`, `.animation(_:)`, `Binding.animation(_:)` in views |
 | `Linter Rule SwiftUI` | `` `state identity` `` | `.id(_:)` whose argument is not a literal or static member |
