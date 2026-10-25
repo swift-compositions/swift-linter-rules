@@ -48,6 +48,21 @@ let package = Package(
         ),
 
         .library(
+            name: "Linter Rule SQL",
+            targets: ["Linter Rule SQL"]
+        ),
+
+        .library(
+            name: "Linter Rule SwiftUI",
+            targets: ["Linter Rule SwiftUI"]
+        ),
+
+        .library(
+            name: "Linter Rule Feature",
+            targets: ["Linter Rule Feature"]
+        ),
+
+        .library(
             name: "Linter Rules Test Support",
             targets: ["Linter Rules Test Support"]
         ),
@@ -124,7 +139,45 @@ let package = Package(
             name: "Linter Rule Package",
             dependencies: [
                 .product(name: "Lint", package: "swift-lint"),
+                .target(name: "Linter Rule Scope"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
+        .target(
+            name: "Linter Rule Scope",
+            dependencies: [
+                .product(name: "Lint", package: "swift-lint"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
+        .target(
+            name: "Linter Rule SQL",
+            dependencies: [
+                .product(name: "Lint", package: "swift-lint"),
+                .target(name: "Linter Rule Scope"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
+        .target(
+            name: "Linter Rule SwiftUI",
+            dependencies: [
+                .product(name: "Lint", package: "swift-lint"),
+                .target(name: "Linter Rule Scope"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
+        .target(
+            name: "Linter Rule Feature",
+            dependencies: [
+                .product(name: "Lint", package: "swift-lint"),
+                .target(name: "Linter Rule Scope"),
+                .target(name: "Linter Rule SwiftUI"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
             ]
         ),
@@ -203,6 +256,37 @@ let package = Package(
             name: "Linter Rule Package Tests",
             dependencies: [
                 .target(name: "Linter Rule Package"),
+                .target(name: "Linter Rule Scope"),
+                .target(name: "Linter Rules Test Support"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+
+        .testTarget(
+            name: "Linter Rule SQL Tests",
+            dependencies: [
+                .target(name: "Linter Rule SQL"),
+                .target(name: "Linter Rule Scope"),
+                .target(name: "Linter Rules Test Support"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+
+        .testTarget(
+            name: "Linter Rule SwiftUI Tests",
+            dependencies: [
+                .target(name: "Linter Rule SwiftUI"),
+                .target(name: "Linter Rule Scope"),
+                .target(name: "Linter Rules Test Support"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+
+        .testTarget(
+            name: "Linter Rule Feature Tests",
+            dependencies: [
+                .target(name: "Linter Rule Feature"),
+                .target(name: "Linter Rule Scope"),
                 .target(name: "Linter Rules Test Support"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]

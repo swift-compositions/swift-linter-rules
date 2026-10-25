@@ -1,4 +1,5 @@
 import Lint
+import Linter_Rule_Scope
 import Linter_Rules_Test_Support
 import SwiftParser
 import SwiftSyntax
@@ -81,8 +82,8 @@ import Testing
         }
 
         fileprivate static func removeRecursively(_ raw: Swift::String) {
-            if packageTargetImportEdgeIsDirectory(raw) {
-                for name in packageTargetImportEdgeEntryNames(in: raw) {
+            if Lint.Scope.File.isDirectory(raw) {
+                for name in Lint.Scope.File.entries(in: raw) {
                     removeRecursively(raw + "/" + name)
                 }
                 _ = unsafe rmdir(raw)
@@ -97,7 +98,7 @@ import Testing
 
         fileprivate func findings() throws(Failure) -> [Diagnostic.Record] {
             let manifestPath = root + "/Package.swift"
-            guard let text = packageTargetImportEdgeReadText(atPath: manifestPath) else {
+            guard let text = Lint.Scope.File.text(at: manifestPath) else {
                 throw Failure(reason: "unreadable manifest: \(manifestPath)")
             }
             let parsed = Lint.Source.parsed(

@@ -78,6 +78,52 @@ Each pack ships as its own SwiftPM product. Activate per-rule via the
 | `Linter Rule Naming` | `` `property named flags` `` | `OptionSet` types named `*.Flags` (use `*.Options`) |
 | `Linter Rule Naming` | `` `compound identifier` `` | Compound type, method, or property names that should decompose into nested forms |
 | `Linter Rule Naming` | `` `tag suffix` `` | Phantom-type tags suffixed with `Tag` (use the bare concept name) |
+| `Linter Rule SQL` | `` `sql label` `` | Call arguments labelled `sql:` |
+| `Linter Rule SQL` | `` `sql string` `` | String literals whose trimmed text begins with an SQL statement keyword (upper-case, or any case with an SQL clause word); a direct `#sql` argument is exempt |
+| `Linter Rule SQL` | `` `sql registry` `` | `#sql` sites outside a `… Schema` target that are not listed in `Lint.SQL.Exceptions`, stale entries, and reasons without a one-line text or a required `swift-compositions/swift-sql#<n>` link (it checks that a reason is present, not that it is sound) |
+| `Linter Rule SwiftUI` | `` `with animation` `` | `withAnimation` in `View` conformers and their extensions |
+| `Linter Rule SwiftUI` | `` `animation modifier` `` | `.animation(_:value:)`, `.animation(_:)`, `Binding.animation(_:)` in views |
+| `Linter Rule SwiftUI` | `` `state identity` `` | `.id(_:)` whose argument is not a literal or static member |
+| `Linter Rule SwiftUI` | `` `toolbar hidden` `` | `.hidden()` inside `toolbar { }`, `ToolbarItem`, `ToolbarItemGroup` (swift-institute/Issues#153) |
+| `Linter Rule SwiftUI` | `` `view state` `` | `@State`, `@StateObject`, `@ObservedObject`, `@AppStorage`, `@SceneStorage`, `@Observable`-class and stored-closure view properties |
+| `Linter Rule SwiftUI` | `` `view logic` `` | Sequence algorithms, Set/Dictionary construction, `Task`, lifecycle modifiers, `Date()`/`UUID()`, `UserDefaults`, `FileManager`, `Store(`, `store.modify` in views |
+| `Linter Rule Feature` | `` `feature user defaults` `` | `UserDefaults`, `@AppStorage`, `.appStorage` in `@Feature` types and `… Feature` targets |
+| `Linter Rule Feature` | `` `feature with animation` `` | `withAnimation` in `@Feature` types and `… Feature` targets |
+
+The SQL, SwiftUI and Feature packs are activated from a root `Lint.swift`; the
+SQL registry lives there as a Swift value:
+
+```swift
+// swift-linter-tools-version: 0.1
+
+import Linter
+import Linter_Rule_Feature
+import Linter_Rule_SQL
+import Linter_Rule_SwiftUI
+
+Lint.run(dependencies: [
+    .package(
+        url: "https://github.com/swift-compositions/swift-linter-rules.git",
+        branch: "main",
+        products: ["Linter Rule SQL", "Linter Rule SwiftUI", "Linter Rule Feature"]
+    ),
+]) {
+    Lint.Rule.Bundle.sql(exceptions: [
+        .init(
+            file: "Sources/Affairs SQLite/Library+SQLite.swift",
+            declaration: "Library.conditions(for:)",
+            sites: 2,
+            reason: "mailbox predicates interpolate a JSON path that the builders cannot express yet"
+        ),
+    ])
+    Lint.Rule.Bundle.swiftUI
+    Lint.Rule.Bundle.feature
+}
+```
+
+An entry names the file relative to the package root, the enclosing declaration
+exactly as the `sql registry` finding reports it, the number of `#sql` sites in
+that declaration, and a one-line reason.
 
 Each rule's source carries inline documentation describing its AST
 predicate, the source patterns it covers, and the convention it enforces.
