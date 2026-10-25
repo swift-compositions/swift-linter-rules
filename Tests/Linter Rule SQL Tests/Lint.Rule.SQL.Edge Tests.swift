@@ -93,6 +93,59 @@ extension Lint.Rule.`sql edge Tests`.Unit {
   }
 }
 
+extension Lint.Rule.`sql edge Tests`.Unit {
+  @Test
+  func `a transaction's run is an edge`() {
+    let findings = Lint.Rule.`sql edge Tests`.findings(
+      """
+      struct Derivation: SQLite.Transaction {
+        func run(_ db: SQLite.Connection) throws { try Letter.Record.deletion.execute(db) }
+      }
+      """
+    )
+    #expect(findings.isEmpty)
+  }
+
+  @Test
+  func `run that is not a transaction's is not an edge`() {
+    let findings = Lint.Rule.`sql edge Tests`.findings(
+      """
+      struct Derivation: FetchKeyRequest {
+        func run(_ db: SQLite.Connection) throws { try Letter.Record.deletion.execute(db) }
+      }
+      """
+    )
+    #expect(findings.count == 1)
+  }
+
+  @Test(arguments: [
+    "try Letter.Record.where { $0.isPending }.fetchAll(db)",
+    "try Letter.Record.insert { letter }.execute(db)",
+    "try Letter.Record.order(by: \\.received).select(\\.id).fetchAll(db)",
+    "try Letter.Record.find(id).update { $0.read = true }.execute(db)",
+  ])
+  func `a statement built at an edge fires`(call: Swift::String) {
+    let findings = Lint.Rule.`sql edge Tests`.findings(
+      "func load(_ database: SQLite.Database) throws { try database.write { db in \(call) } }"
+    )
+    #expect(findings.count == 1)
+    #expect(findings.first?.message.contains("built here") == true)
+  }
+
+  @Test(arguments: [
+    "try Letter.Record.pending.fetchAll(db)",
+    "try Letter.Record.find(id).fetchOne(db)",
+    "try Letter.Record.all.fetchAll(db)",
+    "try Library.listed(query).fetchAll(db)",
+  ])
+  func `a named statement at an edge is clean`(call: Swift::String) {
+    let findings = Lint.Rule.`sql edge Tests`.findings(
+      "func load(_ database: SQLite.Database) throws { try database.read { db in \(call) } }"
+    )
+    #expect(findings.isEmpty)
+  }
+}
+
 extension Lint.Rule.`sql edge Tests`.`Edge Case` {
   @Test
   func `a function declared inside a read closure is still at the edge`() {

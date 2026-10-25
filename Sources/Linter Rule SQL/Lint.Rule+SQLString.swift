@@ -26,10 +26,13 @@ extension Lint.Rule {
         expectation: .clean
       ),
     ],
-    observe: Lint.Rule.measured { source, severity in
+    observe: { source, severity in
+      guard !Lint.Scope.Target.isTest(source.path) else {
+        return Lint.Rule.Observation(findings: [], coverage: .measured, applicability: .inapplicable)
+      }
       let visitor = SQLStringVisitor()
       visitor.walk(source.tree)
-      return visitor.literals.map { literal in
+      let findings = visitor.literals.map { literal in
         Lint.Scope.record(
           at: literal,
           in: source,
@@ -38,6 +41,7 @@ extension Lint.Rule {
           message: `sql string message`
         )
       }
+      return Lint.Rule.Observation(findings: findings, coverage: .measured)
     }
   )
 }

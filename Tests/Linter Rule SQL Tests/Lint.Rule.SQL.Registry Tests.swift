@@ -110,6 +110,16 @@ extension Lint.Rule.`sql registry Tests`.Exemption {
   }
 
   @Test
+  func `a test target is exempt and inapplicable`() {
+    let observation = Lint.Rule.`sql registry`(exceptions: .none).observe(
+      Lint.Source.parsed(from: "let v = #sql(\"SELECT 1\")", file: "Tests/Affairs Tests/Schema.Tests.swift"),
+      .warning
+    )
+    #expect(observation.findings.isEmpty)
+    #expect(observation.applicability == .inapplicable)
+  }
+
+  @Test
   func `schema target in a nested directory is exempt`() {
     let findings = Lint.Rule.`sql registry Tests`.findings(
       "let v = #sql(\"1\")",
@@ -125,7 +135,6 @@ extension Lint.Rule.`sql registry Tests`.Exemption {
     "Sources/Schema/V1.swift",
     "Sources/AffairsSchema/V1.swift",
     "Sources/Affairs Schema Tests/V1.swift",
-    "Tests/Affairs Schema Tests/V1.swift",
     "Sources/Affairs/Affairs Schema/V1.swift",
     "Schema/ Schema/V1.swift",
     "Sources/ Schema/V1.swift",

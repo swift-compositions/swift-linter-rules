@@ -64,6 +64,11 @@ extension Lint.Rule.`sql label Tests`.`Edge Case` {
   }
 
   @Test
+  func `a test target is exempt`() {
+    #expect(Lint.Rule.`sql label Tests`.findings("run(sql: x)", file: "Tests/Affairs Tests/Store.Tests.swift").isEmpty)
+  }
+
+  @Test
   func `bare filename still fires`() {
     #expect(Lint.Rule.`sql label Tests`.findings("run(sql: x)", file: "Test.swift").count == 1)
   }

@@ -25,4 +25,9 @@ extension Lint.Scope.Target {
     guard let name = name(of: path) else { return false }
     return name.count > suffix.count && name.hasSuffix(suffix)
   }
+
+  /// Whether `path` is in a test target: its first directory is `Tests`.
+  package static func isTest(_ path: Lint.Source.Path) -> Swift::Bool {
+    path.underlying.split(separator: "/", omittingEmptySubsequences: true).dropLast().first == "Tests"
+  }
 }

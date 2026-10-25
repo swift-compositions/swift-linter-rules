@@ -28,7 +28,7 @@ extension Lint.SQL.Fragment {
     _ source: borrowing Lint.Source.Parsed,
     severity: Diagnostic.Severity
   ) -> Lint.Rule.Observation {
-    guard !Lint.Scope.Target.named(source.path, suffix: " Schema") else {
+    guard !Lint.Scope.Target.named(source.path, suffix: " Schema"), !Lint.Scope.Target.isTest(source.path) else {
       return Lint.Rule.Observation(findings: [], coverage: .measured, applicability: .inapplicable)
     }
     let visitor = Visitor()

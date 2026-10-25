@@ -34,7 +34,7 @@ extension Lint.SQL.Registry {
     if source.path.underlying == "Package.swift" {
       findings += registry(source, severity: severity)
     }
-    guard !Lint.Scope.Target.named(source.path, suffix: Self.schemaSuffix) else {
+    guard !Lint.Scope.Target.named(source.path, suffix: Self.schemaSuffix), !Lint.Scope.Target.isTest(source.path) else {
       return Lint.Rule.Observation(
         findings: findings,
         coverage: .measured,

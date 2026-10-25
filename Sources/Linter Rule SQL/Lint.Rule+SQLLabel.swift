@@ -27,10 +27,13 @@ extension Lint.Rule {
         expectation: .clean
       ),
     ],
-    observe: Lint.Rule.measured { source, severity in
+    observe: { source, severity in
+      guard !Lint.Scope.Target.isTest(source.path) else {
+        return Lint.Rule.Observation(findings: [], coverage: .measured, applicability: .inapplicable)
+      }
       let visitor = SQLLabelVisitor()
       visitor.walk(source.tree)
-      return visitor.labels.map { label in
+      let findings = visitor.labels.map { label in
         Lint.Scope.record(
           at: label,
           in: source,
@@ -39,6 +42,7 @@ extension Lint.Rule {
           message: `sql label message`
         )
       }
+      return Lint.Rule.Observation(findings: findings, coverage: .measured)
     }
   )
 }
