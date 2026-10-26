@@ -8,14 +8,17 @@ extension Lint.SQL {
 
 extension Lint.SQL.Statement {
 
-  package static let keywords: Swift::Set<Swift::String> = [
-    "SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER", "DROP", "PRAGMA", "WITH",
-    "REPLACE", "BEGIN",
-  ]
+  /// The schema objects `CREATE` and `DROP` name.
+  package static let objects: Swift::Set<Swift::String> = ["TABLE", "INDEX", "TRIGGER", "VIEW"]
 
-  package static let clauses: Swift::Set<Swift::String> = [
-    "FROM", "INTO", "VALUES", "WHERE", "SET", "TABLE", "INDEX", "TRIGGER", "TRANSACTION",
-  ]
+  /// The words that may stand between `CREATE` and its object.
+  package static let modifiers: Swift::Set<Swift::String> = ["UNIQUE", "TEMP", "TEMPORARY", "VIRTUAL"]
+
+  /// The statements a `WITH` clause leads into.
+  package static let bodies: Swift::Set<Swift::String> = ["SELECT", "INSERT", "UPDATE", "DELETE", "REPLACE"]
+
+  /// The words that make `BEGIN` a transaction.
+  package static let transactions: Swift::Set<Swift::String> = ["TRANSACTION", "DEFERRED", "IMMEDIATE", "EXCLUSIVE"]
 
   package static func text(of literal: StringLiteralExprSyntax) -> Swift::String {
     var text = ""
@@ -29,13 +32,29 @@ extension Lint.SQL.Statement {
     return text
   }
 
+  /// Whether `text` begins with an upper-case SQL statement in its clause shape: `SELECT … FROM`,
+  /// `INSERT [OR …] INTO`, `REPLACE INTO`, `UPDATE … SET`, `DELETE FROM`, `CREATE [UNIQUE|TEMP|TEMPORARY|VIRTUAL]
+  /// TABLE|INDEX|TRIGGER|VIEW`, `ALTER TABLE`, `DROP TABLE|INDEX|TRIGGER|VIEW`, `PRAGMA name`, `WITH … SELECT|INSERT|…`
+  /// or `BEGIN TRANSACTION|DEFERRED|IMMEDIATE|EXCLUSIVE`. Case-sensitive: `"DELETE"` alone and
+  /// `"Delete from library"` are not statements, and neither is lower-case SQL.
   package static func leads(_ text: Swift::String) -> Swift::Bool {
     let words = Self.words(in: text)
     guard let first = words.first, first.leading else { return false }
-    let upper = first.text.uppercased()
-    guard keywords.contains(upper) else { return false }
-    if first.text == upper { return true }
-    return words.dropFirst().contains { clauses.contains($0.text.uppercased()) }
+    let rest = words.dropFirst().map(\.text)
+    switch first.text {
+    case "SELECT": return rest.contains("FROM")
+    case "INSERT": return rest.prefix(3).contains("INTO")
+    case "REPLACE": return rest.first == "INTO"
+    case "UPDATE": return rest.contains("SET")
+    case "DELETE": return rest.first == "FROM"
+    case "CREATE": return rest.first { !modifiers.contains($0) }.map(objects.contains) ?? false
+    case "ALTER": return rest.first == "TABLE"
+    case "DROP": return rest.first.map(objects.contains) ?? false
+    case "PRAGMA": return !rest.isEmpty
+    case "WITH": return rest.contains(where: bodies.contains)
+    case "BEGIN": return rest.first.map(transactions.contains) ?? false
+    default: return false
+    }
   }
 
   fileprivate static func words(in text: Swift::String) -> [(text: Swift::String, leading: Swift::Bool)] {

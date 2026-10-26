@@ -71,6 +71,28 @@ extension `sql fragment Tests`.Exemption {
     #expect(observation.findings.isEmpty)
     #expect(observation.applicability == .inapplicable)
   }
+
+  @Test
+  func `a test target is inapplicable`() {
+    let observation = Lint.Rule.`sql fragment`.observe(
+      Lint.Source.parsed(from: #"let v = #sql("DELETE FROM \(Item.self)")"#, file: "Tests/Affairs Tests/Store.Tests.swift"),
+      .warning
+    )
+    #expect(observation.findings.isEmpty)
+    #expect(observation.applicability == .inapplicable)
+  }
+
+  @Test(arguments: [
+    "Library.swift",
+    "Sources/Affairs/Tests/Library.swift",
+    "Sources/Schema/V1.swift",
+    "Sources/Affairs Schemas/V1.swift",
+    "TestsKit/Library.swift",
+  ])
+  func `near miss: every other path fires, a bare filename too`(file: Swift::String) {
+    let findings = `sql fragment Tests`.findings(#"let v = #sql("DELETE FROM \(Item.self)")"#, file: file)
+    #expect(findings.count == 1, "\(file)")
+  }
 }
 
 extension `sql fragment Tests`.Integration {

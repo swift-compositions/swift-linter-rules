@@ -47,13 +47,13 @@ extension Lint.Rule {
 }
 
 package let `sql string message`: Swift::String =
-  "[sql string]: checks string literals (single-line, multi-line or raw) whose trimmed text begins "
-  + "with an SQL statement keyword (SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP, PRAGMA, "
-  + "WITH, REPLACE, BEGIN): an upper-case keyword always matches; a keyword in any other case matches "
-  + "when the literal also contains FROM, INTO, VALUES, WHERE, SET, TABLE, INDEX, TRIGGER or "
-  + "TRANSACTION. SQL in a String value is not checked against the schema. Fix: build the statement "
-  + "with swift-sql; a literal that is a direct argument of `#sql` is exempt here and governed by "
-  + "`sql registry` instead."
+  "[sql string]: checks string literals (single-line, multi-line or raw) outside `Tests/` whose trimmed "
+  + "text begins with an upper-case SQL statement in its clause shape: SELECT … FROM, INSERT [OR …] INTO, "
+  + "REPLACE INTO, UPDATE … SET, DELETE FROM, CREATE [UNIQUE|TEMP|VIRTUAL] TABLE|INDEX|TRIGGER|VIEW, "
+  + "ALTER TABLE, DROP TABLE|INDEX|TRIGGER|VIEW, PRAGMA name, WITH … SELECT, BEGIN TRANSACTION. A bare "
+  + "keyword (`\"DELETE\"`), prose (`\"Delete from library\"`) and lower-case SQL are not matched. SQL in a "
+  + "String value is not checked against the schema. Fix: build the statement with swift-sql; a literal "
+  + "that is a direct argument of `#sql` is exempt here and governed by `sql registry` instead."
 
 internal final class SQLStringVisitor: SyntaxVisitor {
   var literals: [StringLiteralExprSyntax] = []

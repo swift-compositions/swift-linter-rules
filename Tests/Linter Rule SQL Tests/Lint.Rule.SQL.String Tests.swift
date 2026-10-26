@@ -20,23 +20,56 @@ extension `sql string Tests` {
 
 extension `sql string Tests`.Unit {
   @Test(arguments: [
-    "SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER", "DROP", "PRAGMA", "WITH",
-    "REPLACE", "BEGIN",
+    "SELECT name FROM holder",
+    "  SELECT count(*) FROM item WHERE flag = 1",
+    "INSERT INTO item VALUES (1)",
+    "INSERT OR REPLACE INTO item VALUES (1)",
+    "REPLACE INTO item VALUES (1)",
+    "UPDATE item SET flag = 1",
+    "DELETE FROM item",
+    "CREATE TABLE item (id INTEGER)",
+    "CREATE UNIQUE INDEX item_id ON item (id)",
+    "CREATE TEMP TRIGGER t AFTER INSERT ON item BEGIN SELECT 1; END",
+    "CREATE VIEW v AS SELECT id FROM item",
+    "ALTER TABLE item ADD COLUMN flag",
+    "DROP TABLE item",
+    "DROP INDEX item_id",
+    "PRAGMA foreign_keys = ON",
+    "WITH recent AS (SELECT id FROM item) SELECT id FROM recent",
+    "BEGIN TRANSACTION",
+    "BEGIN IMMEDIATE",
   ])
-  func `every upper-case statement keyword fires`(keyword: Swift::String) {
-    #expect(`sql string Tests`.findings("let s = \"\(keyword) x\"").count == 1)
+  func `every upper-case statement shape fires`(statement: Swift::String) {
+    #expect(`sql string Tests`.findings("let s = \"\(statement)\"").count == 1, "\(statement)")
   }
 
   @Test
-  func `lower-case statement with a clause word fires`() {
+  func `a bare upper-case keyword does not fire`() {
     let findings = `sql string Tests`.findings(
       """
-      let a = "select name from holder"
-      let b = "  insert into item values (1)"
-      let c = "update item set flag = 1"
+      request.httpMethod = "DELETE"
+      let a = "UPDATE"
+      let b = "SELECT ALL"
+      let c = "PRAGMA"
+      let d = "BEGIN"
+      let e = "DROP x"
+      let f = "INSERT x"
       """
     )
-    #expect(findings.count == 3)
+    #expect(findings.isEmpty)
+  }
+
+  @Test
+  func `prose and lower-case text do not fire`() {
+    let findings = `sql string Tests`.findings(
+      """
+      let a = "Delete from library"
+      let b = "Select documents from the list"
+      let c = "Update the record, then set it aside"
+      let d = "select name from holder"
+      """
+    )
+    #expect(findings.isEmpty)
   }
 
   @Test
@@ -89,7 +122,7 @@ extension `sql string Tests`.`Edge Case` {
   @Test
   func `literal nested in a sql macro interpolation still fires`() {
     let findings = `sql string Tests`.findings(
-      #"let s = #sql("x IN (\(raw("SELECT 1")))")"#
+      #"let s = #sql("x IN (\(raw("SELECT id FROM item")))")"#
     )
     #expect(findings.count == 1)
   }
@@ -114,7 +147,22 @@ extension `sql string Tests`.Exemption {
 
   @Test
   func `near miss: argument of another macro still fires`() {
-    #expect(`sql string Tests`.findings(#"let a = #query("SELECT 1")"#).count == 1)
+    #expect(`sql string Tests`.findings(#"let a = #query("SELECT id FROM item")"#).count == 1)
+  }
+
+  @Test
+  func `a test target is inapplicable`() {
+    let observation = Lint.Rule.`sql string`.observe(
+      Lint.Source.parsed(from: "let s = \"DELETE FROM item\"", file: "Tests/Affairs Tests/Store.Tests.swift"),
+      .warning
+    )
+    #expect(observation.findings.isEmpty)
+    #expect(observation.applicability == .inapplicable)
+  }
+
+  @Test
+  func `near miss: a Tests directory inside a source target still fires`() {
+    #expect(`sql string Tests`.findings("let s = \"DELETE FROM item\"", file: "Sources/X/Tests/a.swift").count == 1)
   }
 }
 

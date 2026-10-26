@@ -12,9 +12,10 @@ extension Lint.SQL.Fragment {
   package static let identifier: Swift::String = "sql fragment"
 
   package static let scope: Swift::String =
-    "This rule checks every `#sql` outside a `… Schema` target: it must be a fragment the builder "
-    + "cannot express, not a whole statement (SELECT, INSERT, UPDATE, DELETE, WITH, CREATE, ALTER, "
-    + "DROP, PRAGMA, REPLACE or BEGIN first), must name no table or column by a quoted identifier, "
+    "This rule checks every `#sql` outside a `… Schema` target and `Tests/`: it must be a fragment the "
+    + "builder cannot express, not a whole statement (an upper-case SELECT … FROM, INSERT INTO, UPDATE … "
+    + "SET, DELETE FROM, WITH … SELECT, CREATE, ALTER or DROP of a table, PRAGMA, REPLACE INTO or BEGIN "
+    + "TRANSACTION first), must name no table or column by a quoted identifier, "
     + "and must interpolate at least one column, table or value. It does not check that the builder "
     + "really cannot express it; `sql registry` asks for that reason."
 
