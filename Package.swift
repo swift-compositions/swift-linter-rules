@@ -63,6 +63,21 @@ let package = Package(
         ),
 
         .library(
+            name: "Linter Rule Build Errors",
+            targets: ["Linter Rule Build Errors"]
+        ),
+
+        .executable(
+            name: "swift-linter-build-errors",
+            targets: ["Linter Build Errors"]
+        ),
+
+        .plugin(
+            name: "Linter Build Errors Plugin",
+            targets: ["Linter Build Errors Plugin"]
+        ),
+
+        .library(
             name: "Linter Rules Test Support",
             targets: ["Linter Rules Test Support"]
         ),
@@ -197,6 +212,35 @@ let package = Package(
         ),
 
         .target(
+            name: "Linter Rule Build Errors",
+            dependencies: [
+                .product(name: "Byte", package: "swift-byte"),
+                .product(name: "Lint", package: "swift-lint"),
+                .target(name: "Linter Rule Scope"),
+                .target(name: "Linter Rule SQL"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
+        .executableTarget(
+            name: "Linter Build Errors",
+            dependencies: [
+                .product(name: "Lint", package: "swift-lint"),
+                .target(name: "Linter Rule Build Errors"),
+            ]
+        ),
+
+        .plugin(
+            name: "Linter Build Errors Plugin",
+            capability: .buildTool(),
+            dependencies: [
+                .target(name: "Linter Build Errors")
+            ],
+            path: "Sources/Linter Build Errors Plugin"
+        ),
+
+        .target(
             name: "Linter Rules Test Support",
             dependencies: [
 
@@ -298,6 +342,14 @@ let package = Package(
                 .target(name: "Linter Rule Suppression"),
                 .target(name: "Linter Rules Test Support"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+
+        .testTarget(
+            name: "Linter Rule Build Errors Tests",
+            dependencies: [
+                .target(name: "Linter Rule Build Errors"),
+                .target(name: "Linter Rules Test Support"),
             ]
         ),
     ],
