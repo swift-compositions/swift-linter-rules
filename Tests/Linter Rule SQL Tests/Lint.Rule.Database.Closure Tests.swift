@@ -72,6 +72,29 @@ extension `database closure type Tests`.Unit {
   }
 
   @Test
+  func `a single return statement does not fire`() {
+    #expect(
+      `database closure type Tests`.findings(
+        """
+        let n = try database.read { db in
+          return try Item.count.fetchOne(db)
+        }
+        """
+      ).isEmpty
+    )
+  }
+
+  @Test
+  func `the edges are sql edge's`() {
+    for edge in Lint.SQL.Edge.edges {
+      let findings = `database closure type Tests`.findings(
+        "let v = try database.\(edge) { db in\n  let n = try Item.count.fetchOne(db)\n  return n\n}"
+      )
+      #expect(findings.count == 1, "\(edge)")
+    }
+  }
+
+  @Test
   func `a closure that returns nothing does not fire`() {
     #expect(
       `database closure type Tests`.findings(

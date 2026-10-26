@@ -22,6 +22,18 @@ extension Lint.Rule {
         expectation: .findings(1)
       ),
       .init(
+        id: "single return statement read",
+        source: """
+          func count() throws -> Int? {
+            try database.read { db in
+              return try Text.count.fetchOne(db)
+            }
+          }
+          """,
+        path: "Controls/DatabaseClosureTypeReturn.swift",
+        expectation: .clean
+      ),
+      .init(
         id: "typed multi-statement read",
         source: """
           func keys() throws -> [Int] {
@@ -61,11 +73,6 @@ package let `database closure type message`: Swift::String =
   + "-> Value in … }`, or make its body one expression. The rule checks that the type is written, not "
   + "that the body is otherwise easy to type-check."
 
-/// The database calls that run a closure on a connection.
-package let `database closure edges`: Set<Swift::String> = [
-  "read", "write", "writeWithoutTransaction", "withRollback", "observe",
-]
-
 internal final class DatabaseClosureVisitor: SyntaxVisitor {
   var closures: [ClosureExprSyntax] = []
 
@@ -75,7 +82,7 @@ internal final class DatabaseClosureVisitor: SyntaxVisitor {
 
   override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
     guard let member = node.calledExpression.as(MemberAccessExprSyntax.self),
-      `database closure edges`.contains(member.declName.baseName.text)
+      Lint.SQL.Edge.edges.contains(member.declName.baseName.text)
     else { return .visitChildren }
     let arguments = node.arguments.compactMap { $0.expression.as(ClosureExprSyntax.self) }
     let trailing = [node.trailingClosure].compactMap { $0 } + node.additionalTrailingClosures.map(\.closure)
@@ -89,8 +96,7 @@ internal final class DatabaseClosureVisitor: SyntaxVisitor {
   static func untyped(_ closure: ClosureExprSyntax) -> Bool {
     guard closure.signature?.returnClause == nil else { return false }
     let statements = closure.statements
-    let single = statements.count == 1 && statements.first?.item.is(ExprSyntax.self) == true
-    guard !single, !statements.isEmpty else { return false }
+    guard statements.count > 1 else { return false }
     let returns = ReturnVisitor()
     returns.walk(statements)
     return returns.found
