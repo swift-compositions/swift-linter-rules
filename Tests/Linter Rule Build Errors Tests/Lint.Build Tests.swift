@@ -35,12 +35,13 @@ extension `build errors Tests` {
   static func run(
     writing files: [Swift::String: Swift::String],
     checking names: [Swift::String],
-    rules: [Lint.Rule.Configuration] = Lint.Rule.Bundle.buildErrors
+    rules: [Lint.Rule.Configuration] = Lint.Rule.Bundle.buildErrors,
+    stamp: Swift::String? = nil
   ) throws(Lint.Source.Fixture.Failure) -> Lint.Build.Outcome {
     let fixture = try Lint.Source.Fixture(files: files)
     let root = fixture.root
     let outcome = Lint.Build.run(
-      arguments: ["--root", root] + names.map { root + "/" + $0 },
+      arguments: ["--root", root] + (stamp.map { ["--stamp", $0] } ?? []) + names.map { root + "/" + $0 },
       rules: rules
     )
     _ = fixture.root
@@ -111,6 +112,35 @@ extension `build errors Tests`.Unit {
   func `arguments are the root and the files`() throws {
     let parsed = try Lint.Build.Arguments.parse(["--root", "/r", "/r/a.swift", "/r/b.swift"])
     #expect(parsed == Lint.Build.Arguments(root: "/r", files: ["/r/a.swift", "/r/b.swift"]))
+  }
+
+  @Test
+  func `a stamp is read when given`() throws {
+    let parsed = try Lint.Build.Arguments.parse(["--root", "/r", "--stamp", "/w/s.swift", "/r/a.swift"])
+    #expect(parsed == Lint.Build.Arguments(root: "/r", files: ["/r/a.swift"], stamp: "/w/s.swift"))
+  }
+
+  @Test
+  func `a stamp without a value is refused`() {
+    #expect(`build errors Tests`.refusal(["--root", "/r", "/r/a.swift", "--stamp"]) == .missing(option: "--stamp"))
+  }
+
+  @Test
+  func `a clean run hands back the stamp and a failed run does not`() throws {
+    let clean = try `build errors Tests`.run(
+      writing: ["A.swift": `build errors Tests`.typed],
+      checking: ["A.swift"],
+      stamp: "/w/s.swift"
+    )
+    #expect(clean.status == 0)
+    #expect(clean.stamp == "/w/s.swift")
+    let failed = try `build errors Tests`.run(
+      writing: ["A.swift": `build errors Tests`.untyped],
+      checking: ["A.swift"],
+      stamp: "/w/s.swift"
+    )
+    #expect(failed.status == 1)
+    #expect(failed.stamp == nil)
   }
 
   @Test

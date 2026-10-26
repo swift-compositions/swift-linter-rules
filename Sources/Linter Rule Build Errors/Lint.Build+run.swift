@@ -33,7 +33,7 @@ extension Lint.Build {
     lines.append(
       "swift-linter-build-errors: \(parsed.files.count) files, \(enabled.count) rules, \(errors) errors"
     )
-    return Outcome(lines: lines, status: errors == 0 ? 0 : 1)
+    return Outcome(lines: lines, status: errors == 0 ? 0 : 1, stamp: errors == 0 ? parsed.stamp : nil)
   }
 
   fileprivate static func check(
