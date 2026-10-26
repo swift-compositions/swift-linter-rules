@@ -21,8 +21,15 @@ extension Lint.SQL.Edge {
     "read", "write", "writeWithoutTransaction", "withRollback", "observe",
   ]
 
+  /// The names a connection argument goes by when the receiver of an execution call is a value, not a type.
+  package static let connections: Swift::Set<Swift::String> = ["db", "database", "connection"]
+
   /// The edge types and the one method each runs statements in: a read's `FetchKeyRequest.fetch(_:)` and a write's
   /// `SQLite.Transaction.run(_:)`.
+  ///
+  /// A conformance is matched by the last component of its name only: `SQLite.Transaction`, `Transaction` and
+  /// `Other.Transaction` all count. A local protocol of that name with a one-parameter `run` is therefore treated as
+  /// an edge; the rule accepts that false negative rather than resolve types it cannot see.
   package static let requests: [Swift::String: Swift::String] = ["FetchKeyRequest": "fetch", "Transaction": "run"]
 
   /// Builder methods: in the receiver of an execution call outside a `… SQL` or `… Schema` target, a statement is
@@ -34,11 +41,14 @@ extension Lint.SQL.Edge {
 
   package static let scope: Swift::String =
     "This rule checks every call of fetchAll, fetchOne, fetchCount, fetchSet, fetchCursor or "
-    + "execute in a library target: it must sit lexically inside a closure passed to a database's "
+    + "execute whose first argument is an unlabelled name and whose receiver is rooted in a type "
+    + "(`Letter.all.execute(db)`) or whose argument is `db`, `database` or `connection` "
+    + "(`statement.execute(db)`): it must sit lexically inside a closure passed to a database's "
     + "read, write, writeWithoutTransaction, withRollback or observe, inside the fetch(_:) of a "
-    + "FetchKeyRequest or the run(_:) of an SQLite.Transaction; and the statement it runs must be named, "
-    + "not built there with where, select, join, order, insert, update or delete. Executable targets, "
-    + "`Hosts/`, tests and `… Schema` targets (migrations) are edges and are not checked."
+    + "FetchKeyRequest or the run(_:) of a type conforming to something named Transaction (matched by "
+    + "that last name only); and the statement it runs must be named, not built there with where, "
+    + "select, join, order, insert, update or delete. Only `Tests/` and `Hosts/` at the package root, "
+    + "`… Schema` targets (migrations) and executable targets (a `main.swift`) are not checked."
 
   package static func observe(
     _ source: borrowing Lint.Source.Parsed,
@@ -59,7 +69,7 @@ extension Lint.SQL.Edge {
         message: "[sql edge]: `\(call.declName.baseName.text)` runs inside `\(declaration)`, "
           + "which is not an edge. \(scope) Fix: make `\(declaration)` return the swift-sql "
           + "statement, and run it where the connection is opened (`database.read { db in "
-          + "try statement.fetchAll(db) }`), in a FetchKeyRequest or SQLite.Transaction, or in a reducer effect."
+          + "try statement.fetchAll(db) }`) or in a FetchKeyRequest's fetch(_:) or SQLite.Transaction's run(_:)."
       )
     }
     if !Lint.Scope.Target.named(source.path, suffix: " SQL") {
@@ -78,10 +88,14 @@ extension Lint.SQL.Edge {
     return Lint.Rule.Observation(findings: findings, coverage: .measured)
   }
 
+  /// The directories, as the first whole segment of a path relative to the package root, that are edges.
+  package static let exempt: Swift::Set<Swift::String> = ["Tests", "Hosts"]
+
+  /// Whether the rule applies to `source`. A deny-list, so an unrecognised path is checked: only a first directory
+  /// in `exempt`, a `… Schema` target and an executable target are not.
   package static func checks(_ source: borrowing Lint.Source.Parsed) -> Swift::Bool {
-    let path = source.path.underlying
-    let components = path.split(separator: "/", omittingEmptySubsequences: true)
-    guard components.first == "Sources" else { return false }
+    let directories = source.path.underlying.split(separator: "/", omittingEmptySubsequences: true).dropLast()
+    if let first = directories.first, exempt.contains(Swift::String(first)) { return false }
     if Lint.Scope.Target.named(source.path, suffix: " Schema") { return false }
     if let root = Lint.Scope.File.root(of: source), let target = Lint.Scope.Target.name(of: source.path),
       Lint.Scope.File.isFile(root + "/Sources/" + target + "/main.swift")
@@ -111,11 +125,36 @@ extension Lint.SQL.Edge {
     return false
   }
 
+  /// The member of `node` when it is a call that plausibly runs SQL: an execution name, a first argument that is an
+  /// unlabelled name, and either a receiver rooted in a type (`Letter.all`, `X.statement`, `Item`) or an argument
+  /// named like a connection. `process.execute()` and `executor.execute(job)` are not executions.
   package static func execution(of node: FunctionCallExprSyntax) -> MemberAccessExprSyntax? {
     guard let member = node.calledExpression.as(MemberAccessExprSyntax.self),
-      executions.contains(member.declName.baseName.text)
+      executions.contains(member.declName.baseName.text),
+      let base = member.base,
+      let first = node.arguments.first, first.label == nil,
+      let argument = first.expression.as(DeclReferenceExprSyntax.self)
     else { return nil }
+    guard isTypeRooted(base) || connections.contains(argument.baseName.text) else { return nil }
     return member
+  }
+
+  /// Whether the receiver chain `expression` starts at an upper-case name, which by convention is a type.
+  fileprivate static func isTypeRooted(_ expression: ExprSyntax) -> Swift::Bool {
+    var current = expression
+    while true {
+      if let access = current.as(MemberAccessExprSyntax.self), let base = access.base {
+        current = base
+      } else if let call = current.as(FunctionCallExprSyntax.self) {
+        current = call.calledExpression
+      } else if let specialized = current.as(GenericSpecializationExprSyntax.self) {
+        current = specialized.expression
+      } else if let reference = current.as(DeclReferenceExprSyntax.self) {
+        return reference.baseName.text.first?.isUppercase == true
+      } else {
+        return false
+      }
+    }
   }
 
   package static func isEdge(_ node: Syntax) -> Swift::Bool {

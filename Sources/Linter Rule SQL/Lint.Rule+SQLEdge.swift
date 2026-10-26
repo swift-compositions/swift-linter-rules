@@ -21,6 +21,22 @@ extension Lint.Rule {
         expectation: .findings(1)
       ),
       .init(
+        id: "sql edge bare filename",
+        source: """
+          func pending(_ db: SQLite.Connection) throws -> [Letter] { try Letter.pending.fetchAll(db) }
+          """,
+        path: "Letter.swift",
+        expectation: .findings(1)
+      ),
+      .init(
+        id: "sql edge execute that runs no statement",
+        source: """
+          func run(_ db: SQLite.Connection) { process.execute(); executor.execute(job) }
+          """,
+        path: "Sources/Controls SQLite/Run.swift",
+        expectation: .clean
+      ),
+      .init(
         id: "sql edge fetch inside a read closure",
         source: """
           extension Library {

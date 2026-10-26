@@ -188,6 +188,34 @@ extension `sql edge Tests`.`Edge Case` {
   func `free function calls named like executions do not fire`() {
     #expect(`sql edge Tests`.findings("func f() { execute(plan) }").isEmpty)
   }
+
+  @Test(arguments: [
+    "process.execute()",
+    "executor.execute(job)",
+    "self.executor.execute(job)",
+    "queue.execute(job, priority: .high)",
+  ])
+  func `an execute that runs no SQL does not fire`(call: Swift::String) {
+    #expect(`sql edge Tests`.findings("func f(_ db: SQLite.Connection) throws { try \(call) }").isEmpty)
+  }
+
+  @Test(arguments: [
+    "try Letter.all.execute(db)",
+    "try X.statement.execute(db)",
+    "try statement.execute(db)",
+    "try deletion.execute(connection)",
+    "try Item.fetchAll(db, sql: text)",
+  ])
+  func `an execution of a statement or on a connection fires`(call: Swift::String) {
+    #expect(`sql edge Tests`.findings("func f(_ db: SQLite.Connection) throws { \(call) }").count == 1)
+  }
+
+  @Test
+  func `the message promises only the edges the rule exempts`() {
+    let message = `sql edge Tests`.findings("func f(db: C) { try? T.all.execute(db) }").first?.message ?? ""
+    #expect(!message.contains("reducer"))
+    #expect(message.contains("Transaction"))
+  }
 }
 
 extension `sql edge Tests`.Exemption {
@@ -214,6 +242,20 @@ extension `sql edge Tests`.Exemption {
     let observation = Lint.Rule.`sql edge`.observe(fixture.parsed("Sources/db/Command.swift"), .warning)
     #expect(observation.findings.isEmpty)
     #expect(observation.applicability == .inapplicable)
+  }
+
+  @Test(arguments: [
+    "Letter.swift",
+    "Library/Letter.swift",
+    "Sources/Affairs/Tests/Letter.swift",
+    "Sources/Affairs/Hosts/Letter.swift",
+    "TestsKit/Letter.swift",
+    "Sources/Schema/Letter.swift",
+    "Sources/Affairs Schemas/Letter.swift",
+  ])
+  func `near miss: every other path fires, a bare filename too`(file: Swift::String) {
+    let findings = `sql edge Tests`.findings("func f(_ db: C) throws { try T.all.execute(db) }", file: file)
+    #expect(findings.count == 1, "\(file)")
   }
 }
 
