@@ -48,11 +48,11 @@ extension Lint.Rule {
 }
 
 package let `sql label message`: Swift::String =
-  "[sql label]: checks every call argument labelled `sql:`. An `sql:` argument hands raw SQL "
-  + "text to an executor, outside swift-sql's typed statements and the schema. Fix: express the "
-  + "statement with swift-sql (`@Table` query builders and `@Selection` rows) and execute the typed "
-  + "statement; a fragment the builders cannot express yet is a `#sql` site in the `… Schema` target "
-  + "or listed in `Lint.SQL.Exceptions`."
+  "[sql label]: checks every call argument labelled `sql:` outside `Tests/`; it has no exemption list. "
+  + "An `sql:` argument hands raw SQL text to an executor, outside swift-sql's typed statements and the "
+  + "schema. Fix: express the statement with swift-sql (`@Table` query builders and `@Selection` rows) "
+  + "and execute the typed statement; a fragment the builders cannot express yet becomes a `#sql` site, "
+  + "which `sql fragment` and `sql registry` govern."
 
 internal final class SQLLabelVisitor: SyntaxVisitor {
   var labels: [TokenSyntax] = []

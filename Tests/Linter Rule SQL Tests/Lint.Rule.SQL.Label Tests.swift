@@ -71,11 +71,23 @@ extension `sql label Tests`.`Edge Case` {
     #expect(`sql label Tests`.findings("run(sql: x)", file: "Test.swift").count == 1)
   }
 
+  @Test(arguments: ["Sources/X/Tests/a.swift", "TestsKit/a.swift", "Sources/Tests/a.swift"])
+  func `near miss: a Tests segment that is not the first directory still fires`(file: Swift::String) {
+    #expect(`sql label Tests`.findings("run(sql: x)", file: file).count == 1, "\(file)")
+  }
+
   @Test
   func `message states what it checks and the fix`() {
     let message = `sql label Tests`.findings("run(sql: x)").first?.message ?? ""
     #expect(message.contains("checks every call argument labelled `sql:`"))
     #expect(message.contains("Fix:"))
+  }
+
+  @Test
+  func `message names no exception list it does not consult`() {
+    let message = `sql label Tests`.findings("run(sql: x)").first?.message ?? ""
+    #expect(!message.contains("Lint.SQL.Exceptions"))
+    #expect(message.contains("no exemption list"))
   }
 }
 
