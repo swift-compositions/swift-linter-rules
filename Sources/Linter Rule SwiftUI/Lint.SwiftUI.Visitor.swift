@@ -117,7 +117,9 @@ extension Lint.SwiftUI {
     package override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
       guard inScope else { return .visitChildren }
       if Lint.SwiftUI.Expression.isWithAnimation(node) {
-        hit(node, .withAnimation, "`withAnimation` call")
+        if !Lint.SwiftUI.Expression.animatesStoreSends(node) {
+          hit(node, .withAnimation, "`withAnimation` call")
+        }
         return .visitChildren
       }
       let callee = node.calledExpression
@@ -153,13 +155,11 @@ extension Lint.SwiftUI {
       let closure = node.trailingClosure != nil
       if name == "animation" {
         if Lint.SwiftUI.Expression.isBinding(member.base), arguments.count <= 1, !closure {
-          hit(node, .animationModifier, "`Binding.animation(_:)`")
+          if !Lint.SwiftUI.Expression.isStoreBinding(member.base) {
+            hit(node, .animationModifier, "`Binding.animation(_:)` on a binding not rooted at `$store`")
+          }
         } else if !closure, arguments.count == 1, arguments[0].label == nil {
           hit(node, .animationModifier, "`.animation(_:)`")
-        } else if !closure, arguments.count == 2, arguments[0].label == nil,
-          arguments[1].label?.text == "value"
-        {
-          hit(node, .animationModifier, "`.animation(_:value:)`")
         }
         return
       }

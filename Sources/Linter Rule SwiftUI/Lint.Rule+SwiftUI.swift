@@ -13,12 +13,25 @@ extension Lint.Rule {
           struct Row: View {
             let store: StoreOf<Feature>
             var body: some View {
-              Button("Flag") { withAnimation { store.send(.flagTapped) } }
+              Button("Flag") { withAnimation { flagged.toggle() } }
             }
           }
           """,
         path: "Controls/WithAnimation.swift",
         expectation: .findings(1)
+      ),
+      .init(
+        id: "with animation around a store send",
+        source: """
+          struct Row: View {
+            let store: StoreOf<Feature>
+            var body: some View {
+              Button("Select All") { withAnimation { store.send(.selectAllButtonTapped) } }
+            }
+          }
+          """,
+        path: "Controls/WithAnimationSend.swift",
+        expectation: .clean
       ),
       .init(
         id: "with animation outside view",
@@ -34,11 +47,12 @@ extension Lint.Rule {
     observe: Lint.SwiftUI.observe(
       .withAnimation,
       identifier: "with animation",
-      message: "This rule checks for `withAnimation` calls \(Lint.SwiftUI.scope). A view does "
-        + "not drive animation imperatively. Fix: send the action (`store.send(.case)`); a change "
-        + "that comes from the database animates through the feature's `Observing(...).animation()`, "
-        + "other state animates through the feature (TCA26); the view declares only `.transition`, "
-        + "`.contentTransition` and `.symbolEffect`."
+      message: "This rule checks for `withAnimation` calls \(Lint.SwiftUI.scope) whose body is "
+        + "anything other than `store.send(...)` calls. `withAnimation { store.send(.case) }` is how "
+        + "a button animates state that never touches the database (coenttb-app A3); whether the "
+        + "action writes the database (A2) is not checked. Fix: animate only store sends, and let a "
+        + "change that comes from the database animate through the feature's "
+        + "`Observing(...).animation()`."
     )
   )
 
@@ -47,7 +61,21 @@ extension Lint.Rule {
     default: .warning,
     controls: [
       .init(
-        id: "animation modifier value and binding",
+        id: "animation modifier unscoped and non-store binding",
+        source: """
+          struct Row: View {
+            @Bindable var store: StoreOf<Feature>
+            var body: some View {
+              Toggle("Flag", isOn: $model.flagged.animation())
+                .animation(.default)
+            }
+          }
+          """,
+        path: "Controls/AnimationModifier.swift",
+        expectation: .findings(2)
+      ),
+      .init(
+        id: "animation modifier value and store binding",
         source: """
           struct Row: View {
             @Bindable var store: StoreOf<Feature>
@@ -57,8 +85,8 @@ extension Lint.Rule {
             }
           }
           """,
-        path: "Controls/AnimationModifier.swift",
-        expectation: .findings(2)
+        path: "Controls/AnimationModifierScoped.swift",
+        expectation: .clean
       ),
       .init(
         id: "animation modifier transition",
@@ -74,11 +102,12 @@ extension Lint.Rule {
     observe: Lint.SwiftUI.observe(
       .animationModifier,
       identifier: "animation modifier",
-      message: "This rule checks for `.animation(_:value:)`, `.animation(_:)` and "
-        + "`Binding.animation(_:)` (`$x.animation(…)`) \(Lint.SwiftUI.scope). Fix: remove it; the "
-        + "feature owns animation (`Observing(...).animation()` for database changes, TCA26 for "
-        + "state that never touches the database), a binding sends its action unanimated, and the "
-        + "view keeps only `.transition`, `.contentTransition` and `.symbolEffect`."
+      message: "This rule checks for the unscoped `.animation(_:)` and for `Binding.animation(_:)` "
+        + "on a binding not rooted at `$store` \(Lint.SwiftUI.scope). The coenttb-app A3 forms, "
+        + "`$store.x.animation()` and `.animation(_:value:)`, are admitted; whether the state "
+        + "they animate writes the database (A2) is not checked. Fix: scope the animation with "
+        + "`.animation(_:value:)` on the subtree whose look depends on the value, or animate the "
+        + "store binding."
     )
   )
 

@@ -85,8 +85,8 @@ Each pack ships as its own SwiftPM product. Activate per-rule via the
 | `Linter Rule SQL` | `` `sql edge` `` | `fetchAll`, `fetchOne`, `fetchCount`, `fetchSet`, `fetchCursor` or `execute` in a library target outside a database's `read`/`write`/`writeWithoutTransaction`/`withRollback`/`observe` closure or a `FetchKeyRequest`'s `fetch(_:)` (swift-institute/Issues#177) |
 | `Linter Rule SQL` | `` `grdb import` `` | `import GRDB` in any form, and manifest strings naming the GRDB.swift package; enable everywhere except swift-sqlite |
 | `Linter Rule SQL` | `` `database closure type` `` | A closure passed to `read`, `write`, `writeWithoutTransaction`, `withRollback` or `observe` that has more than one statement, returns a value and does not state its result type: inferring it from several returns is where the compiler hung on an unresolved name (swift-institute/Issues#181). Part of `Lint.Rule.Bundle.buildErrors` |
-| `Linter Rule SwiftUI` | `` `with animation` `` | `withAnimation` in `View` conformers and their extensions |
-| `Linter Rule SwiftUI` | `` `animation modifier` `` | `.animation(_:value:)`, `.animation(_:)`, `Binding.animation(_:)` in views |
+| `Linter Rule SwiftUI` | `` `with animation` `` | `withAnimation` in `View` conformers and their extensions, unless its body is only `store.send(...)` calls (coenttb-app A3) |
+| `Linter Rule SwiftUI` | `` `animation modifier` `` | `.animation(_:)` and `Binding.animation(_:)` on a binding not rooted at `$store`, in views; `.animation(_:value:)` and `$store.x.animation()` are admitted (coenttb-app A3) |
 | `Linter Rule SwiftUI` | `` `state identity` `` | `.id(_:)` whose argument is not a literal or static member |
 | `Linter Rule SwiftUI` | `` `toolbar hidden` `` | `.hidden()` inside `toolbar { }`, `ToolbarItem`, `ToolbarItemGroup` (swift-institute/Issues#153) |
 | `Linter Rule SwiftUI` | `` `view state` `` | `@State`, `@StateObject`, `@ObservedObject`, `@AppStorage`, `@SceneStorage`, `@Observable`-class and stored-closure view properties |

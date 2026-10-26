@@ -22,6 +22,31 @@ extension Lint.SwiftUI.Expression {
     return false
   }
 
+  package static func animatesStoreSends(_ call: FunctionCallExprSyntax) -> Swift::Bool {
+    let body =
+      call.trailingClosure ?? call.arguments.last?.expression.as(ClosureExprSyntax.self)
+    guard let body, !body.statements.isEmpty else { return false }
+    return body.statements.allSatisfy { statement in
+      guard let send = statement.item.as(FunctionCallExprSyntax.self),
+        let member = send.calledExpression.as(MemberAccessExprSyntax.self),
+        member.declName.baseName.text == "send",
+        let base = member.base?.trimmedDescription
+      else { return false }
+      return base == "store" || base == "self.store"
+    }
+  }
+
+  package static func isStoreBinding(_ expression: ExprSyntax?) -> Swift::Bool {
+    var current = expression
+    while let member = current?.as(MemberAccessExprSyntax.self) {
+      if member.declName.baseName.text == "$store" {
+        return member.base?.trimmedDescription == "self"
+      }
+      current = member.base
+    }
+    return current?.as(DeclReferenceExprSyntax.self)?.baseName.text == "$store"
+  }
+
   package static func name(of callee: ExprSyntax) -> Swift::String? {
     if let reference = callee.as(DeclReferenceExprSyntax.self) {
       return reference.baseName.text

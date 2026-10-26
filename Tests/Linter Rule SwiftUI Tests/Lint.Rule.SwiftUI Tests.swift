@@ -114,9 +114,34 @@ extension `SwiftUI Tests`.`With Animation` {
   @Test
   func `withAnimation and SwiftUI.withAnimation fire`() {
     let source = `SwiftUI Tests`.view(
-      "Button(\"A\") { withAnimation(.default) { store.send(.a) }; SwiftUI.withAnimation { } }"
+      "Button(\"A\") { withAnimation(.default) { flag.toggle() }; SwiftUI.withAnimation { } }"
     )
     #expect(`SwiftUI Tests`.findings(.`with animation`, source).count == 2)
+  }
+
+  @Test
+  func `withAnimation around store sends is the coenttb-app A3 form and does not fire`() {
+    let source = `SwiftUI Tests`.view(
+      """
+      Button("A") { withAnimation { store.send(.selectAllButtonTapped) } }
+          Button("B") { withAnimation(.snappy) { self.store.send(.a); store.send(.b) } }
+          Button("C") { SwiftUI.withAnimation(.default, { store.send(.c) }) }
+      """
+    )
+    #expect(`SwiftUI Tests`.findings(.`with animation`, source).isEmpty)
+  }
+
+  @Test
+  func `near miss: withAnimation around anything besides store sends fires`() {
+    let source = `SwiftUI Tests`.view(
+      """
+      Button("A") { withAnimation { store.send(.a); flag.toggle() } }
+          Button("B") { withAnimation { model.send(.b) } }
+          Button("C") { withAnimation { _ = store.send(.c) } }
+          Button("D") { withAnimation { store.state.value = 1 } }
+      """
+    )
+    #expect(`SwiftUI Tests`.findings(.`with animation`, source).count == 4)
   }
 
   @Test
@@ -128,7 +153,7 @@ extension `SwiftUI Tests`.`With Animation` {
 
 extension `SwiftUI Tests`.`Animation Modifier` {
   @Test
-  func `animation forms fire`() {
+  func `unscoped animation and animated non-store bindings fire`() {
     let source = `SwiftUI Tests`.view(
       """
       Text("A")
@@ -138,7 +163,33 @@ extension `SwiftUI Tests`.`Animation Modifier` {
           Toggle("C", isOn: $flag.animation(.easeIn))
       """
     )
-    #expect(`SwiftUI Tests`.findings(.`animation modifier`, source).count == 4)
+    #expect(`SwiftUI Tests`.findings(.`animation modifier`, source).count == 2)
+  }
+
+  @Test
+  func `the coenttb-app A3 forms do not fire`() {
+    let source = `SwiftUI Tests`.view(
+      """
+      Text("A")
+            .animation(.default, value: store.isSelecting)
+          Toggle("B", isOn: $store.flag.animation())
+          Toggle("C", isOn: $store.filter.isActive.animation(.snappy))
+          TextField("D", text: self.$store.query.animation())
+      """
+    )
+    #expect(`SwiftUI Tests`.findings(.`animation modifier`, source).isEmpty)
+  }
+
+  @Test
+  func `near miss: a binding not rooted at the store still fires`() {
+    let source = `SwiftUI Tests`.view(
+      """
+      Toggle("A", isOn: $model.flag.animation())
+          Toggle("B", isOn: $storeCopy.flag.animation())
+          Toggle("C", isOn: other.$store.flag.animation())
+      """
+    )
+    #expect(`SwiftUI Tests`.findings(.`animation modifier`, source).count == 3)
   }
 
   @Test
