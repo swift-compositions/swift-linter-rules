@@ -4,16 +4,14 @@ import Testing
 
 @testable import Linter_Rule_SQL
 
-extension Lint.Rule {
-  @Suite
-  struct `sql fragment Tests` {
-    @Suite struct Unit {}
-    @Suite struct Exemption {}
-    @Suite struct Integration {}
-  }
+@Suite
+struct `sql fragment Tests` {
+  @Suite struct Unit {}
+  @Suite struct Exemption {}
+  @Suite struct Integration {}
 }
 
-extension Lint.Rule.`sql fragment Tests` {
+extension `sql fragment Tests` {
   static func findings(
     _ source: Swift::String,
     file: Swift::String = "Sources/Affairs SQLite/Library+SQLite.swift"
@@ -22,7 +20,7 @@ extension Lint.Rule.`sql fragment Tests` {
   }
 }
 
-extension Lint.Rule.`sql fragment Tests`.Unit {
+extension `sql fragment Tests`.Unit {
   @Test(arguments: [
     #"let a = #sql("SELECT count(*) FROM \(Item.self)", as: Int.self)"#,
     #"let b = #sql("DELETE FROM \(Item.self)")"#,
@@ -30,7 +28,7 @@ extension Lint.Rule.`sql fragment Tests`.Unit {
     "let d = #sql(\n  \"\"\"\n  WITH \\(Library.letters)\n  SELECT 1\n  \"\"\"\n)",
   ])
   func `whole statements fire`(source: Swift::String) {
-    let findings = Lint.Rule.`sql fragment Tests`.findings(source)
+    let findings = `sql fragment Tests`.findings(source)
     #expect(findings.count == 1)
     #expect(findings.first?.message.contains("whole statement") == true)
   }
@@ -41,14 +39,14 @@ extension Lint.Rule.`sql fragment Tests`.Unit {
     "let c = #sql(\n  \"\"\"\n  coalesce(\"listed\".\"person\", '') || \\(x)\n  \"\"\"\n)",
   ])
   func `quoted identifiers fire`(source: Swift::String) {
-    let findings = Lint.Rule.`sql fragment Tests`.findings(source)
+    let findings = `sql fragment Tests`.findings(source)
     #expect(findings.count == 1)
     #expect(findings.first?.message.contains("quoted identifier") == true)
   }
 
   @Test
   func `a fragment without interpolation fires`() {
-    let findings = Lint.Rule.`sql fragment Tests`.findings(#"let all = #sql("1", as: Bool.self)"#)
+    let findings = `sql fragment Tests`.findings(#"let all = #sql("1", as: Bool.self)"#)
     #expect(findings.count == 1)
     #expect(findings.first?.message.contains("interpolates nothing") == true)
   }
@@ -59,11 +57,11 @@ extension Lint.Rule.`sql fragment Tests`.Unit {
     #"let c = #sql("strftime('%Y', \(Letter.columns.date))", as: String.self)"#,
   ])
   func `interpolated fragments are clean`(source: Swift::String) {
-    #expect(Lint.Rule.`sql fragment Tests`.findings(source).isEmpty)
+    #expect(`sql fragment Tests`.findings(source).isEmpty)
   }
 }
 
-extension Lint.Rule.`sql fragment Tests`.Exemption {
+extension `sql fragment Tests`.Exemption {
   @Test
   func `schema target is inapplicable`() {
     let observation = Lint.Rule.`sql fragment`.observe(
@@ -75,7 +73,7 @@ extension Lint.Rule.`sql fragment Tests`.Exemption {
   }
 }
 
-extension Lint.Rule.`sql fragment Tests`.Integration {
+extension `sql fragment Tests`.Integration {
   @Test
   func `controls hold`() {
     let outcomes = Lint.Rule.`sql fragment`.outcomes()

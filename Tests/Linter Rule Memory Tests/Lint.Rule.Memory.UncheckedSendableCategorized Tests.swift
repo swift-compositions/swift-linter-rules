@@ -6,16 +6,14 @@ import Testing
 
 @testable import Linter_Rule_Memory
 
-extension Lint.Rule {
-    @Suite
-    struct `unchecked sendable categorization Tests` {
-        @Suite struct Unit {}
-        @Suite struct `Edge Case` {}
-        @Suite struct Integration {}
-    }
+@Suite
+struct `unchecked sendable categorization Tests` {
+    @Suite struct Unit {}
+    @Suite struct `Edge Case` {}
+    @Suite struct Integration {}
 }
 
-extension Lint.Rule.`unchecked sendable categorization Tests` {
+extension `unchecked sendable categorization Tests` {
     static func findings(
         in source: Swift::String,
         file: Swift::String = "Sources/X/Test.swift"
@@ -25,14 +23,14 @@ extension Lint.Rule.`unchecked sendable categorization Tests` {
     }
 }
 
-extension Lint.Rule.`unchecked sendable categorization Tests`.Unit {
+extension `unchecked sendable categorization Tests`.Unit {
 
     @Test
     func `unchecked Sendable without unsafe is permitted`() {
         let source = """
             final class Foo: @unchecked Sendable {}
             """
-        let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
+        let findings = `unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -41,7 +39,7 @@ extension Lint.Rule.`unchecked sendable categorization Tests`.Unit {
         let source = """
             final class Foo: @unsafe @unchecked Sendable {}
             """
-        let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
+        let findings = `unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -50,7 +48,7 @@ extension Lint.Rule.`unchecked sendable categorization Tests`.Unit {
         let source = """
             struct Foo: Sendable {}
             """
-        let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
+        let findings = `unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -59,7 +57,7 @@ extension Lint.Rule.`unchecked sendable categorization Tests`.Unit {
         let source = """
             extension Bar: @unchecked Sendable {}
             """
-        let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
+        let findings = `unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -68,7 +66,7 @@ extension Lint.Rule.`unchecked sendable categorization Tests`.Unit {
         let source = """
             extension Bar: @unsafe @unchecked Sendable {}
             """
-        let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
+        let findings = `unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -77,7 +75,7 @@ extension Lint.Rule.`unchecked sendable categorization Tests`.Unit {
         let source = """
             actor Foo: @unchecked Sendable {}
             """
-        let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
+        let findings = `unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -88,7 +86,7 @@ extension Lint.Rule.`unchecked sendable categorization Tests`.Unit {
             @unsafe
             public struct UnsafeWrapper: @unchecked Sendable {}
             """
-        let findings = Lint.Rule.`unchecked sendable categorization Tests`.findings(in: source)
+        let findings = `unchecked sendable categorization Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

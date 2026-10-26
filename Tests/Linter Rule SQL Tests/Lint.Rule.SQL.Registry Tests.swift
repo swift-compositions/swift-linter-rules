@@ -4,18 +4,16 @@ import Testing
 
 @testable import Linter_Rule_SQL
 
-extension Lint.Rule {
-  @Suite
-  struct `sql registry Tests` {
-    @Suite struct Unit {}
-    @Suite struct `Edge Case` {}
-    @Suite struct Exemption {}
-    @Suite struct Registry {}
-    @Suite struct Integration {}
-  }
+@Suite
+struct `sql registry Tests` {
+  @Suite struct Unit {}
+  @Suite struct `Edge Case` {}
+  @Suite struct Exemption {}
+  @Suite struct Registry {}
+  @Suite struct Integration {}
 }
 
-extension Lint.Rule.`sql registry Tests` {
+extension `sql registry Tests` {
   static let library = """
     extension Library {
       func conditions() -> [SQLQueryExpression<Bool>] {
@@ -35,10 +33,10 @@ extension Lint.Rule.`sql registry Tests` {
   }
 }
 
-extension Lint.Rule.`sql registry Tests`.Unit {
+extension `sql registry Tests`.Unit {
   @Test
   func `unlisted sites fire once each`() {
-    let findings = Lint.Rule.`sql registry Tests`.findings(Lint.Rule.`sql registry Tests`.library)
+    let findings = `sql registry Tests`.findings(`sql registry Tests`.library)
     #expect(findings.count == 3)
     #expect(findings[0].message.contains("`Library.conditions()`"))
     #expect(findings[2].message.contains("`Library.pending`"))
@@ -46,8 +44,8 @@ extension Lint.Rule.`sql registry Tests`.Unit {
 
   @Test
   func `listed sites with matching counts are clean`() {
-    let findings = Lint.Rule.`sql registry Tests`.findings(
-      Lint.Rule.`sql registry Tests`.library,
+    let findings = `sql registry Tests`.findings(
+      `sql registry Tests`.library,
       exceptions: [
         .init(
           file: "Sources/Affairs SQLite/Library.swift",
@@ -67,8 +65,8 @@ extension Lint.Rule.`sql registry Tests`.Unit {
 
   @Test
   func `site count mismatch fires`() {
-    let findings = Lint.Rule.`sql registry Tests`.findings(
-      Lint.Rule.`sql registry Tests`.library,
+    let findings = `sql registry Tests`.findings(
+      `sql registry Tests`.library,
       exceptions: [
         .init(file: "Sources/Affairs SQLite/Library.swift", declaration: "Library.conditions()", reason: "r"),
         .init(file: "Sources/Affairs SQLite/Library.swift", declaration: "Library.pending", reason: "r"),
@@ -80,7 +78,7 @@ extension Lint.Rule.`sql registry Tests`.Unit {
 
   @Test
   func `stale declaration entry fires`() {
-    let findings = Lint.Rule.`sql registry Tests`.findings(
+    let findings = `sql registry Tests`.findings(
       "struct Library {}",
       exceptions: [
         .init(file: "Sources/Affairs SQLite/Library.swift", declaration: "Library.gone()", reason: "r")
@@ -92,13 +90,13 @@ extension Lint.Rule.`sql registry Tests`.Unit {
 
   @Test
   func `message says it checks presence not soundness`() {
-    let message = Lint.Rule.`sql registry Tests`.findings("let x = #sql(\"1\")").first?.message ?? ""
+    let message = `sql registry Tests`.findings("let x = #sql(\"1\")").first?.message ?? ""
     #expect(message.contains("does not check that the reason is sound"))
     #expect(message.contains("Fix:"))
   }
 }
 
-extension Lint.Rule.`sql registry Tests`.Exemption {
+extension `sql registry Tests`.Exemption {
   @Test
   func `schema target is exempt and inapplicable`() {
     let observation = Lint.Rule.`sql registry`(exceptions: .none).observe(
@@ -121,7 +119,7 @@ extension Lint.Rule.`sql registry Tests`.Exemption {
 
   @Test
   func `schema target in a nested directory is exempt`() {
-    let findings = Lint.Rule.`sql registry Tests`.findings(
+    let findings = `sql registry Tests`.findings(
       "let v = #sql(\"1\")",
       file: "Sources/Affairs Schema/Versions/V1.swift"
     )
@@ -140,14 +138,14 @@ extension Lint.Rule.`sql registry Tests`.Exemption {
     "Sources/ Schema/V1.swift",
   ])
   func `near misses still fire`(file: Swift::String) {
-    #expect(Lint.Rule.`sql registry Tests`.findings("let v = #sql(\"1\")", file: file).count == 1)
+    #expect(`sql registry Tests`.findings("let v = #sql(\"1\")", file: file).count == 1)
   }
 }
 
-extension Lint.Rule.`sql registry Tests`.`Edge Case` {
+extension `sql registry Tests`.`Edge Case` {
   @Test
   func `top-level and nested declaration identities`() {
-    let findings = Lint.Rule.`sql registry Tests`.findings(
+    let findings = `sql registry Tests`.findings(
       """
       let a = #sql("1")
       enum Outer {
@@ -167,7 +165,7 @@ extension Lint.Rule.`sql registry Tests`.`Edge Case` {
 
   @Test
   func `entry for another file does not cover the site`() {
-    let findings = Lint.Rule.`sql registry Tests`.findings(
+    let findings = `sql registry Tests`.findings(
       "let a = #sql(\"1\")",
       exceptions: [.init(file: "Sources/Other/Library.swift", declaration: "a", reason: "r")]
     )
@@ -175,7 +173,7 @@ extension Lint.Rule.`sql registry Tests`.`Edge Case` {
   }
 }
 
-extension Lint.Rule.`sql registry Tests`.Registry {
+extension `sql registry Tests`.Registry {
   static let manifest = "// swift-tools-version: 6.4\nimport PackageDescription\n"
 
   static func registryFindings(_ exceptions: Lint.SQL.Exceptions) throws -> [Diagnostic.Record] {
@@ -261,7 +259,7 @@ extension Lint.Rule.`sql registry Tests`.Registry {
   }
 }
 
-extension Lint.Rule.`sql registry Tests`.Integration {
+extension `sql registry Tests`.Integration {
   @Test
   func `controls hold`() {
     let outcomes = Lint.Rule.`sql registry`(exceptions: .none).outcomes()

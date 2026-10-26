@@ -6,27 +6,25 @@ import Testing
 
 @testable import Linter_Rule_Idiom
 
-extension Lint.Rule {
-    @Suite
-    struct `redundant refinement Tests` {
-        @Suite struct Unit {}
-        @Suite struct `Edge Case` {}
-        @Suite struct Integration {}
-    }
+@Suite
+struct `redundant refinement Tests` {
+    @Suite struct Unit {}
+    @Suite struct `Edge Case` {}
+    @Suite struct Integration {}
 }
 
-extension Lint.Rule.`redundant refinement Tests` {
+extension `redundant refinement Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
         let parsed = Lint.Source.parsed(from: source, file: file)
         return Lint.Rule.`redundant refinement`.observe(parsed, .warning).findings
     }
 }
 
-extension Lint.Rule.`redundant refinement Tests`.Unit {
+extension `redundant refinement Tests`.Unit {
     @Test
     func `Error ampersand Sendable in generic constraint is flagged`() {
         let source = "func f<E: Error & Sendable>(_ e: E) {}"
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
@@ -38,49 +36,49 @@ extension Lint.Rule.`redundant refinement Tests`.Unit {
     @Test
     func `Swift dot Error ampersand Sendable is flagged via leaf name`() {
         let source = "func f<E: Swift.Error & Sendable>(_ e: E) {}"
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `Sendable ampersand Error reverse order is flagged`() {
         let source = "func f<E: Sendable & Error>(_ e: E) {}"
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `Hashable ampersand Equatable is flagged`() {
         let source = "func f<T: Hashable & Equatable>(_ t: T) {}"
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `Comparable ampersand Equatable is flagged`() {
         let source = "func f<T: Comparable & Equatable>(_ t: T) {}"
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `Strideable ampersand Comparable is flagged`() {
         let source = "func f<T: Strideable & Comparable>(_ t: T) {}"
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `BidirectionalCollection ampersand Collection is flagged`() {
         let source = "func f<C: BidirectionalCollection & Collection>(_ c: C) {}"
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `any Error ampersand Sendable existential is flagged`() {
         let source = "func f(_ e: any Error & Sendable) {}"
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -89,7 +87,7 @@ extension Lint.Rule.`redundant refinement Tests`.Unit {
         let source = """
             func f<E>(_ e: E) where E: Error & Sendable {}
             """
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -99,28 +97,28 @@ extension Lint.Rule.`redundant refinement Tests`.Unit {
             func a<E: Error & Sendable>(_ e: E) {}
             func b<T: Hashable & Equatable>(_ t: T) {}
             """
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 2)
     }
 
     @Test
     func `OptionSet ampersand SetAlgebra is flagged via expanded table`() {
         let source = "struct S: OptionSet & SetAlgebra { var rawValue: Int = 0 }"
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `StringProtocol ampersand Collection is flagged via expanded table`() {
         let source = "func f<S: StringProtocol & Collection>(_ s: S) {}"
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `SIMD ampersand Hashable is flagged via expanded table`() {
         let source = "func f<V: SIMD & Hashable>(_ v: V) {}"
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -128,7 +126,7 @@ extension Lint.Rule.`redundant refinement Tests`.Unit {
     func `FixedWidthInteger ampersand Numeric is flagged via expanded table`() {
 
         let source = "func f<I: FixedWidthInteger & Numeric>(_ i: I) {}"
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -137,17 +135,17 @@ extension Lint.Rule.`redundant refinement Tests`.Unit {
         let source = """
             func f<S: ExpressibleByStringLiteral & ExpressibleByUnicodeScalarLiteral>(_ s: S) {}
             """
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.`redundant refinement Tests`.`Edge Case` {
+extension `redundant refinement Tests`.`Edge Case` {
     @Test
     func `unrelated composition Error ampersand Hashable is NOT flagged`() {
 
         let source = "func f<T: Error & Hashable>(_ t: T) {}"
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -155,21 +153,21 @@ extension Lint.Rule.`redundant refinement Tests`.`Edge Case` {
     func `non-Copyable suppression with Sendable is NOT flagged`() {
 
         let source = "struct S: ~Copyable & Sendable {}"
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `bare single conformance is NOT flagged`() {
         let source = "func f<E: Error>(_ e: E) {}"
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `composition in a string literal is NOT flagged`() {
         let source = "let s = \"Error & Sendable\""
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -177,14 +175,14 @@ extension Lint.Rule.`redundant refinement Tests`.`Edge Case` {
     func `three-way composition with one redundant pair flags once`() {
 
         let source = "func f<T: Comparable & Hashable & Equatable>(_ t: T) {}"
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
     @Test
     func `unrelated composition Sendable ampersand Hashable is NOT flagged`() {
         let source = "func f<T: Sendable & Hashable>(_ t: T) {}"
-        let findings = Lint.Rule.`redundant refinement Tests`.findings(in: source)
+        let findings = `redundant refinement Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

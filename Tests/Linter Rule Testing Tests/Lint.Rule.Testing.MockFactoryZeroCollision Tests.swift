@@ -6,16 +6,14 @@ import Testing
 
 @testable import Linter_Rule_Testing
 
-extension Lint.Rule {
-    @Suite
-    struct `mock factory zero collision Tests` {
-        @Suite struct Unit {}
-        @Suite struct `Edge Case` {}
-        @Suite struct Integration {}
-    }
+@Suite
+struct `mock factory zero collision Tests` {
+    @Suite struct Unit {}
+    @Suite struct `Edge Case` {}
+    @Suite struct Integration {}
 }
 
-extension Lint.Rule.`mock factory zero collision Tests` {
+extension `mock factory zero collision Tests` {
 
     static func findings(
         in source: String,
@@ -26,13 +24,13 @@ extension Lint.Rule.`mock factory zero collision Tests` {
     }
 }
 
-extension Lint.Rule.`mock factory zero collision Tests`.Unit {
+extension `mock factory zero collision Tests`.Unit {
     @Test
     func `unsafeBitCast with bare tag is flagged`() {
         let source = """
             let value = unsafeBitCast(tag, to: UnownedJob.self)
             """
-        let findings = Lint.Rule.`mock factory zero collision Tests`.findings(in: source)
+        let findings = `mock factory zero collision Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -41,7 +39,7 @@ extension Lint.Rule.`mock factory zero collision Tests`.Unit {
         let source = """
             let value = unsafeBitCast(tag &+ 1, to: UnownedJob.self)
             """
-        let findings = Lint.Rule.`mock factory zero collision Tests`.findings(in: source)
+        let findings = `mock factory zero collision Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -50,7 +48,7 @@ extension Lint.Rule.`mock factory zero collision Tests`.Unit {
         let source = """
             let value = unsafeBitCast(tag + 1, to: UnownedJob.self)
             """
-        let findings = Lint.Rule.`mock factory zero collision Tests`.findings(in: source)
+        let findings = `mock factory zero collision Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -59,7 +57,7 @@ extension Lint.Rule.`mock factory zero collision Tests`.Unit {
         let source = """
             let value = makeValue(tag, to: UnownedJob.self)
             """
-        let findings = Lint.Rule.`mock factory zero collision Tests`.findings(in: source)
+        let findings = `mock factory zero collision Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -72,7 +70,7 @@ extension Lint.Rule.`mock factory zero collision Tests`.Unit {
                 }
             }
             """
-        let findings = Lint.Rule.`mock factory zero collision Tests`.findings(in: source)
+        let findings = `mock factory zero collision Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }

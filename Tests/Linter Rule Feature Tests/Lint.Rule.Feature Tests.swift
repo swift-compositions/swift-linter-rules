@@ -4,17 +4,15 @@ import Testing
 
 @testable import Linter_Rule_Feature
 
-extension Lint.Rule {
-  @Suite
-  struct `Feature Tests` {
-    @Suite struct `User Defaults` {}
-    @Suite struct `With Animation` {}
-    @Suite struct Path {}
-    @Suite struct Integration {}
-  }
+@Suite
+struct `Feature Tests` {
+  @Suite struct `User Defaults` {}
+  @Suite struct `With Animation` {}
+  @Suite struct Path {}
+  @Suite struct Integration {}
 }
 
-extension Lint.Rule.`Feature Tests` {
+extension `Feature Tests` {
   static func findings(
     _ rule: Lint.Rule,
     _ source: Swift::String,
@@ -31,7 +29,7 @@ extension Lint.Rule.`Feature Tests` {
     """
 }
 
-extension Lint.Rule.`Feature Tests`.`User Defaults` {
+extension `Feature Tests`.`User Defaults` {
   @Test
   func `user defaults forms fire inside a feature`() {
     let source = """
@@ -40,12 +38,12 @@ extension Lint.Rule.`Feature Tests`.`User Defaults` {
         func f(_ d: UserDefaults) { _ = UserDefaults.standard; @Shared(.appStorage("x")) var x = 0 }
       }
       """
-    #expect(Lint.Rule.`Feature Tests`.findings(.`feature user defaults`, source).count == 4)
+    #expect(`Feature Tests`.findings(.`feature user defaults`, source).count == 4)
   }
 
   @Test
   func `outside a feature does not fire`() {
-    #expect(Lint.Rule.`Feature Tests`.findings(.`feature user defaults`, Lint.Rule.`Feature Tests`.outside).isEmpty)
+    #expect(`Feature Tests`.findings(.`feature user defaults`, `Feature Tests`.outside).isEmpty)
   }
 
   @Test
@@ -54,7 +52,7 @@ extension Lint.Rule.`Feature Tests`.`User Defaults` {
       extension Laurie { @Feature struct Sweep {} }
       extension Laurie.Sweep { func f() { _ = UserDefaults.standard } }
       """
-    #expect(Lint.Rule.`Feature Tests`.findings(.`feature user defaults`, source).count == 1)
+    #expect(`Feature Tests`.findings(.`feature user defaults`, source).count == 1)
   }
 
   @Test
@@ -70,27 +68,27 @@ extension Lint.Rule.`Feature Tests`.`User Defaults` {
   }
 }
 
-extension Lint.Rule.`Feature Tests`.`With Animation` {
+extension `Feature Tests`.`With Animation` {
   @Test
   func `withAnimation fires inside a feature`() {
     let source = "@Feature struct Sweep { func f() { withAnimation(.default) { }; SwiftUI.withAnimation { } } }"
-    #expect(Lint.Rule.`Feature Tests`.findings(.`feature with animation`, source).count == 2)
+    #expect(`Feature Tests`.findings(.`feature with animation`, source).count == 2)
   }
 
   @Test
   func `Observing animation does not fire`() {
     let source = "@Feature struct Sweep { var rows = Observing(query).animation() }"
-    #expect(Lint.Rule.`Feature Tests`.findings(.`feature with animation`, source).isEmpty)
+    #expect(`Feature Tests`.findings(.`feature with animation`, source).isEmpty)
   }
 
   @Test
   func `feature-named attribute lookalikes do not fire`() {
     let source = "@FeatureState struct Sweep { func f() { withAnimation { } } }"
-    #expect(Lint.Rule.`Feature Tests`.findings(.`feature with animation`, source).isEmpty)
+    #expect(`Feature Tests`.findings(.`feature with animation`, source).isEmpty)
   }
 }
 
-extension Lint.Rule.`Feature Tests`.Path {
+extension `Feature Tests`.Path {
   @Test(arguments: [
     "Sources/Laurie Feature/Helper.swift",
     "Sources/Laurie Feature/Nested/Helper.swift",
@@ -98,9 +96,9 @@ extension Lint.Rule.`Feature Tests`.Path {
   ])
   func `every file of a Feature target is in scope`(file: Swift::String) {
     let rule = Lint.Rule.`feature with animation`
-    #expect(Lint.Rule.`Feature Tests`.findings(rule, Lint.Rule.`Feature Tests`.outside, file: file).count == 1)
+    #expect(`Feature Tests`.findings(rule, `Feature Tests`.outside, file: file).count == 1)
     let defaults = Lint.Rule.`feature user defaults`
-    #expect(Lint.Rule.`Feature Tests`.findings(defaults, Lint.Rule.`Feature Tests`.outside, file: file).count == 2)
+    #expect(`Feature Tests`.findings(defaults, `Feature Tests`.outside, file: file).count == 2)
   }
 
   @Test(arguments: [
@@ -115,17 +113,17 @@ extension Lint.Rule.`Feature Tests`.Path {
   ])
   func `near misses outside a Feature target do not fire`(file: Swift::String) {
     let rule = Lint.Rule.`feature with animation`
-    #expect(Lint.Rule.`Feature Tests`.findings(rule, Lint.Rule.`Feature Tests`.outside, file: file).isEmpty)
+    #expect(`Feature Tests`.findings(rule, `Feature Tests`.outside, file: file).isEmpty)
   }
 
   @Test
   func `bare filename feature type still fires`() {
     let source = "@Feature struct Sweep { func f() { withAnimation { } } }"
-    #expect(Lint.Rule.`Feature Tests`.findings(.`feature with animation`, source, file: "Sweep.swift").count == 1)
+    #expect(`Feature Tests`.findings(.`feature with animation`, source, file: "Sweep.swift").count == 1)
   }
 }
 
-extension Lint.Rule.`Feature Tests`.Integration {
+extension `Feature Tests`.Integration {
   @Test
   func `controls hold for every rule`() {
     for rule in Lint.Rule.Bundle.feature.map(\.rule) {

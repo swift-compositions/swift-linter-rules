@@ -4,22 +4,20 @@ import Testing
 
 @testable import Linter_Rule_SwiftUI
 
-extension Lint.Rule {
-  @Suite
-  struct `SwiftUI Tests` {
-    @Suite struct Scope {}
-    @Suite struct `With Animation` {}
-    @Suite struct `Animation Modifier` {}
-    @Suite struct `State Identity` {}
-    @Suite struct `Toolbar Hidden` {}
-    @Suite struct `View State` {}
-    @Suite struct `View Logic` {}
-    @Suite struct Exemption {}
-    @Suite struct Integration {}
-  }
+@Suite
+struct `SwiftUI Tests` {
+  @Suite struct Scope {}
+  @Suite struct `With Animation` {}
+  @Suite struct `Animation Modifier` {}
+  @Suite struct `State Identity` {}
+  @Suite struct `Toolbar Hidden` {}
+  @Suite struct `View State` {}
+  @Suite struct `View Logic` {}
+  @Suite struct Exemption {}
+  @Suite struct Integration {}
 }
 
-extension Lint.Rule.`SwiftUI Tests` {
+extension `SwiftUI Tests` {
   static func findings(
     _ rule: Lint.Rule,
     _ source: Swift::String,
@@ -40,7 +38,7 @@ extension Lint.Rule.`SwiftUI Tests` {
   }
 }
 
-extension Lint.Rule.`SwiftUI Tests`.Scope {
+extension `SwiftUI Tests`.Scope {
   @Test
   func `non-view type does not fire`() {
     let source = """
@@ -48,8 +46,8 @@ extension Lint.Rule.`SwiftUI Tests`.Scope {
         func run() { withAnimation { }; _ = items.filter { $0 }; _ = Date() }
       }
       """
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`with animation`, source).isEmpty)
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`view logic`, source).isEmpty)
+    #expect(`SwiftUI Tests`.findings(.`with animation`, source).isEmpty)
+    #expect(`SwiftUI Tests`.findings(.`view logic`, source).isEmpty)
   }
 
   @Test
@@ -57,7 +55,7 @@ extension Lint.Rule.`SwiftUI Tests`.Scope {
     let source = """
       extension Laurie { struct View: SwiftUI.View { var body: some SwiftUI.View { Text("A").onAppear { } } } }
       """
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`view logic`, source).count == 1)
+    #expect(`SwiftUI Tests`.findings(.`view logic`, source).count == 1)
   }
 
   @Test
@@ -66,7 +64,7 @@ extension Lint.Rule.`SwiftUI Tests`.Scope {
       extension Laurie { struct Row: View { var body: some View { header } } }
       extension Laurie.Row { var header: some View { Text(Date().description) } }
       """
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`view logic`, source).count == 1)
+    #expect(`SwiftUI Tests`.findings(.`view logic`, source).count == 1)
   }
 
   @Test
@@ -74,7 +72,7 @@ extension Lint.Rule.`SwiftUI Tests`.Scope {
     let source = """
       extension Row: View { var body: some View { Text("A").task { } } }
       """
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`view logic`, source).count == 1)
+    #expect(`SwiftUI Tests`.findings(.`view logic`, source).count == 1)
   }
 
   @Test
@@ -85,7 +83,7 @@ extension Lint.Rule.`SwiftUI Tests`.Scope {
         enum Layout { static func sorted(_ x: [Int]) -> [Int] { x.sorted() } }
       }
       """
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`view logic`, source).isEmpty)
+    #expect(`SwiftUI Tests`.findings(.`view logic`, source).isEmpty)
   }
 
   @Test
@@ -107,31 +105,31 @@ extension Lint.Rule.`SwiftUI Tests`.Scope {
 
   @Test
   func `bare filename view still fires`() {
-    let source = Lint.Rule.`SwiftUI Tests`.view("Button(\"A\") { withAnimation { } }")
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`with animation`, source, file: "Screen.swift").count == 1)
+    let source = `SwiftUI Tests`.view("Button(\"A\") { withAnimation { } }")
+    #expect(`SwiftUI Tests`.findings(.`with animation`, source, file: "Screen.swift").count == 1)
   }
 }
 
-extension Lint.Rule.`SwiftUI Tests`.`With Animation` {
+extension `SwiftUI Tests`.`With Animation` {
   @Test
   func `withAnimation and SwiftUI.withAnimation fire`() {
-    let source = Lint.Rule.`SwiftUI Tests`.view(
+    let source = `SwiftUI Tests`.view(
       "Button(\"A\") { withAnimation(.default) { store.send(.a) }; SwiftUI.withAnimation { } }"
     )
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`with animation`, source).count == 2)
+    #expect(`SwiftUI Tests`.findings(.`with animation`, source).count == 2)
   }
 
   @Test
   func `withTransaction does not fire`() {
-    let source = Lint.Rule.`SwiftUI Tests`.view("Button(\"A\") { withTransaction(t) { } }")
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`with animation`, source).isEmpty)
+    let source = `SwiftUI Tests`.view("Button(\"A\") { withTransaction(t) { } }")
+    #expect(`SwiftUI Tests`.findings(.`with animation`, source).isEmpty)
   }
 }
 
-extension Lint.Rule.`SwiftUI Tests`.`Animation Modifier` {
+extension `SwiftUI Tests`.`Animation Modifier` {
   @Test
   func `animation forms fire`() {
-    let source = Lint.Rule.`SwiftUI Tests`.view(
+    let source = `SwiftUI Tests`.view(
       """
       Text("A")
             .animation(.default, value: store.count)
@@ -140,12 +138,12 @@ extension Lint.Rule.`SwiftUI Tests`.`Animation Modifier` {
           Toggle("C", isOn: $flag.animation(.easeIn))
       """
     )
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`animation modifier`, source).count == 4)
+    #expect(`SwiftUI Tests`.findings(.`animation modifier`, source).count == 4)
   }
 
   @Test
   func `allowed transitions and closure form do not fire`() {
-    let source = Lint.Rule.`SwiftUI Tests`.view(
+    let source = `SwiftUI Tests`.view(
       """
       Text("A")
             .transition(.opacity)
@@ -155,38 +153,38 @@ extension Lint.Rule.`SwiftUI Tests`.`Animation Modifier` {
           Text(store.title.animation)
       """
     )
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`animation modifier`, source).isEmpty)
+    #expect(`SwiftUI Tests`.findings(.`animation modifier`, source).isEmpty)
   }
 }
 
-extension Lint.Rule.`SwiftUI Tests`.`State Identity` {
+extension `SwiftUI Tests`.`State Identity` {
   @Test
   func `state-driven identity fires`() {
-    let source = Lint.Rule.`SwiftUI Tests`.view(
+    let source = `SwiftUI Tests`.view(
       "Text(\"A\").id(store.document).id(selection).id(\"row-\\(store.id)\")"
     )
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`state identity`, source).count == 3)
+    #expect(`SwiftUI Tests`.findings(.`state identity`, source).count == 3)
   }
 
   @Test
   func `literal and static identity does not fire`() {
-    let source = Lint.Rule.`SwiftUI Tests`.view(
+    let source = `SwiftUI Tests`.view(
       "Text(\"A\").id(\"header\").id(1).id(-1).id(true).id(Anchor.top).id(Self.anchor).id(.bottom).id(Laurie.Anchor.top)"
     )
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`state identity`, source).isEmpty)
+    #expect(`SwiftUI Tests`.findings(.`state identity`, source).isEmpty)
   }
 
   @Test
   func `ForEach id label does not fire`() {
-    let source = Lint.Rule.`SwiftUI Tests`.view("ForEach(store.rows, id: \\.id) { Text($0.title) }")
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`state identity`, source).isEmpty)
+    let source = `SwiftUI Tests`.view("ForEach(store.rows, id: \\.id) { Text($0.title) }")
+    #expect(`SwiftUI Tests`.findings(.`state identity`, source).isEmpty)
   }
 }
 
-extension Lint.Rule.`SwiftUI Tests`.`Toolbar Hidden` {
+extension `SwiftUI Tests`.`Toolbar Hidden` {
   @Test
   func `hidden inside toolbar builders fires`() {
-    let source = Lint.Rule.`SwiftUI Tests`.view(
+    let source = `SwiftUI Tests`.view(
       """
       List { }
             .toolbar { Button("A") { }.hidden() }
@@ -194,22 +192,22 @@ extension Lint.Rule.`SwiftUI Tests`.`Toolbar Hidden` {
           ToolbarItemGroup(placement: .primaryAction) { Text("C").hidden() }
       """
     )
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`toolbar hidden`, source).count == 3)
+    #expect(`SwiftUI Tests`.findings(.`toolbar hidden`, source).count == 3)
   }
 
   @Test
   func `hidden outside a toolbar and visibility argument do not fire`() {
-    let source = Lint.Rule.`SwiftUI Tests`.view(
+    let source = `SwiftUI Tests`.view(
       """
       Text("A").hidden()
           List { }.toolbar(.hidden, for: .navigationBar).toolbarVisibility(.hidden)
       """
     )
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`toolbar hidden`, source).isEmpty)
+    #expect(`SwiftUI Tests`.findings(.`toolbar hidden`, source).isEmpty)
   }
 }
 
-extension Lint.Rule.`SwiftUI Tests`.`View State` {
+extension `SwiftUI Tests`.`View State` {
   @Test
   func `state wrappers fire`() {
     let source = """
@@ -223,7 +221,7 @@ extension Lint.Rule.`SwiftUI Tests`.`View State` {
         var body: some View { Text("A") }
       }
       """
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`view state`, source).count == 6)
+    #expect(`SwiftUI Tests`.findings(.`view state`, source).count == 6)
   }
 
   @Test
@@ -238,7 +236,7 @@ extension Lint.Rule.`SwiftUI Tests`.`View State` {
         var body: some View { Text("A") }
       }
       """
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`view state`, source).count == 3)
+    #expect(`SwiftUI Tests`.findings(.`view state`, source).count == 3)
   }
 
   @Test
@@ -252,7 +250,7 @@ extension Lint.Rule.`SwiftUI Tests`.`View State` {
         var body: some View { Text("A") }
       }
       """
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`view state`, source).count == 3)
+    #expect(`SwiftUI Tests`.findings(.`view state`, source).count == 3)
   }
 
   @Test
@@ -270,11 +268,11 @@ extension Lint.Rule.`SwiftUI Tests`.`View State` {
         var body: some View { Text("A") }
       }
       """
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`view state`, source).isEmpty)
+    #expect(`SwiftUI Tests`.findings(.`view state`, source).isEmpty)
   }
 }
 
-extension Lint.Rule.`SwiftUI Tests`.`View Logic` {
+extension `SwiftUI Tests`.`View Logic` {
   @Test(arguments: [
     "xs.filter { $0 }", "xs.sorted()", "xs.sort()", "xs.reduce(0, +)", "xs.map(\\.id)",
     "xs.compactMap { $0 }", "xs.flatMap { $0 }", "xs.first(where: { $0 })", "xs.first { $0 }",
@@ -285,26 +283,26 @@ extension Lint.Rule.`SwiftUI Tests`.`View Logic` {
     "store.modify { _ in }",
   ])
   func `each logic form fires once`(expression: Swift::String) {
-    let source = Lint.Rule.`SwiftUI Tests`.view("let _ = \(expression)")
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`view logic`, source).count == 1, "\(expression)")
+    let source = `SwiftUI Tests`.view("let _ = \(expression)")
+    #expect(`SwiftUI Tests`.findings(.`view logic`, source).count == 1, "\(expression)")
   }
 
   @Test(arguments: [".task { }", ".task(id: store.id) { }", ".onAppear { }", ".onDisappear { }",
     ".onChange(of: store.x) { }", ".onReceive(publisher) { _ in }"])
   func `each lifecycle modifier fires once`(modifier: Swift::String) {
-    let source = Lint.Rule.`SwiftUI Tests`.view("Text(\"A\")\(modifier)")
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`view logic`, source).count == 1, "\(modifier)")
+    let source = `SwiftUI Tests`.view("Text(\"A\")\(modifier)")
+    #expect(`SwiftUI Tests`.findings(.`view logic`, source).count == 1, "\(modifier)")
   }
 
   @Test
   func `map passed to ForEach is not exempt`() {
-    let source = Lint.Rule.`SwiftUI Tests`.view("ForEach(store.rows.map(\\.title), id: \\.self) { Text($0) }")
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`view logic`, source).count == 1)
+    let source = `SwiftUI Tests`.view("ForEach(store.rows.map(\\.title), id: \\.self) { Text($0) }")
+    #expect(`SwiftUI Tests`.findings(.`view logic`, source).count == 1)
   }
 
   @Test
   func `store reads, sends and formatting do not fire`() {
-    let source = Lint.Rule.`SwiftUI Tests`.view(
+    let source = `SwiftUI Tests`.view(
       """
       ForEach(store.rows) { row in Text(row.date, format: .dateTime) }
           Button("Done") { store.send(.doneTapped) }
@@ -313,11 +311,11 @@ extension Lint.Rule.`SwiftUI Tests`.`View Logic` {
           Text(Date(timeIntervalSince1970: 0), style: .date)
       """
     )
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`view logic`, source).isEmpty)
+    #expect(`SwiftUI Tests`.findings(.`view logic`, source).isEmpty)
   }
 }
 
-extension Lint.Rule.`SwiftUI Tests`.Exemption {
+extension `SwiftUI Tests`.Exemption {
   @Test
   func `representables and their coordinator are exempt`() {
     let source = """
@@ -332,7 +330,7 @@ extension Lint.Rule.`SwiftUI Tests`.Exemption {
       extension Web { final class Delegate { func f() { _ = xs.sorted() } } }
       """
     for rule in Lint.Rule.Bundle.swiftUI.map(\.rule) {
-      #expect(Lint.Rule.`SwiftUI Tests`.findings(rule, source).isEmpty, "\(rule.id)")
+      #expect(`SwiftUI Tests`.findings(rule, source).isEmpty, "\(rule.id)")
     }
   }
 
@@ -343,7 +341,7 @@ extension Lint.Rule.`SwiftUI Tests`.Exemption {
         func make() { _ = xs.map { $0 } }
       }
       """
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`view logic`, source).count == 1)
+    #expect(`SwiftUI Tests`.findings(.`view logic`, source).count == 1)
   }
 
   @Test
@@ -352,11 +350,11 @@ extension Lint.Rule.`SwiftUI Tests`.Exemption {
       struct Web: UIViewRepresentable { }
       struct Screen: View { var body: some View { Text("A").onAppear { } } }
       """
-    #expect(Lint.Rule.`SwiftUI Tests`.findings(.`view logic`, source).count == 1)
+    #expect(`SwiftUI Tests`.findings(.`view logic`, source).count == 1)
   }
 }
 
-extension Lint.Rule.`SwiftUI Tests`.Integration {
+extension `SwiftUI Tests`.Integration {
   @Test
   func `controls hold for every rule`() {
     for rule in Lint.Rule.Bundle.swiftUI.map(\.rule) {
@@ -368,8 +366,8 @@ extension Lint.Rule.`SwiftUI Tests`.Integration {
 
   @Test
   func `messages state what they check and the fix`() {
-    let source = Lint.Rule.`SwiftUI Tests`.view("Button(\"A\") { withAnimation { } }")
-    let message = Lint.Rule.`SwiftUI Tests`.findings(.`with animation`, source).first?.message ?? ""
+    let source = `SwiftUI Tests`.view("Button(\"A\") { withAnimation { } }")
+    let message = `SwiftUI Tests`.findings(.`with animation`, source).first?.message ?? ""
     #expect(message.contains("This rule checks for `withAnimation` calls"))
     #expect(message.contains("Fix:"))
   }

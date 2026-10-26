@@ -6,16 +6,14 @@ import Testing
 
 @testable import Linter_Rule_Memory
 
-extension Lint.Rule {
-    @Suite
-    struct `unsafe storage visibility Tests` {
-        @Suite struct Unit {}
-        @Suite struct `Edge Case` {}
-        @Suite struct Integration {}
-    }
+@Suite
+struct `unsafe storage visibility Tests` {
+    @Suite struct Unit {}
+    @Suite struct `Edge Case` {}
+    @Suite struct Integration {}
 }
 
-extension Lint.Rule.`unsafe storage visibility Tests` {
+extension `unsafe storage visibility Tests` {
     static func findings(
         in source: Swift::String,
         file: Swift::String = "Sources/X/Test.swift"
@@ -25,7 +23,7 @@ extension Lint.Rule.`unsafe storage visibility Tests` {
     }
 }
 
-extension Lint.Rule.`unsafe storage visibility Tests`.Unit {
+extension `unsafe storage visibility Tests`.Unit {
     @Test
     func `public unsafe pointer property is flagged`() {
         let source = """
@@ -33,7 +31,7 @@ extension Lint.Rule.`unsafe storage visibility Tests`.Unit {
                 public let storage: UnsafeMutablePointer<UInt8>
             }
             """
-        let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
+        let findings = `unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -44,7 +42,7 @@ extension Lint.Rule.`unsafe storage visibility Tests`.Unit {
                 private let storage: UnsafeMutablePointer<UInt8>
             }
             """
-        let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
+        let findings = `unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -55,7 +53,7 @@ extension Lint.Rule.`unsafe storage visibility Tests`.Unit {
                 let storage: UnsafeMutablePointer<UInt8>
             }
             """
-        let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
+        let findings = `unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -66,7 +64,7 @@ extension Lint.Rule.`unsafe storage visibility Tests`.Unit {
                 @unsafe public let storage: UnsafeMutablePointer<UInt8>
             }
             """
-        let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
+        let findings = `unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -77,7 +75,7 @@ extension Lint.Rule.`unsafe storage visibility Tests`.Unit {
                 public let count: Int
             }
             """
-        let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
+        let findings = `unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -88,7 +86,7 @@ extension Lint.Rule.`unsafe storage visibility Tests`.Unit {
                 public let storage: UnsafeMutablePointer<UInt8>?
             }
             """
-        let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
+        let findings = `unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -101,7 +99,7 @@ extension Lint.Rule.`unsafe storage visibility Tests`.Unit {
                 public let buf: UnsafeBufferPointer<UInt8>
             }
             """
-        let findings = Lint.Rule.`unsafe storage visibility Tests`.findings(in: source)
+        let findings = `unsafe storage visibility Tests`.findings(in: source)
         #expect(findings.count == 3)
     }
 }

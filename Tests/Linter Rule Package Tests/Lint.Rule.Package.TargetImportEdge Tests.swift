@@ -18,17 +18,15 @@ import Testing
 #endif
 
 #if canImport(Darwin) || canImport(Glibc) || canImport(Musl) || canImport(Android)
-    extension Lint.Rule {
-        @Suite
-        struct `target import edge Tests` {
-            @Suite struct Unit {}
-            @Suite struct Exemption {}
-            @Suite struct `Edge Case` {}
-            @Suite struct Integration {}
-        }
+    @Suite
+    struct `target import edge Tests` {
+        @Suite struct Unit {}
+        @Suite struct Exemption {}
+        @Suite struct `Edge Case` {}
+        @Suite struct Integration {}
     }
 
-    extension Lint.Rule.`target import edge Tests` {
+    extension `target import edge Tests` {
 
         struct Fixture {
             let root: Swift::String
@@ -44,13 +42,13 @@ import Testing
         }
     }
 
-    extension Lint.Rule.`target import edge Tests`.Fixture {
+    extension `target import edge Tests`.Fixture {
         struct Failure: Swift::Error {
             let reason: Swift::String
         }
     }
 
-    extension Lint.Rule.`target import edge Tests`.Fixture {
+    extension `target import edge Tests`.Fixture {
         fileprivate static func makeDirectories(_ raw: Swift::String) throws(Failure) {
             var prefix = ""
             for component in raw.split(separator: "/") {
@@ -110,7 +108,7 @@ import Testing
         }
     }
 
-    extension Lint.Rule.`target import edge Tests` {
+    extension `target import edge Tests` {
         static func manifest(
             targets: Swift::String,
             dependencies: Swift::String = ""
@@ -128,11 +126,11 @@ import Testing
         }
     }
 
-    extension Lint.Rule.`target import edge Tests`.Unit {
+    extension `target import edge Tests`.Unit {
         @Test
         func `undeclared import is flagged`() throws {
-            let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
-                manifest: Lint.Rule.`target import edge Tests`.manifest(
+            let fixture = try `target import edge Tests`.Fixture(
+                manifest: `target import edge Tests`.manifest(
                     targets: """
                         .target(name: "A"),
                         .target(name: "B"),
@@ -152,8 +150,8 @@ import Testing
 
         @Test
         func `declared same-package target dependency is accepted`() throws {
-            let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
-                manifest: Lint.Rule.`target import edge Tests`.manifest(
+            let fixture = try `target import edge Tests`.Fixture(
+                manifest: `target import edge Tests`.manifest(
                     targets: """
                         .target(name: "A", dependencies: [.target(name: "B")]),
                         .target(name: "B"),
@@ -167,8 +165,8 @@ import Testing
 
         @Test
         func `target dependency is not materialized as a target declaration`() throws {
-            let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
-                manifest: Lint.Rule.`target import edge Tests`.manifest(
+            let fixture = try `target import edge Tests`.Fixture(
+                manifest: `target import edge Tests`.manifest(
                     targets: """
                         .target(name: "A", dependencies: [.target(name: "B")]),
                         .target(name: "B"),
@@ -187,8 +185,8 @@ import Testing
 
         @Test
         func `bare-string byName dependency resolves to a same-package target`() throws {
-            let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
-                manifest: Lint.Rule.`target import edge Tests`.manifest(
+            let fixture = try `target import edge Tests`.Fixture(
+                manifest: `target import edge Tests`.manifest(
                     targets: """
                         .target(name: "A", dependencies: ["B"]),
                         .target(name: "B"),
@@ -202,8 +200,8 @@ import Testing
 
         @Test
         func `spaced target names normalize to underscored module names`() throws {
-            let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
-                manifest: Lint.Rule.`target import edge Tests`.manifest(
+            let fixture = try `target import edge Tests`.Fixture(
+                manifest: `target import edge Tests`.manifest(
                     targets: """
                         .target(name: "Alpha Core", dependencies: [.target(name: "Beta Core")]),
                         .target(name: "Beta Core"),
@@ -217,8 +215,8 @@ import Testing
 
         @Test
         func `product dependency resolves member modules through a local path dep`() throws {
-            let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
-                manifest: Lint.Rule.`target import edge Tests`.manifest(
+            let fixture = try `target import edge Tests`.Fixture(
+                manifest: `target import edge Tests`.manifest(
                     targets: """
                         .target(name: "A", dependencies: [.product(name: "Lib", package: "dep")]),
                         """,
@@ -243,8 +241,8 @@ import Testing
 
         @Test
         func `import outside a resolved product dependency is flagged`() throws {
-            let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
-                manifest: Lint.Rule.`target import edge Tests`.manifest(
+            let fixture = try `target import edge Tests`.Fixture(
+                manifest: `target import edge Tests`.manifest(
                     targets: """
                         .target(name: "A", dependencies: [.product(name: "Lib", package: "dep")]),
                         """,
@@ -273,8 +271,8 @@ import Testing
 
         @Test
         func `test target sources under Tests are walked`() throws {
-            let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
-                manifest: Lint.Rule.`target import edge Tests`.manifest(
+            let fixture = try `target import edge Tests`.Fixture(
+                manifest: `target import edge Tests`.manifest(
                     targets: """
                         .target(name: "A"),
                         .testTarget(name: "A Tests", dependencies: [.target(name: "A")]),
@@ -292,8 +290,8 @@ import Testing
 
         @Test
         func `explicit target path is honored`() throws {
-            let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
-                manifest: Lint.Rule.`target import edge Tests`.manifest(
+            let fixture = try `target import edge Tests`.Fixture(
+                manifest: `target import edge Tests`.manifest(
                     targets: """
                         .target(name: "A", path: "Custom/A"),
                         """
@@ -305,11 +303,11 @@ import Testing
         }
     }
 
-    extension Lint.Rule.`target import edge Tests`.Exemption {
+    extension `target import edge Tests`.Exemption {
         @Test
         func `toolchain modules and underscored modules are exempt`() throws {
-            let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
-                manifest: Lint.Rule.`target import edge Tests`.manifest(
+            let fixture = try `target import edge Tests`.Fixture(
+                manifest: `target import edge Tests`.manifest(
                     targets: """
                         .target(name: "A"),
                         """
@@ -330,8 +328,8 @@ import Testing
 
         @Test
         func `own module import is exempt`() throws {
-            let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
-                manifest: Lint.Rule.`target import edge Tests`.manifest(
+            let fixture = try `target import edge Tests`.Fixture(
+                manifest: `target import edge Tests`.manifest(
                     targets: """
                         .target(name: "A"),
                         """
@@ -345,8 +343,8 @@ import Testing
         @Test
         func `unresolvable declared dependency degrades soft`() throws {
 
-            let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
-                manifest: Lint.Rule.`target import edge Tests`.manifest(
+            let fixture = try `target import edge Tests`.Fixture(
+                manifest: `target import edge Tests`.manifest(
                     targets: """
                         .target(name: "A", dependencies: [.product(name: "Mystery", package: "nowhere")]),
                         """,
@@ -370,11 +368,11 @@ import Testing
         }
     }
 
-    extension Lint.Rule.`target import edge Tests`.`Edge Case` {
+    extension `target import edge Tests`.`Edge Case` {
         @Test
         func `imports inside comments never match`() throws {
-            let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
-                manifest: Lint.Rule.`target import edge Tests`.manifest(
+            let fixture = try `target import edge Tests`.Fixture(
+                manifest: `target import edge Tests`.manifest(
                     targets: """
                         .target(name: "A"),
                         """
@@ -393,8 +391,8 @@ import Testing
 
         @Test
         func `scoped and attributed import forms are recognized`() throws {
-            let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
-                manifest: Lint.Rule.`target import edge Tests`.manifest(
+            let fixture = try `target import edge Tests`.Fixture(
+                manifest: `target import edge Tests`.manifest(
                     targets: """
                         .target(name: "A"),
                         """
@@ -416,8 +414,8 @@ import Testing
 
         @Test
         func `skip directories are pruned from the walk`() throws {
-            let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
-                manifest: Lint.Rule.`target import edge Tests`.manifest(
+            let fixture = try `target import edge Tests`.Fixture(
+                manifest: `target import edge Tests`.manifest(
                     targets: """
                         .target(name: "A"),
                         """
@@ -430,8 +428,8 @@ import Testing
 
         @Test
         func `missing source directory contributes no findings`() throws {
-            let fixture = try Lint.Rule.`target import edge Tests`.Fixture(
-                manifest: Lint.Rule.`target import edge Tests`.manifest(
+            let fixture = try `target import edge Tests`.Fixture(
+                manifest: `target import edge Tests`.manifest(
                     targets: """
                         .target(name: "Ghost"),
                         """

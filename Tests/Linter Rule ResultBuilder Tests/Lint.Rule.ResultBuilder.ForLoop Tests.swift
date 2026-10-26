@@ -6,22 +6,20 @@ import Testing
 
 @testable import Linter_Rule_ResultBuilder
 
-extension Lint.Rule {
-    @Suite
-    struct `for loop in result builder Tests` {
-        @Suite struct Unit {}
-        @Suite struct `Edge Case` {}
-        @Suite struct Integration {}
-        @Suite struct `Positive Cases` {}
-        @Suite struct `Negative Cases` {}
-        @Suite struct `Callee Patterns` {}
-        @Suite struct `Edge Cases` {}
-        @Suite struct `Severity` {}
-        @Suite struct `Allowlist` {}
-    }
+@Suite
+struct `for loop in result builder Tests` {
+    @Suite struct Unit {}
+    @Suite struct `Edge Case` {}
+    @Suite struct Integration {}
+    @Suite struct `Positive Cases` {}
+    @Suite struct `Negative Cases` {}
+    @Suite struct `Callee Patterns` {}
+    @Suite struct `Edge Cases` {}
+    @Suite struct `Severity` {}
+    @Suite struct `Allowlist` {}
 }
 
-extension Lint.Rule.`for loop in result builder Tests` {
+extension `for loop in result builder Tests` {
     static func findings(
         in source: Swift::String,
         rule: Lint.Rule = Lint.Rule.`for loop in result builder`,
@@ -33,7 +31,7 @@ extension Lint.Rule.`for loop in result builder Tests` {
     }
 }
 
-extension Lint.Rule.`for loop in result builder Tests`.`Positive Cases` {
+extension `for loop in result builder Tests`.`Positive Cases` {
     @Test
     func `Array with for-loop is flagged`() {
         let source = """
@@ -43,7 +41,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Positive Cases` {
                 }
             }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "for loop in result builder")
@@ -60,7 +58,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Positive Cases` {
                 }
             }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -73,7 +71,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Positive Cases` {
                 }
             }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -88,7 +86,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Positive Cases` {
                 }
             }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -100,13 +98,13 @@ extension Lint.Rule.`for loop in result builder Tests`.`Positive Cases` {
                 for j in 10..<20 { j }
             }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
 
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.`for loop in result builder Tests`.`Negative Cases` {
+extension `for loop in result builder Tests`.`Negative Cases` {
     @Test
     func `Array with Sequence overload is NOT flagged`() {
         let source = """
@@ -114,7 +112,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Negative Cases` {
                 0..<100
             }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -127,7 +125,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Negative Cases` {
                 3
             }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -139,7 +137,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Negative Cases` {
                 a.append(i)
             }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -152,7 +150,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Negative Cases` {
                 }
             }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -168,18 +166,18 @@ extension Lint.Rule.`for loop in result builder Tests`.`Negative Cases` {
                 }
             }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }
 
-extension Lint.Rule.`for loop in result builder Tests`.`Callee Patterns` {
+extension `for loop in result builder Tests`.`Callee Patterns` {
     @Test
     func `Generic Array callsite is recognized`() {
         let source = """
             let a = Array<Int> { for i in 0..<10 { i } }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -188,7 +186,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Callee Patterns` {
         let source = """
             let a = Swift.Array<Int> { for i in 0..<10 { i } }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -197,7 +195,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Callee Patterns` {
         let source = """
             let b = Buffer<Int>.Linear { for i in 0..<10 { i } }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -206,7 +204,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Callee Patterns` {
         let source = """
             let t = Tree<Int>.N<2> { for i in 0..<10 { i } }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -215,7 +213,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Callee Patterns` {
         let source = """
             let t = Tree<Int>.Binary { for i in 0..<10 { i } }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -224,7 +222,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Callee Patterns` {
         let source = """
             let s = Set<Int>.Ordered { for i in 0..<10 { i } }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -237,15 +235,15 @@ extension Lint.Rule.`for loop in result builder Tests`.`Callee Patterns` {
                 }
             }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.`for loop in result builder Tests`.`Edge Cases` {
+extension `for loop in result builder Tests`.`Edge Cases` {
     @Test
     func `Empty file produces no findings`() {
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: "")
+        let findings = `for loop in result builder Tests`.findings(in: "")
         #expect(findings.isEmpty)
     }
 
@@ -254,7 +252,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Edge Cases` {
         let source = """
             let s = "Array<Int> { for i in 0..<10 { i } }"
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -264,7 +262,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Edge Cases` {
             // Don't write Array<Int> { for i in 0..<10 { i } }
             let a = 42
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -273,7 +271,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Edge Cases` {
         let source = """
             let a = Array<Int> {}
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -288,7 +286,7 @@ extension Lint.Rule.`for loop in result builder Tests`.`Edge Cases` {
                 }
             }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.count == 2)
     }
 
@@ -298,12 +296,12 @@ extension Lint.Rule.`for loop in result builder Tests`.`Edge Cases` {
         let source = """
             let a = Array(repeating: 0, count: 10)
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source)
+        let findings = `for loop in result builder Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }
 
-extension Lint.Rule.`for loop in result builder Tests`.Severity {
+extension `for loop in result builder Tests`.Severity {
     @Test
     func `Default severity is warning`() {
         #expect(Lint.Rule.`for loop in result builder`.severity.default == .warning)
@@ -314,7 +312,7 @@ extension Lint.Rule.`for loop in result builder Tests`.Severity {
         let source = """
             let a = Array<Int> { for i in 0..<10 { i } }
             """
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(
+        let findings = `for loop in result builder Tests`.findings(
             in: source,
             severity: .error
         )
@@ -325,7 +323,7 @@ extension Lint.Rule.`for loop in result builder Tests`.Severity {
     }
 }
 
-extension Lint.Rule.`for loop in result builder Tests`.Allowlist {
+extension `for loop in result builder Tests`.Allowlist {
     @Test
     func `Default allowlist contains the 18 institute Builder names`() {
         let allowlist = `result builder for loop default allowlist`
@@ -342,7 +340,7 @@ extension Lint.Rule.`for loop in result builder Tests`.Allowlist {
             let a = Array<Int> { for i in 0..<10 { i } }
             """
         let rule = Lint.Rule.`for loop in result builder`(allowlist: [])
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source, rule: rule)
+        let findings = `for loop in result builder Tests`.findings(in: source, rule: rule)
         #expect(findings.isEmpty)
     }
 
@@ -352,7 +350,7 @@ extension Lint.Rule.`for loop in result builder Tests`.Allowlist {
             let m = MyCustomBuilder<Int> { for i in 0..<10 { i } }
             """
         let rule = Lint.Rule.`for loop in result builder`(allowlist: ["MyCustomBuilder"])
-        let findings = Lint.Rule.`for loop in result builder Tests`.findings(in: source, rule: rule)
+        let findings = `for loop in result builder Tests`.findings(in: source, rule: rule)
         #expect(findings.count == 1)
     }
 }

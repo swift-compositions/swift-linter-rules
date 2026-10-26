@@ -4,21 +4,19 @@ import Testing
 
 @testable import Linter_Rule_SQL
 
-extension Lint.Rule {
-  @Suite
-  struct `grdb import Tests` {
-    @Suite struct Unit {}
-    @Suite struct Integration {}
-  }
+@Suite
+struct `grdb import Tests` {
+  @Suite struct Unit {}
+  @Suite struct Integration {}
 }
 
-extension Lint.Rule.`grdb import Tests` {
+extension `grdb import Tests` {
   static func findings(_ source: Swift::String, file: Swift::String = "Sources/Affairs SQLite/Store.swift") -> [Diagnostic.Record] {
     Lint.Rule.`grdb import`.observe(Lint.Source.parsed(from: source, file: file), .warning).findings
   }
 }
 
-extension Lint.Rule.`grdb import Tests`.Unit {
+extension `grdb import Tests`.Unit {
   @Test(arguments: [
     "import GRDB",
     "public import GRDB",
@@ -27,17 +25,17 @@ extension Lint.Rule.`grdb import Tests`.Unit {
     "@testable import GRDB",
   ])
   func `every import of GRDB fires`(source: Swift::String) {
-    #expect(Lint.Rule.`grdb import Tests`.findings(source).count == 1)
+    #expect(`grdb import Tests`.findings(source).count == 1)
   }
 
   @Test
   func `other imports do not fire`() {
-    #expect(Lint.Rule.`grdb import Tests`.findings("import SQLite\nimport GRDBQuery\nimport SQL").isEmpty)
+    #expect(`grdb import Tests`.findings("import SQLite\nimport GRDBQuery\nimport SQL").isEmpty)
   }
 
   @Test
   func `manifest names of the GRDB package fire`() {
-    let findings = Lint.Rule.`grdb import Tests`.findings(
+    let findings = `grdb import Tests`.findings(
       """
       let package = Package(
         dependencies: [.package(url: "https://github.com/groue/GRDB.swift", from: "7.6.0")],
@@ -51,11 +49,11 @@ extension Lint.Rule.`grdb import Tests`.Unit {
 
   @Test
   func `the same strings outside a manifest do not fire`() {
-    #expect(Lint.Rule.`grdb import Tests`.findings(#"let name = "GRDB.swift""#).isEmpty)
+    #expect(`grdb import Tests`.findings(#"let name = "GRDB.swift""#).isEmpty)
   }
 }
 
-extension Lint.Rule.`grdb import Tests`.Integration {
+extension `grdb import Tests`.Integration {
   @Test
   func `controls hold`() {
     let outcomes = Lint.Rule.`grdb import`.outcomes()

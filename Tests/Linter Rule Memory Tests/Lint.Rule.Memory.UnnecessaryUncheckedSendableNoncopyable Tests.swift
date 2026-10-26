@@ -6,16 +6,14 @@ import Testing
 
 @testable import Linter_Rule_Memory
 
-extension Lint.Rule {
-    @Suite
-    struct `unchecked sendable noncopyable Tests` {
-        @Suite struct Unit {}
-        @Suite struct `Edge Case` {}
-        @Suite struct Integration {}
-    }
+@Suite
+struct `unchecked sendable noncopyable Tests` {
+    @Suite struct Unit {}
+    @Suite struct `Edge Case` {}
+    @Suite struct Integration {}
 }
 
-extension Lint.Rule.`unchecked sendable noncopyable Tests` {
+extension `unchecked sendable noncopyable Tests` {
     static func findings(
         in source: Swift::String,
         file: Swift::String = "Sources/X/Test.swift"
@@ -25,13 +23,13 @@ extension Lint.Rule.`unchecked sendable noncopyable Tests` {
     }
 }
 
-extension Lint.Rule.`unchecked sendable noncopyable Tests`.Unit {
+extension `unchecked sendable noncopyable Tests`.Unit {
     @Test
     func `noncopyable struct with unchecked Sendable is flagged`() {
         let source = """
             struct Reader: ~Copyable, @unchecked Sendable {}
             """
-        let findings = Lint.Rule.`unchecked sendable noncopyable Tests`.findings(in: source)
+        let findings = `unchecked sendable noncopyable Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -40,7 +38,7 @@ extension Lint.Rule.`unchecked sendable noncopyable Tests`.Unit {
         let source = """
             struct Reader: ~Copyable, Sendable {}
             """
-        let findings = Lint.Rule.`unchecked sendable noncopyable Tests`.findings(in: source)
+        let findings = `unchecked sendable noncopyable Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -50,7 +48,7 @@ extension Lint.Rule.`unchecked sendable noncopyable Tests`.Unit {
         let source = """
             final class Foo: @unchecked Sendable {}
             """
-        let findings = Lint.Rule.`unchecked sendable noncopyable Tests`.findings(in: source)
+        let findings = `unchecked sendable noncopyable Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -59,7 +57,7 @@ extension Lint.Rule.`unchecked sendable noncopyable Tests`.Unit {
         let source = """
             struct Reader: ~Copyable {}
             """
-        let findings = Lint.Rule.`unchecked sendable noncopyable Tests`.findings(in: source)
+        let findings = `unchecked sendable noncopyable Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -69,7 +67,7 @@ extension Lint.Rule.`unchecked sendable noncopyable Tests`.Unit {
         let source = """
             struct Arena: ~Copyable, @unsafe @unchecked Sendable {}
             """
-        let findings = Lint.Rule.`unchecked sendable noncopyable Tests`.findings(in: source)
+        let findings = `unchecked sendable noncopyable Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -78,7 +76,7 @@ extension Lint.Rule.`unchecked sendable noncopyable Tests`.Unit {
         let source = """
             struct Foo: Sendable {}
             """
-        let findings = Lint.Rule.`unchecked sendable noncopyable Tests`.findings(in: source)
+        let findings = `unchecked sendable noncopyable Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

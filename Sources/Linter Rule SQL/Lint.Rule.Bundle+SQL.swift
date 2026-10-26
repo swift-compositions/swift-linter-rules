@@ -10,6 +10,7 @@ extension Lint.Rule.Bundle {
       .enable(.`sql fragment`),
       .enable(.`sql edge`),
       .enable(.`grdb import`),
+      .enable(.`database closure type`),
     ]
   }
 }

@@ -6,16 +6,14 @@ import Testing
 
 @testable import Linter_Rule_Structure
 
-extension Lint.Rule {
-    @Suite
-    struct `inlinable internal access Tests` {
-        @Suite struct Unit {}
-        @Suite struct `Edge Case` {}
-        @Suite struct Integration {}
-    }
+@Suite
+struct `inlinable internal access Tests` {
+    @Suite struct Unit {}
+    @Suite struct `Edge Case` {}
+    @Suite struct Integration {}
 }
 
-extension Lint.Rule.`inlinable internal access Tests` {
+extension `inlinable internal access Tests` {
     static func findings(
         in source: String,
         file: String = "Sources/X/Test.swift"
@@ -25,14 +23,14 @@ extension Lint.Rule.`inlinable internal access Tests` {
     }
 }
 
-extension Lint.Rule.`inlinable internal access Tests`.Unit {
+extension `inlinable internal access Tests`.Unit {
     @Test
     func `inlinable internal func is flagged`() {
         let source = """
             @inlinable
             func foo() {}
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -42,7 +40,7 @@ extension Lint.Rule.`inlinable internal access Tests`.Unit {
             @inlinable
             public func foo() {}
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -52,7 +50,7 @@ extension Lint.Rule.`inlinable internal access Tests`.Unit {
             @inlinable
             package func foo() {}
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -62,7 +60,7 @@ extension Lint.Rule.`inlinable internal access Tests`.Unit {
             @inlinable @usableFromInline
             func foo() {}
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -72,7 +70,7 @@ extension Lint.Rule.`inlinable internal access Tests`.Unit {
             @inlinable
             var x: Int { 1 }
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -82,7 +80,7 @@ extension Lint.Rule.`inlinable internal access Tests`.Unit {
             @inlinable
             public var x: Int { 1 }
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -95,16 +93,16 @@ extension Lint.Rule.`inlinable internal access Tests`.Unit {
                 init() {}
             }
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
+extension `inlinable internal access Tests`.`Edge Case` {
     @Test
     func `non-inlinable internal func is not flagged`() {
         let source = "func foo() {}"
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -114,7 +112,7 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
             @inlinable
             open func foo() {}
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -126,7 +124,7 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
                 init() {}
             }
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             let message = findings[0].message
@@ -143,7 +141,7 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
             @inlinable
             func foo() {}
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             let message = findings[0].message
@@ -164,12 +162,12 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
                 package init() {}
             }
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }
 
-extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
+extension `inlinable internal access Tests`.`Edge Case` {
 
     @Test
     func `A6 variant A: member in usableFromInline struct is exempt`() {
@@ -180,7 +178,7 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
                 func foo() {}
             }
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -192,7 +190,7 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
                 func foo() {}
             }
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -204,7 +202,7 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
                 var x: Int { 1 }
             }
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -219,7 +217,7 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
                 init(storage: Storage) {}
             }
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -233,12 +231,12 @@ extension Lint.Rule.`inlinable internal access Tests`.`Edge Case` {
                 init(storage: Storage?) {}
             }
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }
 
-extension Lint.Rule.`inlinable internal access Tests`.Unit {
+extension `inlinable internal access Tests`.Unit {
 
     @Test
     func `A6 still fires: member in public struct`() {
@@ -248,7 +246,7 @@ extension Lint.Rule.`inlinable internal access Tests`.Unit {
                 func foo() {}
             }
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -260,7 +258,7 @@ extension Lint.Rule.`inlinable internal access Tests`.Unit {
                 init(value: ExternalThing) {}
             }
             """
-        let findings = Lint.Rule.`inlinable internal access Tests`.findings(in: source)
+        let findings = `inlinable internal access Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }

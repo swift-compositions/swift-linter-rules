@@ -4,34 +4,32 @@ import Testing
 
 @testable import Linter_Rule_SQL
 
-extension Lint.Rule {
-  @Suite
-  struct `sql string Tests` {
-    @Suite struct Unit {}
-    @Suite struct `Edge Case` {}
-    @Suite struct Exemption {}
-    @Suite struct Integration {}
-  }
+@Suite
+struct `sql string Tests` {
+  @Suite struct Unit {}
+  @Suite struct `Edge Case` {}
+  @Suite struct Exemption {}
+  @Suite struct Integration {}
 }
 
-extension Lint.Rule.`sql string Tests` {
+extension `sql string Tests` {
   static func findings(_ source: Swift::String, file: Swift::String = "Sources/X/Test.swift") -> [Diagnostic.Record] {
     Lint.Rule.`sql string`.observe(Lint.Source.parsed(from: source, file: file), .warning).findings
   }
 }
 
-extension Lint.Rule.`sql string Tests`.Unit {
+extension `sql string Tests`.Unit {
   @Test(arguments: [
     "SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER", "DROP", "PRAGMA", "WITH",
     "REPLACE", "BEGIN",
   ])
   func `every upper-case statement keyword fires`(keyword: Swift::String) {
-    #expect(Lint.Rule.`sql string Tests`.findings("let s = \"\(keyword) x\"").count == 1)
+    #expect(`sql string Tests`.findings("let s = \"\(keyword) x\"").count == 1)
   }
 
   @Test
   func `lower-case statement with a clause word fires`() {
-    let findings = Lint.Rule.`sql string Tests`.findings(
+    let findings = `sql string Tests`.findings(
       """
       let a = "select name from holder"
       let b = "  insert into item values (1)"
@@ -43,7 +41,7 @@ extension Lint.Rule.`sql string Tests`.Unit {
 
   @Test
   func `prose beginning with a keyword word does not fire`() {
-    let findings = Lint.Rule.`sql string Tests`.findings(
+    let findings = `sql string Tests`.findings(
       """
       let a = "Select Documents"
       let b = "With SMS"
@@ -56,7 +54,7 @@ extension Lint.Rule.`sql string Tests`.Unit {
 
   @Test
   func `keyword not at the start does not fire`() {
-    let findings = Lint.Rule.`sql string Tests`.findings(
+    let findings = `sql string Tests`.findings(
       """
       let a = "Run SELECT later"
       let b = "(SELECT 1)"
@@ -67,10 +65,10 @@ extension Lint.Rule.`sql string Tests`.Unit {
   }
 }
 
-extension Lint.Rule.`sql string Tests`.`Edge Case` {
+extension `sql string Tests`.`Edge Case` {
   @Test
   func `multi-line and raw literals fire`() {
-    let findings = Lint.Rule.`sql string Tests`.findings(
+    let findings = `sql string Tests`.findings(
       """
       let a = \"\"\"
 
@@ -85,12 +83,12 @@ extension Lint.Rule.`sql string Tests`.`Edge Case` {
 
   @Test
   func `interpolated literal with a leading keyword fires`() {
-    #expect(Lint.Rule.`sql string Tests`.findings(#"let s = "SELECT count(*) FROM \(table)""#).count == 1)
+    #expect(`sql string Tests`.findings(#"let s = "SELECT count(*) FROM \(table)""#).count == 1)
   }
 
   @Test
   func `literal nested in a sql macro interpolation still fires`() {
-    let findings = Lint.Rule.`sql string Tests`.findings(
+    let findings = `sql string Tests`.findings(
       #"let s = #sql("x IN (\(raw("SELECT 1")))")"#
     )
     #expect(findings.count == 1)
@@ -98,14 +96,14 @@ extension Lint.Rule.`sql string Tests`.`Edge Case` {
 
   @Test
   func `bare filename still fires`() {
-    #expect(Lint.Rule.`sql string Tests`.findings("let s = \"DROP TABLE x\"", file: "Test.swift").count == 1)
+    #expect(`sql string Tests`.findings("let s = \"DROP TABLE x\"", file: "Test.swift").count == 1)
   }
 }
 
-extension Lint.Rule.`sql string Tests`.Exemption {
+extension `sql string Tests`.Exemption {
   @Test
   func `direct argument of sql macro is exempt`() {
-    let findings = Lint.Rule.`sql string Tests`.findings(
+    let findings = `sql string Tests`.findings(
       """
       let a = #sql("SELECT holderID FROM retrievalJoin", as: String.self)
       let b = #sql(#"PRAGMA quick_check"#)
@@ -116,11 +114,11 @@ extension Lint.Rule.`sql string Tests`.Exemption {
 
   @Test
   func `near miss: argument of another macro still fires`() {
-    #expect(Lint.Rule.`sql string Tests`.findings(#"let a = #query("SELECT 1")"#).count == 1)
+    #expect(`sql string Tests`.findings(#"let a = #query("SELECT 1")"#).count == 1)
   }
 }
 
-extension Lint.Rule.`sql string Tests`.Integration {
+extension `sql string Tests`.Integration {
   @Test
   func `controls hold`() {
     let outcomes = Lint.Rule.`sql string`.outcomes()
