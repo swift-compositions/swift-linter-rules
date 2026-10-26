@@ -30,6 +30,22 @@ extension Lint.Rule {
         expectation: .findings(1)
       ),
       .init(
+        id: "grdb import versioned manifest dependency",
+        source: """
+          let package = Package(dependencies: [.package(url: "https://github.com/groue/GRDB.swift", from: "7.6.0")])
+          """,
+        path: "Package@swift-6.0.swift",
+        expectation: .findings(1)
+      ),
+      .init(
+        id: "grdb import file named like a manifest",
+        source: """
+          let package = Package(dependencies: [.package(url: "https://github.com/groue/GRDB.swift", from: "7.6.0")])
+          """,
+        path: "MyPackage.swift",
+        expectation: .clean
+      ),
+      .init(
         id: "grdb import swift-sqlite",
         source: """
           import SQLite
@@ -40,7 +56,7 @@ extension Lint.Rule {
       ),
     ],
     observe: Lint.Rule.measured { source, severity in
-      let visitor = GRDBImportVisitor(manifest: source.path.underlying.hasSuffix("Package.swift"))
+      let visitor = GRDBImportVisitor(manifest: Lint.Scope.File.isManifest(source.path))
       visitor.walk(source.tree)
       return visitor.sites.map { site in
         Lint.Scope.record(

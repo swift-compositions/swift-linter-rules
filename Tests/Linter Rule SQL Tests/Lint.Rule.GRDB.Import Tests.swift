@@ -51,6 +51,16 @@ extension `grdb import Tests`.Unit {
   func `the same strings outside a manifest do not fire`() {
     #expect(`grdb import Tests`.findings(#"let name = "GRDB.swift""#).isEmpty)
   }
+
+  @Test(arguments: ["Package@swift-6.0.swift", "Package@swift-5.10.swift", "Nested/Package.swift"])
+  func `a versioned or nested manifest fires`(file: Swift::String) {
+    #expect(`grdb import Tests`.findings(#"let p = Package(name: "GRDB.swift")"#, file: file).count == 1, "\(file)")
+  }
+
+  @Test(arguments: ["MyPackage.swift", "Sources/X/MyPackage.swift", "Package@swift.swift", "Package@6.0.swift"])
+  func `near miss: a file whose name only ends in Package.swift is not a manifest`(file: Swift::String) {
+    #expect(`grdb import Tests`.findings(#"let p = Package(name: "GRDB.swift")"#, file: file).isEmpty, "\(file)")
+  }
 }
 
 extension `grdb import Tests`.Integration {

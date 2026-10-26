@@ -98,6 +98,16 @@ extension Lint.Scope.File {
 
 extension Lint.Scope.File {
 
+  /// Whether `path`'s last component is a package manifest: exactly `Package.swift`, or `Package@swift-<version>.swift`
+  /// with a non-empty version. `MyPackage.swift` is not.
+  package static func isManifest(_ path: Lint.Source.Path) -> Swift::Bool {
+    guard let name = path.underlying.split(separator: "/", omittingEmptySubsequences: true).last else { return false }
+    if name == "Package.swift" { return true }
+    let prefix = "Package@swift-"
+    let suffix = ".swift"
+    return name.hasPrefix(prefix) && name.hasSuffix(suffix) && name.count > prefix.count + suffix.count
+  }
+
   package static func root(of source: borrowing Lint.Source.Parsed) -> Swift::String? {
     let relative = source.path.underlying
     let absolute = source.file.filePath
