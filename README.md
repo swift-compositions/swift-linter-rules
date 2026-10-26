@@ -84,6 +84,7 @@ Each pack ships as its own SwiftPM product. Activate per-rule via the
 | `Linter Rule SQL` | `` `sql fragment` `` | `#sql` outside a `… Schema` target that is a whole statement, names a table or column by a quoted identifier, or interpolates nothing |
 | `Linter Rule SQL` | `` `sql edge` `` | `fetchAll`, `fetchOne`, `fetchCount`, `fetchSet`, `fetchCursor` or `execute` in a library target outside a database's `read`/`write`/`writeWithoutTransaction`/`withRollback`/`observe` closure or a `FetchKeyRequest`'s `fetch(_:)` (swift-institute/Issues#177) |
 | `Linter Rule SQL` | `` `grdb import` `` | `import GRDB` in any form, and manifest strings naming the GRDB.swift package; enable everywhere except swift-sqlite |
+| `Linter Rule SQL` | `` `database closure type` `` | A closure passed to `read`, `write`, `writeWithoutTransaction`, `withRollback` or `observe` that has more than one statement, returns a value and does not state its result type: inferring it from several returns is where the compiler hung on an unresolved name (swift-institute/Issues#181). Part of `Lint.Rule.Bundle.buildErrors` |
 | `Linter Rule SwiftUI` | `` `with animation` `` | `withAnimation` in `View` conformers and their extensions |
 | `Linter Rule SwiftUI` | `` `animation modifier` `` | `.animation(_:value:)`, `.animation(_:)`, `Binding.animation(_:)` in views |
 | `Linter Rule SwiftUI` | `` `state identity` `` | `.id(_:)` whose argument is not a literal or static member |
@@ -127,6 +128,90 @@ Lint.run(dependencies: [
 An entry names the file relative to the package root, the enclosing declaration
 exactly as the `sql registry` finding reports it, the number of `#sql` sites in
 that declaration, and a one-line reason.
+
+## Rules as build errors
+
+Until now the rules ran only through `swift-linter`, from a `Lint.swift` at a package root, by hand or in CI. Nothing
+stopped a build on a finding. `Lint.Rule.Bundle.buildErrors` is the set of rules whose findings must stop one, each
+pinned to `error`, and three products run it:
+
+| Product | What it is |
+|---|---|
+| `Linter Build Errors Plugin` | A SwiftPM build-tool plugin. It runs before the target compiles and prints `path:line:column: error: [rule]: message`, which Xcode and SwiftPM show as build errors. |
+| `swift-linter-build-errors` | The executable the plugin runs. By hand: `swift run swift-linter-build-errors --root <directory> <file.swift> ...`. It exits 0 when clean, 1 on an error and 64 on refused arguments. |
+| `Linter Rule Build Errors` | The library that holds the bundle, for a `Lint.swift`. |
+
+The bundle holds `database closure type`. A rule joins it when a finding is a hang or a defect that must stop the build,
+never when it is a matter of style. The tool reads every file it is given: a file it cannot read, and a rule that
+cannot measure a file, are errors, and a `// swift-linter:disable` comment does not silence a finding.
+
+### A SwiftPM package
+
+```swift
+// Package.swift
+dependencies: [
+    .package(url: "https://github.com/swift-compositions/swift-linter-rules.git", branch: "main"),
+],
+```
+
+Apply the plugin to the targets to check, or to all of them at the end of the manifest:
+
+```swift
+.target(
+    name: "Affairs SQLite",
+    plugins: [.plugin(name: "Linter Build Errors Plugin", package: "swift-linter-rules")]
+)
+```
+
+```swift
+for target in package.targets where [.regular, .executable, .test].contains(target.type) {
+    target.plugins =
+        (target.plugins ?? []) + [.plugin(name: "Linter Build Errors Plugin", package: "swift-linter-rules")]
+}
+```
+
+`swift build`, `xcodebuild` and Xcode's own build then run the check first. A finding stops the build before the
+compiler starts.
+
+### An Xcode project
+
+Add the package to the project (File, Add Package Dependencies), then for each target: Build Phases, +, Run Build Tool
+Plug-ins, Linter Build Errors Plugin. A target that belongs to a package in the workspace takes the plugin from that
+package's manifest instead, as above.
+
+### Approval
+
+Xcode asks once to trust a package plugin, and `xcodebuild` refuses it without `-skipPackagePluginValidation`. Both
+are approvals the owner of the project gives; a build script should not switch validation off.
+
+### One run through `swift-linter`
+
+To run just these rules from a `Lint.swift`, in CI or by hand, and nothing else:
+
+```swift
+// swift-linter-tools-version: 0.1
+
+import Linter
+import Linter_Rule_Build_Errors
+
+Lint.run(dependencies: [
+    .package(
+        url: "https://github.com/swift-compositions/swift-linter-rules.git",
+        branch: "main",
+        products: ["Linter Rule Build Errors"]
+    ),
+]) {
+    Lint.Rule.Bundle.buildErrors
+}
+```
+
+`swift run swift-linter --exit-policy strict .` then exits non-zero on a finding.
+
+### Checking that it fails
+
+Plant an untyped multi-statement closure, such as `try database.read { db in if x { return a }; return b }`, in a
+checked target. The build must fail with `error: [database closure type]` and the file and line, and pass once the
+closure states its result type.
 
 Each rule's source carries inline documentation describing its AST
 predicate, the source patterns it covers, and the convention it enforces.
