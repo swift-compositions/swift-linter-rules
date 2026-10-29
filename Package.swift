@@ -99,6 +99,12 @@ let package = Package(
         .package(url: "https://github.com/swift-atoms/swift-byte", branch: "main"),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "604.0.0"..<"605.0.0"),
     ],
+    traits: [
+        .trait(
+            name: "LinterRuleBuildErrors",
+            description: "Linter Rule Build Errors and the dependencies only it needs"
+        )
+    ],
     targets: [
 
         .target(
@@ -214,7 +220,7 @@ let package = Package(
         .target(
             name: "Linter Rule Build Errors",
             dependencies: [
-                .product(name: "Byte", package: "swift-byte"),
+                .product(name: "Byte", package: "swift-byte", condition: .when(traits: ["LinterRuleBuildErrors"])),
                 .product(name: "Lint", package: "swift-lint"),
                 .target(name: "Linter Rule Scope"),
                 .target(name: "Linter Rule SQL"),
@@ -245,7 +251,7 @@ let package = Package(
             dependencies: [
 
                 .product(name: "Lint Test Support", package: "swift-lint"),
-                .product(name: "Byte", package: "swift-byte"),
+                .product(name: "Byte", package: "swift-byte", condition: .when(traits: ["LinterRuleBuildErrors"])),
                 .product(name: "SwiftParser", package: "swift-syntax"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
             ],
