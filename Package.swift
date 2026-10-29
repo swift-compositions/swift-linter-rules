@@ -87,6 +87,12 @@ let package = Package(
             targets: ["Linter Rules"]
         ),
     ],
+    traits: [
+        .trait(
+            name: "LinterRuleBuildErrors",
+            description: "Linter Rule Build Errors and the dependencies only it needs"
+        )
+    ],
     dependencies: [
         .package(
             url: "https://github.com/swift-molecules/swift-lint.git",
@@ -98,12 +104,6 @@ let package = Package(
         ),
         .package(url: "https://github.com/swift-atoms/swift-byte", branch: "main"),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "604.0.0"..<"605.0.0"),
-    ],
-    traits: [
-        .trait(
-            name: "LinterRuleBuildErrors",
-            description: "Linter Rule Build Errors and the dependencies only it needs"
-        )
     ],
     targets: [
 
