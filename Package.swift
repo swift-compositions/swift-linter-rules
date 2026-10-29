@@ -103,6 +103,8 @@ let package = Package(
             branch: "main"
         ),
         .package(url: "https://github.com/swift-atoms/swift-byte", branch: "main"),
+        .package(url: "https://github.com/swift-compositions/swift-file-system.git", branch: "main"),
+        .package(url: "https://github.com/swift-compositions/swift-process.git", branch: "main"),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "604.0.0"..<"605.0.0"),
     ],
     targets: [
@@ -169,6 +171,8 @@ let package = Package(
         .target(
             name: "Linter Rule Scope",
             dependencies: [
+                .product(name: "Byte", package: "swift-byte"),
+                .product(name: "File System", package: "swift-file-system"),
                 .product(name: "Lint", package: "swift-lint"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
@@ -232,8 +236,11 @@ let package = Package(
         .executableTarget(
             name: "Linter Build Errors",
             dependencies: [
+                .product(name: "Byte", package: "swift-byte"),
+                .product(name: "File System", package: "swift-file-system"),
                 .product(name: "Lint", package: "swift-lint"),
                 .target(name: "Linter Rule Build Errors"),
+                .product(name: "Process", package: "swift-process"),
             ]
         ),
 
@@ -250,8 +257,9 @@ let package = Package(
             name: "Linter Rules Test Support",
             dependencies: [
 
+                .product(name: "Byte", package: "swift-byte"),
+                .product(name: "File System", package: "swift-file-system"),
                 .product(name: "Lint Test Support", package: "swift-lint"),
-                .product(name: "Byte", package: "swift-byte", condition: .when(traits: ["LinterRuleBuildErrors"])),
                 .product(name: "SwiftParser", package: "swift-syntax"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
             ],

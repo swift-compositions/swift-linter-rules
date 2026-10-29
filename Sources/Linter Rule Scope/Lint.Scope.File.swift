@@ -1,14 +1,8 @@
+internal import Byte
+internal import File_System
 package import Lint
 
-#if canImport(Darwin)
-    internal import Darwin
-#elseif canImport(Glibc)
-    internal import Glibc
-#elseif canImport(Musl)
-    internal import Musl
-#elseif canImport(Android)
-    internal import Android
-#endif
+private typealias FilePath = File.Path
 
 extension Lint.Scope {
 
@@ -36,65 +30,39 @@ extension Lint.Scope.File {
     }
 }
 
-#if canImport(Darwin) || canImport(Glibc) || canImport(Musl) || canImport(Android)
+extension Lint.Scope.File {
 
-    extension Lint.Scope.File {
-
-        package static func text(at raw: Swift::String) -> Swift::String? {
-            guard let handle = unsafe fopen(raw, "rb") else { return nil }
-            defer { _ = unsafe fclose(handle) }
+    package static func text(at raw: Swift::String) -> Swift::String? {
+        guard let path = try? FilePath(raw) else { return nil }
+        return try? File.System.Read.Full.read(from: path) { span -> Swift::String in
             var bytes: [Swift::UInt8] = []
-            var buffer = [Swift::UInt8](repeating: 0, count: 4096)
-            while true {
-                let count = buffer.withUnsafeMutableBytes { pointer in
-                    unsafe fread(pointer.baseAddress, 1, pointer.count, handle)
-                }
-                guard count > 0 else { break }
-                bytes.append(contentsOf: buffer[0..<count])
+            bytes.reserveCapacity(span.count)
+            for index in span.indices {
+                bytes.append(span[index].bitPattern)
             }
             return Swift::String(decoding: bytes, as: Swift::UTF8.self)
         }
-
-        package static func isDirectory(_ raw: Swift::String) -> Swift::Bool {
-            var status = stat()
-            guard unsafe stat(raw, &status) == 0 else { return false }
-            return (status.st_mode & S_IFMT) == S_IFDIR
-        }
-
-        package static func isFile(_ raw: Swift::String) -> Swift::Bool {
-            var status = stat()
-            guard unsafe stat(raw, &status) == 0 else { return false }
-            return (status.st_mode & S_IFMT) == S_IFREG
-        }
-
-        package static func entries(in directory: Swift::String) -> [Swift::String] {
-            guard let handle = unsafe opendir(directory) else { return [] }
-            defer { _ = unsafe closedir(handle) }
-            var names: [Swift::String] = []
-            while let entry = unsafe readdir(handle) {
-                let name = unsafe withUnsafeBytes(of: entry.pointee.d_name) { pointer in
-                    unsafe Swift::String(
-                        decoding: pointer.prefix(while: { $0 != 0 }),
-                        as: Swift::UTF8.self
-                    )
-                }
-                if name == "." || name == ".." { continue }
-                names.append(name)
-            }
-            return names.sorted()
-        }
     }
 
-#else
-
-    extension Lint.Scope.File {
-        package static func text(at raw: Swift::String) -> Swift::String? { nil }
-        package static func isDirectory(_ raw: Swift::String) -> Swift::Bool { false }
-        package static func isFile(_ raw: Swift::String) -> Swift::Bool { false }
-        package static func entries(in directory: Swift::String) -> [Swift::String] { [] }
+    package static func isDirectory(_ raw: Swift::String) -> Swift::Bool {
+        guard let path = try? FilePath(raw), let info = try? File.System.Stat.info(at: path) else { return false }
+        if case .directory = info.type { return true }
+        return false
     }
 
-#endif
+    package static func isFile(_ raw: Swift::String) -> Swift::Bool {
+        guard let path = try? FilePath(raw), let info = try? File.System.Stat.info(at: path) else { return false }
+        if case .regular = info.type { return true }
+        return false
+    }
+
+    package static func entries(in directory: Swift::String) -> [Swift::String] {
+        guard let path = try? FilePath(directory),
+            let listing = try? File.Directory.Contents.list(at: File.Directory(path))
+        else { return [] }
+        return listing.compactMap { Swift::String($0.name) }.sorted()
+    }
+}
 
 extension Lint.Scope.File {
 
@@ -110,12 +78,22 @@ extension Lint.Scope.File {
 
     package static func root(of source: borrowing Lint.Source.Parsed) -> Swift::String? {
         let relative = source.path.underlying
-        let absolute = source.file.filePath
-        guard !relative.isEmpty, absolute.hasPrefix("/"), absolute.hasSuffix("/" + relative) else {
+        let absolute = Swift::String(source.file.filePath.map { $0 == "\\" ? "/" : $0 })
+        guard !relative.isEmpty, isAbsolute(absolute), absolute.hasSuffix("/" + relative) else {
             return nil
         }
         let root = Swift::String(absolute.dropLast(relative.count + 1))
         guard !root.isEmpty, isDirectory(root) else { return nil }
         return root
+    }
+}
+
+extension Lint.Scope.File {
+
+    /// Whether `path`, written with `/` separators, is rooted: a leading `/`, or a drive letter and `:/`.
+    private static func isAbsolute(_ path: Swift::String) -> Swift::Bool {
+        if path.hasPrefix("/") { return true }
+        let scalars = Swift::Array(path.unicodeScalars.prefix(3))
+        return scalars.count == 3 && scalars[0].properties.isAlphabetic && scalars[1] == ":" && scalars[2] == "/"
     }
 }

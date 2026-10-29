@@ -1,14 +1,6 @@
+internal import Byte
+internal import File_System
 public import Lint
-
-#if canImport(Darwin)
-    import Darwin
-#elseif canImport(Glibc)
-    import Glibc
-#elseif canImport(Musl)
-    import Musl
-#elseif canImport(Android)
-    import Android
-#endif
 
 extension Lint.Source {
 
@@ -19,8 +11,7 @@ extension Lint.Source {
         public let files: [Swift::String: Swift::String]
 
         public init(files: [Swift::String: Swift::String]) throws(Failure) {
-            var random = Swift::SystemRandomNumberGenerator()
-            self.root = "/tmp/linter-rules-fixture-\(random.next())"
+            self.root = try Self.temporaryRoot(prefix: "linter-rules-fixture-")
             self.files = files
             for (relative, content) in files {
                 try Self.write(content, to: root + "/" + relative)
@@ -37,6 +28,10 @@ extension Lint.Source.Fixture {
 
     public struct Failure: Swift::Error {
         public let reason: Swift::String
+
+        public init(reason: Swift::String) {
+            self.reason = reason
+        }
     }
 
     public func parsed(_ relative: Swift::String) -> Lint.Source.Parsed {
@@ -48,69 +43,38 @@ extension Lint.Source.Fixture {
     }
 }
 
-#if canImport(Darwin) || canImport(Glibc) || canImport(Musl) || canImport(Android)
+extension Lint.Source.Fixture {
 
-    extension Lint.Source.Fixture {
-
-        fileprivate static func makeDirectories(_ raw: Swift::String) throws(Failure) {
-            var prefix = ""
-            for component in raw.split(separator: "/") {
-                prefix += "/" + component
-                guard unsafe mkdir(prefix, 0o755) == 0 || errno == EEXIST else {
-                    throw Failure(reason: "mkdir failed: \(prefix)")
-                }
-            }
-        }
-
-        fileprivate static func write(_ content: Swift::String, to raw: Swift::String) throws(Failure) {
-            if let slash = raw.lastIndex(of: "/") {
-                try makeDirectories(Swift::String(raw[raw.startIndex..<slash]))
-            }
-            guard let handle = unsafe fopen(raw, "wb") else {
-                throw Failure(reason: "fopen failed: \(raw)")
-            }
-            defer { _ = unsafe fclose(handle) }
-            let bytes = [Swift::UInt8](content.utf8)
-            let written = bytes.withUnsafeBytes { pointer in
-                unsafe fwrite(pointer.baseAddress, 1, pointer.count, handle)
-            }
-            guard written == bytes.count else {
-                throw Failure(reason: "fwrite failed: \(raw)")
-            }
-        }
-
-        fileprivate static func remove(_ raw: Swift::String) {
-            var status = stat()
-            guard unsafe lstat(raw, &status) == 0 else { return }
-            if (status.st_mode & S_IFMT) == S_IFDIR {
-                if let handle = unsafe opendir(raw) {
-                    var names: [Swift::String] = []
-                    while let entry = unsafe readdir(handle) {
-                        let name = unsafe withUnsafeBytes(of: entry.pointee.d_name) { pointer in
-                            unsafe Swift::String(
-                                decoding: pointer.prefix(while: { $0 != 0 }),
-                                as: Swift::UTF8.self
-                            )
-                        }
-                        if name != "." && name != ".." { names.append(name) }
-                    }
-                    _ = unsafe closedir(handle)
-                    for name in names { remove(raw + "/" + name) }
-                }
-                _ = unsafe rmdir(raw)
-            } else {
-                _ = unsafe unlink(raw)
-            }
+    /// A fresh path in the platform's temporary directory, written with `/` separators.
+    public static func temporaryRoot(prefix: Swift::String) throws(Failure) -> Swift::String {
+        var random = Swift::SystemRandomNumberGenerator()
+        do {
+            let path = try File.Path.Temporary.deterministic(prefix: prefix, key: "\(random.next())", suffix: "")
+            return Swift::String(path.string.map { $0 == "\\" ? "/" : $0 })
+        } catch {
+            throw Failure(reason: "no temporary directory: \(error)")
         }
     }
 
-#else
-
-    extension Lint.Source.Fixture {
-        fileprivate static func write(_ content: Swift::String, to raw: Swift::String) throws(Failure) {
-            throw Failure(reason: "no file system on this platform")
+    /// Writes `content` to `raw`, creating the directories above it.
+    public static func write(_ content: Swift::String, to raw: Swift::String) throws(Failure) {
+        let path: File.Path
+        do {
+            path = try File.Path(raw)
+        } catch {
+            throw Failure(reason: "invalid path: \(raw)")
         }
-        fileprivate static func remove(_ raw: Swift::String) {}
+        let bytes = [Byte](utf8: content)
+        do {
+            try File.System.Write.Atomic.write(bytes.span, to: path, createIntermediates: true)
+        } catch {
+            throw Failure(reason: "write failed: \(raw): \(error)")
+        }
     }
 
-#endif
+    /// Removes `raw` and everything under it; a path that is already gone is not an error.
+    public static func remove(_ raw: Swift::String) {
+        guard let path = try? File.Path(raw) else { return }
+        _ = try? File.System.Delete.delete(at: path, recursive: true)
+    }
+}

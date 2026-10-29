@@ -1,18 +1,9 @@
 #if LinterRuleBuildErrors
+    import Byte
+    import File_System
     import Lint
     import Linter_Rule_Build_Errors
-
-    #if canImport(Darwin)
-        internal import Darwin
-    #elseif canImport(Glibc)
-        internal import Glibc
-    #elseif canImport(Musl)
-        internal import Musl
-    #elseif canImport(Android)
-        internal import Android
-    #elseif canImport(ucrt)
-        internal import ucrt
-    #endif
+    import Process
 
     let outcome = Lint.Build.run(
         arguments: [Swift::String](Swift::CommandLine.arguments.dropFirst()),
@@ -22,18 +13,14 @@
         print(line)
     }
     if let stamp = outcome.stamp {
-        #if canImport(ucrt)
-            var opened: UnsafeMutablePointer<FILE>?
-            let status = unsafe fopen_s(&opened, stamp, "wb")
-            let file = unsafe (status == 0 ? opened : nil)
-        #else
-            let file = unsafe fopen(stamp, "wb")
-        #endif
-        guard let handle = unsafe file else {
+        let empty: [Byte] = []
+        do {
+            let path = try File.Path(stamp)
+            try File.System.Write.Atomic.write(empty.span, to: path)
+        } catch {
             print("swift-linter-build-errors: could not write the stamp file \(stamp)")
-            exit(1)
+            Process.Exit.normal(1)
         }
-        _ = unsafe fclose(handle)
     }
-    exit(outcome.status)
+    Process.Exit.normal(outcome.status)
 #endif
