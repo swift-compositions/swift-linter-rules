@@ -25,11 +25,11 @@
         #if canImport(ucrt)
             var opened: UnsafeMutablePointer<FILE>?
             let status = unsafe fopen_s(&opened, stamp, "wb")
-            let file = status == 0 ? opened : nil
+            let file = unsafe (status == 0 ? opened : nil)
         #else
             let file = unsafe fopen(stamp, "wb")
         #endif
-        guard let handle = file else {
+        guard let handle = unsafe file else {
             print("swift-linter-build-errors: could not write the stamp file \(stamp)")
             exit(1)
         }
