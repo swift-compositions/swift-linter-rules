@@ -1,16 +1,9 @@
 #if LinterRuleBuildErrors
+    import Byte
+    import File_System
     import Lint
     import Linter_Rule_Build_Errors
-
-    #if canImport(Darwin)
-        internal import Darwin
-    #elseif canImport(Glibc)
-        internal import Glibc
-    #elseif canImport(Musl)
-        internal import Musl
-    #elseif canImport(Android)
-        internal import Android
-    #endif
+    import Process
 
     let outcome = Lint.Build.run(
         arguments: [Swift::String](Swift::CommandLine.arguments.dropFirst()),
@@ -20,12 +13,13 @@
         print(line)
     }
     if let stamp = outcome.stamp {
-        let descriptor = unsafe open(stamp, O_WRONLY | O_CREAT | O_TRUNC, 0o644)
-        if descriptor < 0 {
+        do {
+            let empty: [Byte] = []
+            try File.System.Write.Atomic.write(empty.span, to: File.Path(stamp))
+        } catch {
             print("swift-linter-build-errors: could not write the stamp file \(stamp)")
-            exit(1)
+            Process.exit(1)
         }
-        close(descriptor)
     }
-    exit(outcome.status)
+    Process.exit(outcome.status)
 #endif

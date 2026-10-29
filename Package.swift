@@ -103,6 +103,8 @@ let package = Package(
             branch: "main"
         ),
         .package(url: "https://github.com/swift-atoms/swift-byte", branch: "main"),
+        .package(url: "https://github.com/swift-compositions/swift-file-system.git", branch: "main"),
+        .package(url: "https://github.com/swift-compositions/swift-process.git", branch: "main"),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "604.0.0"..<"605.0.0"),
     ],
     targets: [
@@ -234,6 +236,9 @@ let package = Package(
             dependencies: [
                 .product(name: "Lint", package: "swift-lint"),
                 .target(name: "Linter Rule Build Errors"),
+                .product(name: "Byte", package: "swift-byte", condition: .when(traits: ["LinterRuleBuildErrors"])),
+                .product(name: "File System", package: "swift-file-system", condition: .when(traits: ["LinterRuleBuildErrors"])),
+                .product(name: "Process", package: "swift-process", condition: .when(traits: ["LinterRuleBuildErrors"])),
             ]
         ),
 
