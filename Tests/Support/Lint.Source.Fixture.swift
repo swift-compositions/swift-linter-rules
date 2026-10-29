@@ -11,11 +11,17 @@ extension Lint.Source {
         public let files: [Swift::String: Swift::String]
 
         public init(files: [Swift::String: Swift::String]) throws(Failure) {
-            self.root = try Self.temporaryRoot(prefix: "linter-rules-fixture-")
-            self.files = files
+            let root = try Self.temporaryRoot(prefix: "linter-rules-fixture-")
             for (relative, content) in files {
-                try Self.write(content, to: root + "/" + relative)
+                do {
+                    try Self.write(content, to: root + "/" + relative)
+                } catch {
+                    Self.remove(root)
+                    throw error
+                }
             }
+            self.root = root
+            self.files = files
         }
 
         deinit {
