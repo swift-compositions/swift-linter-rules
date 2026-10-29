@@ -71,6 +71,7 @@ Each pack ships as its own SwiftPM product. Activate per-rule via the
 | `Linter Rule RawValue` | `` `chained rawvalue access` `` | Chained `.rawValue.method()` patterns that escape the typed wrapper |
 | `Linter Rule RawValue` | `` `bitpattern rawvalue chain` `` | Bit-pattern conversions chaining `.rawValue` |
 | `Linter Rule ResultBuilder` | `` `for loop in result builder` `` | `for i in 0..<N { i }` style integer loops in builder bodies |
+| `Linter Rule Package` | `` `conflicting dependency url` `` | A pinned package identity that a root `Package.swift`, or a manifest under its `.build/checkouts`, spells with a location other than its `Package.resolved` pin (after lowercasing and dropping scheme, `.git` and trailing `/`): two spellings of one package make SwiftPM walk every dependency path to reconcile them (swiftlang/swift-package-manager#10744). Unpinned identities and Xcode workspace resolution are not checked |
 | `Linter Rule Try` | `` `try optional` `` | `try?` sites that swallow typed-throws errors silently |
 | `Linter Rule Throws` | `` `untyped throws` `` | `throws` declarations without a typed-throws clause |
 | `Linter Rule Throws` | `` `existential throws` `` | `throws(any Error)` existential-error declarations |

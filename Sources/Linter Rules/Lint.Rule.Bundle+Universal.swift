@@ -18,6 +18,7 @@ extension Lint.Rule.Bundle {
         .enable(.`unsafe storage visibility`),
 
         .enable(.`target import edge`),
+        .enable(.`conflicting dependency url`),
 
         .enable(.`for loop in result builder`),
 
