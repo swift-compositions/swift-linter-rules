@@ -11,32 +11,32 @@ import PackagePlugin
 @main
 struct BuildErrors: BuildToolPlugin {
 
-  /// The executable target the plugin depends on.
-  static let tool = "Linter Build Errors"
+    /// The executable target the plugin depends on.
+    static let tool = "Linter Build Errors"
 
-  func createBuildCommands(context: PluginContext, target: any Target) async throws -> [Command] {
-    guard let module = target.sourceModule else { return [] }
-    return try Self.commands(
-      named: module.name,
-      tool: context.tool(named: Self.tool).url,
-      root: context.package.directoryURL,
-      files: module.sourceFiles(withSuffix: ".swift").map(\.url),
-      work: context.pluginWorkDirectoryURL
-    )
-  }
+    func createBuildCommands(context: PluginContext, target: any Target) async throws -> [Command] {
+        guard let module = target.sourceModule else { return [] }
+        return try Self.commands(
+            named: module.name,
+            tool: context.tool(named: Self.tool).url,
+            root: context.package.directoryURL,
+            files: module.sourceFiles(withSuffix: ".swift").map(\.url),
+            work: context.pluginWorkDirectoryURL
+        )
+    }
 
-  static func commands(named name: String, tool: URL, root: URL, files: [URL], work: URL) -> [Command] {
-    guard !files.isEmpty else { return [] }
-    let stamp = work.appending(path: "LinterBuildErrors.swift")
-    return [
-      .buildCommand(
-        displayName: "Linter build errors: \(name)",
-        executable: tool,
-        arguments: ["--root", root.path(percentEncoded: false), "--stamp", stamp.path(percentEncoded: false)]
-          + files.map { $0.path(percentEncoded: false) },
-        inputFiles: files,
-        outputFiles: [stamp]
-      )
-    ]
-  }
+    static func commands(named name: String, tool: URL, root: URL, files: [URL], work: URL) -> [Command] {
+        guard !files.isEmpty else { return [] }
+        let stamp = work.appending(path: "LinterBuildErrors.swift")
+        return [
+            .buildCommand(
+                displayName: "Linter build errors: \(name)",
+                executable: tool,
+                arguments: ["--root", root.path(percentEncoded: false), "--stamp", stamp.path(percentEncoded: false)]
+                    + files.map { $0.path(percentEncoded: false) },
+                inputFiles: files,
+                outputFiles: [stamp]
+            )
+        ]
+    }
 }

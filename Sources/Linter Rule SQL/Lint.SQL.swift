@@ -2,5 +2,5 @@ public import Lint
 
 extension Lint {
 
-  public enum SQL {}
+    public enum SQL {}
 }

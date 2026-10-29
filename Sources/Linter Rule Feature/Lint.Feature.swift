@@ -2,5 +2,5 @@ package import Lint
 
 extension Lint {
 
-  package enum Feature {}
+    package enum Feature {}
 }
