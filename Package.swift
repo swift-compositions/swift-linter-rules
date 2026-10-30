@@ -58,6 +58,11 @@ let package = Package(
         ),
 
         .library(
+            name: "Linter Rule Framework",
+            targets: ["Linter Rule Framework"]
+        ),
+
+        .library(
             name: "Linter Rule Feature",
             targets: ["Linter Rule Feature"]
         ),
@@ -181,6 +186,15 @@ let package = Package(
 
         .target(
             name: "Linter Rule SQL",
+            dependencies: [
+                .product(name: "Lint", package: "swift-lint"),
+                .target(name: "Linter Rule Scope"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
+        .target(
+            name: "Linter Rule Framework",
             dependencies: [
                 .product(name: "Lint", package: "swift-lint"),
                 .target(name: "Linter Rule Scope"),
@@ -324,6 +338,16 @@ let package = Package(
             name: "Linter Rule SQL Tests",
             dependencies: [
                 .target(name: "Linter Rule SQL"),
+                .target(name: "Linter Rule Scope"),
+                .target(name: "Linter Rules Test Support"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+
+        .testTarget(
+            name: "Linter Rule Framework Tests",
+            dependencies: [
+                .target(name: "Linter Rule Framework"),
                 .target(name: "Linter Rule Scope"),
                 .target(name: "Linter Rules Test Support"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
