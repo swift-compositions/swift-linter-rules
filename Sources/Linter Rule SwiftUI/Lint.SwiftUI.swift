@@ -1,6 +1,6 @@
-package import Lint
+public import Lint
 
 extension Lint {
 
-    package enum SwiftUI {}
+    public enum SwiftUI {}
 }

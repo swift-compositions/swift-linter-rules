@@ -1,42 +1,42 @@
-package import Lint
-package import Linter_Rule_Scope
-package import SwiftSyntax
+public import Lint
+public import Linter_Rule_Scope
+public import SwiftSyntax
 
 extension Lint.SwiftUI {
 
-    package final class Visitor: SyntaxVisitor {
+    public final class Visitor: SyntaxVisitor {
 
-        package static let sequenceAlgorithms: Swift::Set<Swift::String> = [
+        public static let sequenceAlgorithms: Swift::Set<Swift::String> = [
             "filter", "sorted", "sort", "reduce", "map", "compactMap", "flatMap", "min", "max",
             "allSatisfy",
         ]
 
-        package static let predicateAlgorithms: Swift::Set<Swift::String> = [
+        public static let predicateAlgorithms: Swift::Set<Swift::String> = [
             "first", "last", "contains",
         ]
 
-        package static let lifecycleModifiers: Swift::Set<Swift::String> = [
+        public static let lifecycleModifiers: Swift::Set<Swift::String> = [
             "task", "onAppear", "onDisappear", "onChange", "onReceive",
         ]
 
-        package static let stateWrappers: Swift::Set<Swift::String> = [
+        public static let stateWrappers: Swift::Set<Swift::String> = [
             "State", "StateObject", "ObservedObject", "AppStorage", "SceneStorage",
         ]
 
-        package static let systemServices: Swift::Set<Swift::String> = [
+        public static let systemServices: Swift::Set<Swift::String> = [
             "UserDefaults", "FileManager",
         ]
 
-        package static let storeBases: Swift::Set<Swift::String> = [
+        public static let storeBases: Swift::Set<Swift::String> = [
             "store", "self.store", "_store", "$store",
         ]
 
         let index: Lint.Scope.Index
         var frames: [Swift::Bool] = []
         var representable: [Swift::Bool] = []
-        package var hits: [Hit] = []
+        public var hits: [Hit] = []
 
-        package init(index: Lint.Scope.Index) {
+        public init(index: Lint.Scope.Index) {
             self.index = index
             super.init(viewMode: .sourceAccurate)
         }
@@ -71,50 +71,50 @@ extension Lint.SwiftUI {
             representable.removeLast()
         }
 
-        package override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
+        public override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
             enter(node, inheritance: node.inheritanceClause, extending: false)
             return .visitChildren
         }
 
-        package override func visitPost(_ node: StructDeclSyntax) { leave() }
+        public override func visitPost(_ node: StructDeclSyntax) { leave() }
 
-        package override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
+        public override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
             enter(node, inheritance: node.inheritanceClause, extending: false)
             return .visitChildren
         }
 
-        package override func visitPost(_ node: ClassDeclSyntax) { leave() }
+        public override func visitPost(_ node: ClassDeclSyntax) { leave() }
 
-        package override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
+        public override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
             enter(node, inheritance: node.inheritanceClause, extending: false)
             return .visitChildren
         }
 
-        package override func visitPost(_ node: EnumDeclSyntax) { leave() }
+        public override func visitPost(_ node: EnumDeclSyntax) { leave() }
 
-        package override func visit(_ node: ActorDeclSyntax) -> SyntaxVisitorContinueKind {
+        public override func visit(_ node: ActorDeclSyntax) -> SyntaxVisitorContinueKind {
             enter(node, inheritance: node.inheritanceClause, extending: false)
             return .visitChildren
         }
 
-        package override func visitPost(_ node: ActorDeclSyntax) { leave() }
+        public override func visitPost(_ node: ActorDeclSyntax) { leave() }
 
-        package override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
+        public override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
             frames.append(false)
             representable.append(false)
             return .visitChildren
         }
 
-        package override func visitPost(_ node: ProtocolDeclSyntax) { leave() }
+        public override func visitPost(_ node: ProtocolDeclSyntax) { leave() }
 
-        package override func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
+        public override func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
             enter(node, inheritance: node.inheritanceClause, extending: true)
             return .visitChildren
         }
 
-        package override func visitPost(_ node: ExtensionDeclSyntax) { leave() }
+        public override func visitPost(_ node: ExtensionDeclSyntax) { leave() }
 
-        package override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
+        public override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
             guard inScope else { return .visitChildren }
             if Lint.SwiftUI.Expression.isWithAnimation(node) {
                 if !Lint.SwiftUI.Expression.animatesStoreSends(node) {
@@ -194,7 +194,7 @@ extension Lint.SwiftUI {
             }
         }
 
-        package override func visit(_ node: MemberAccessExprSyntax) -> SyntaxVisitorContinueKind {
+        public override func visit(_ node: MemberAccessExprSyntax) -> SyntaxVisitorContinueKind {
             guard inScope, let base = node.base else { return .visitChildren }
             let name = node.declName.baseName.text
             if name == "modify", Self.storeBases.contains(base.trimmedDescription) {
@@ -205,7 +205,7 @@ extension Lint.SwiftUI {
             return .visitChildren
         }
 
-        package override func visit(_ node: DeclReferenceExprSyntax) -> SyntaxVisitorContinueKind {
+        public override func visit(_ node: DeclReferenceExprSyntax) -> SyntaxVisitorContinueKind {
             let name = node.baseName.text
             if Self.systemServices.contains(name) {
                 hit(node, .viewLogic, "`\(name)`")
@@ -213,7 +213,7 @@ extension Lint.SwiftUI {
             return .visitChildren
         }
 
-        package override func visit(_ node: IdentifierTypeSyntax) -> SyntaxVisitorContinueKind {
+        public override func visit(_ node: IdentifierTypeSyntax) -> SyntaxVisitorContinueKind {
             let name = node.name.text
             if Self.systemServices.contains(name) {
                 hit(node, .viewLogic, "`\(name)`")
@@ -221,7 +221,7 @@ extension Lint.SwiftUI {
             return .visitChildren
         }
 
-        package override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
+        public override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
             guard inScope, node.parent?.is(MemberBlockItemSyntax.self) == true else {
                 return .visitChildren
             }

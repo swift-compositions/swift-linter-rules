@@ -1,14 +1,14 @@
-package import Lint
+public import Lint
 internal import Linter_Rule_Scope
 internal import SwiftSyntax
 
 extension Lint.SwiftUI {
 
-    package static let scope: Swift::String =
+    public static let scope: Swift::String =
         "in types conforming to `View` and in extensions of them (types conforming to "
         + "`UIViewRepresentable` or `NSViewRepresentable`, and their `Coordinator`, are exempt)"
 
-    package static func observe(
+    public static func observe(
         _ kind: Kind,
         identifier: Swift::String,
         message: Swift::String

@@ -1,11 +1,11 @@
-package import Lint
-package import SwiftSyntax
+public import Lint
+public import SwiftSyntax
 
 extension Lint.SwiftUI {
 
-    package struct Hit {
-        package let node: Syntax
-        package let kind: Kind
-        package let detail: Swift::String
+    public struct Hit {
+        public let node: Syntax
+        public let kind: Kind
+        public let detail: Swift::String
     }
 }

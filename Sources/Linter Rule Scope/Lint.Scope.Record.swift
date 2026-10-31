@@ -1,9 +1,9 @@
-package import Lint
-package import SwiftSyntax
+public import Lint
+public import SwiftSyntax
 
 extension Lint.Scope {
 
-    package static func record(
+    public static func record(
         at node: some SyntaxProtocol,
         in source: borrowing Lint.Source.Parsed,
         severity: Diagnostic.Severity,

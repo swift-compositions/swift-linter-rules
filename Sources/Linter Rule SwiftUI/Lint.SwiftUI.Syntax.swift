@@ -1,14 +1,14 @@
-internal import Lint
-package import SwiftSyntax
+public import Lint
+public import SwiftSyntax
 
 extension Lint.SwiftUI {
 
-    package enum Expression {}
+    public enum Expression {}
 }
 
 extension Lint.SwiftUI.Expression {
 
-    package static func isWithAnimation(_ call: FunctionCallExprSyntax) -> Swift::Bool {
+    public static func isWithAnimation(_ call: FunctionCallExprSyntax) -> Swift::Bool {
         let callee = call.calledExpression
         if let reference = callee.as(DeclReferenceExprSyntax.self) {
             return reference.baseName.text == "withAnimation"
@@ -22,7 +22,7 @@ extension Lint.SwiftUI.Expression {
         return false
     }
 
-    package static func animatesStoreSends(_ call: FunctionCallExprSyntax) -> Swift::Bool {
+    public static func animatesStoreSends(_ call: FunctionCallExprSyntax) -> Swift::Bool {
         let body =
             call.trailingClosure ?? call.arguments.last?.expression.as(ClosureExprSyntax.self)
         guard let body, !body.statements.isEmpty else { return false }
@@ -36,7 +36,7 @@ extension Lint.SwiftUI.Expression {
         }
     }
 
-    package static func isStoreBinding(_ expression: ExprSyntax?) -> Swift::Bool {
+    public static func isStoreBinding(_ expression: ExprSyntax?) -> Swift::Bool {
         var current = expression
         while let member = current?.as(MemberAccessExprSyntax.self) {
             if member.declName.baseName.text == "$store" {
@@ -47,7 +47,7 @@ extension Lint.SwiftUI.Expression {
         return current?.as(DeclReferenceExprSyntax.self)?.baseName.text == "$store"
     }
 
-    package static func name(of callee: ExprSyntax) -> Swift::String? {
+    public static func name(of callee: ExprSyntax) -> Swift::String? {
         if let reference = callee.as(DeclReferenceExprSyntax.self) {
             return reference.baseName.text
         }
@@ -57,7 +57,7 @@ extension Lint.SwiftUI.Expression {
         return nil
     }
 
-    package static func isBinding(_ expression: ExprSyntax?) -> Swift::Bool {
+    public static func isBinding(_ expression: ExprSyntax?) -> Swift::Bool {
         var current = expression
         while let node = current {
             if let reference = node.as(DeclReferenceExprSyntax.self) {
@@ -85,7 +85,7 @@ extension Lint.SwiftUI.Expression {
         return false
     }
 
-    package static func isStable(_ expression: ExprSyntax) -> Swift::Bool {
+    public static func isStable(_ expression: ExprSyntax) -> Swift::Bool {
         if let literal = expression.as(StringLiteralExprSyntax.self) {
             return literal.segments.allSatisfy { $0.is(StringSegmentSyntax.self) }
         }
@@ -109,7 +109,7 @@ extension Lint.SwiftUI.Expression {
         return false
     }
 
-    package static func isTypeReference(_ expression: ExprSyntax) -> Swift::Bool {
+    public static func isTypeReference(_ expression: ExprSyntax) -> Swift::Bool {
         if let reference = expression.as(DeclReferenceExprSyntax.self) {
             let text = reference.baseName.text
             guard let first = text.first else { return false }
@@ -125,7 +125,7 @@ extension Lint.SwiftUI.Expression {
         return expression.is(TypeExprSyntax.self)
     }
 
-    package static func isFunctionType(_ type: TypeSyntax) -> Swift::Bool {
+    public static func isFunctionType(_ type: TypeSyntax) -> Swift::Bool {
         var current = type
         while true {
             if current.is(FunctionTypeSyntax.self) { return true }
@@ -145,7 +145,7 @@ extension Lint.SwiftUI.Expression {
         }
     }
 
-    package static func isInsideToolbar(_ node: some SyntaxProtocol) -> Swift::Bool {
+    public static func isInsideToolbar(_ node: some SyntaxProtocol) -> Swift::Bool {
         var current: Syntax? = Syntax(node).parent
         while let ancestor = current {
             if ancestor.is(DeclSyntax.self) && !ancestor.is(VariableDeclSyntax.self) {

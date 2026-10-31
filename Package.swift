@@ -12,10 +12,6 @@ let package = Package(
         .visionOS(.v27),
     ],
     products: [
-        .library(
-            name: "Linter Rule ResultBuilder",
-            targets: ["Linter Rule ResultBuilder"]
-        ),
 
         .library(
             name: "Linter Rule Structure",
@@ -43,13 +39,18 @@ let package = Package(
         ),
 
         .library(
-            name: "Linter Rule Package",
-            targets: ["Linter Rule Package"]
+            name: "Linter Rule Platform",
+            targets: ["Linter Rule Platform"]
         ),
 
         .library(
-            name: "Linter Rule SQL",
-            targets: ["Linter Rule SQL"]
+            name: "Linter Rule Throws",
+            targets: ["Linter Rule Throws"]
+        ),
+
+        .library(
+            name: "Linter Rule Scope",
+            targets: ["Linter Rule Scope"]
         ),
 
         .library(
@@ -58,29 +59,16 @@ let package = Package(
         ),
 
         .library(
-            name: "Linter Rule Framework",
-            targets: ["Linter Rule Framework"]
+            name: "Linter Rule Package",
+            targets: ["Linter Rule Package"]
         ),
 
-        .library(
-            name: "Linter Rule Feature",
-            targets: ["Linter Rule Feature"]
-        ),
 
-        .library(
-            name: "Linter Rule Build Errors",
-            targets: ["Linter Rule Build Errors"]
-        ),
 
-        .executable(
-            name: "swift-linter-build-errors",
-            targets: ["Linter Build Errors"]
-        ),
 
-        .plugin(
-            name: "Linter Build Errors Plugin",
-            targets: ["Linter Build Errors Plugin"]
-        ),
+
+
+
 
         .library(
             name: "Linter Rules Test Support",
@@ -91,12 +79,6 @@ let package = Package(
             name: "Linter Rules",
             targets: ["Linter Rules"]
         ),
-    ],
-    traits: [
-        .trait(
-            name: "LinterRuleBuildErrors",
-            description: "Linter Rule Build Errors and the dependencies only it needs"
-        )
     ],
     dependencies: [
         .package(
@@ -109,18 +91,11 @@ let package = Package(
         ),
         .package(url: "https://github.com/swift-atoms/swift-byte", branch: "main"),
         .package(url: "https://github.com/swift-compositions/swift-file-system.git", branch: "main"),
-        .package(url: "https://github.com/swift-compositions/swift-process.git", branch: "main"),
+        .package(url: "https://github.com/swift-standards/swift-spm-standard.git", branch: "main"),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "604.0.0"..<"605.0.0"),
     ],
     targets: [
 
-        .target(
-            name: "Linter Rule ResultBuilder",
-            dependencies: [
-                .product(name: "Lint", package: "swift-lint"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-            ]
-        ),
 
         .target(
             name: "Linter Rule Structure",
@@ -156,6 +131,22 @@ let package = Package(
         ),
 
         .target(
+            name: "Linter Rule Platform",
+            dependencies: [
+                .product(name: "Lint", package: "swift-lint"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
+        .target(
+            name: "Linter Rule Throws",
+            dependencies: [
+                .product(name: "Lint", package: "swift-lint"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
+        .target(
             name: "Linter Rule Suppression",
             dependencies: [
                 .product(name: "Lint", package: "swift-lint"),
@@ -166,8 +157,10 @@ let package = Package(
         .target(
             name: "Linter Rule Package",
             dependencies: [
+                .product(name: "Byte", package: "swift-byte"),
                 .product(name: "Lint", package: "swift-lint"),
                 .target(name: "Linter Rule Scope"),
+                .product(name: "SPM Standard", package: "swift-spm-standard"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
             ]
@@ -184,23 +177,7 @@ let package = Package(
             ]
         ),
 
-        .target(
-            name: "Linter Rule SQL",
-            dependencies: [
-                .product(name: "Lint", package: "swift-lint"),
-                .target(name: "Linter Rule Scope"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-            ]
-        ),
 
-        .target(
-            name: "Linter Rule Framework",
-            dependencies: [
-                .product(name: "Lint", package: "swift-lint"),
-                .target(name: "Linter Rule Scope"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-            ]
-        ),
 
         .target(
             name: "Linter Rule SwiftUI",
@@ -211,15 +188,6 @@ let package = Package(
             ]
         ),
 
-        .target(
-            name: "Linter Rule Feature",
-            dependencies: [
-                .product(name: "Lint", package: "swift-lint"),
-                .target(name: "Linter Rule Scope"),
-                .target(name: "Linter Rule SwiftUI"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-            ]
-        ),
 
         .target(
             name: "Linter Rules",
@@ -228,44 +196,16 @@ let package = Package(
                 .target(name: "Linter Rule Idiom"),
                 .target(name: "Linter Rule Memory"),
                 .target(name: "Linter Rule Package"),
-                .target(name: "Linter Rule ResultBuilder"),
+                .target(name: "Linter Rule Platform"),
                 .target(name: "Linter Rule Structure"),
                 .target(name: "Linter Rule Suppression"),
                 .target(name: "Linter Rule Testing"),
+                .target(name: "Linter Rule Throws"),
             ]
         ),
 
-        .target(
-            name: "Linter Rule Build Errors",
-            dependencies: [
-                .product(name: "Byte", package: "swift-byte", condition: .when(traits: ["LinterRuleBuildErrors"])),
-                .product(name: "Lint", package: "swift-lint"),
-                .target(name: "Linter Rule Scope"),
-                .target(name: "Linter Rule SQL"),
-                .product(name: "SwiftParser", package: "swift-syntax"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-            ]
-        ),
 
-        .executableTarget(
-            name: "Linter Build Errors",
-            dependencies: [
-                .product(name: "Byte", package: "swift-byte"),
-                .product(name: "File System", package: "swift-file-system"),
-                .product(name: "Lint", package: "swift-lint"),
-                .target(name: "Linter Rule Build Errors"),
-                .product(name: "Process", package: "swift-process"),
-            ]
-        ),
 
-        .plugin(
-            name: "Linter Build Errors Plugin",
-            capability: .buildTool(),
-            dependencies: [
-                .target(name: "Linter Build Errors")
-            ],
-            path: "Sources/Linter Build Errors Plugin"
-        ),
 
         .target(
             name: "Linter Rules Test Support",
@@ -280,14 +220,6 @@ let package = Package(
             path: "Tests/Support"
         ),
 
-        .testTarget(
-            name: "Linter Rule ResultBuilder Tests",
-            dependencies: [
-                .target(name: "Linter Rule ResultBuilder"),
-                .target(name: "Linter Rules Test Support"),
-                .product(name: "SwiftParser", package: "swift-syntax"),
-            ]
-        ),
 
         .testTarget(
             name: "Linter Rule Structure Tests",
@@ -334,25 +266,7 @@ let package = Package(
             ]
         ),
 
-        .testTarget(
-            name: "Linter Rule SQL Tests",
-            dependencies: [
-                .target(name: "Linter Rule SQL"),
-                .target(name: "Linter Rule Scope"),
-                .target(name: "Linter Rules Test Support"),
-                .product(name: "SwiftParser", package: "swift-syntax"),
-            ]
-        ),
 
-        .testTarget(
-            name: "Linter Rule Framework Tests",
-            dependencies: [
-                .target(name: "Linter Rule Framework"),
-                .target(name: "Linter Rule Scope"),
-                .target(name: "Linter Rules Test Support"),
-                .product(name: "SwiftParser", package: "swift-syntax"),
-            ]
-        ),
 
         .testTarget(
             name: "Linter Rule SwiftUI Tests",
@@ -364,11 +278,20 @@ let package = Package(
             ]
         ),
 
+
         .testTarget(
-            name: "Linter Rule Feature Tests",
+            name: "Linter Rule Platform Tests",
             dependencies: [
-                .target(name: "Linter Rule Feature"),
-                .target(name: "Linter Rule Scope"),
+                .target(name: "Linter Rule Platform"),
+                .target(name: "Linter Rules Test Support"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+
+        .testTarget(
+            name: "Linter Rule Throws Tests",
+            dependencies: [
+                .target(name: "Linter Rule Throws"),
                 .target(name: "Linter Rules Test Support"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
@@ -383,13 +306,6 @@ let package = Package(
             ]
         ),
 
-        .testTarget(
-            name: "Linter Rule Build Errors Tests",
-            dependencies: [
-                .target(name: "Linter Rule Build Errors"),
-                .target(name: "Linter Rules Test Support"),
-            ]
-        ),
     ],
     swiftLanguageModes: [.v6]
 )

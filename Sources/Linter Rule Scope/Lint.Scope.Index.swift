@@ -1,49 +1,49 @@
-package import Lint
+public import Lint
 internal import SwiftParser
-package import SwiftSyntax
+public import SwiftSyntax
 internal import Synchronization
 
 extension Lint.Scope {
 
-    package struct Index: Sendable, Equatable {
+    public struct Index: Sendable, Equatable {
 
-        package var views: Swift::Set<Swift::String> = []
+        public var views: Swift::Set<Swift::String> = []
 
-        package var representables: Swift::Set<Swift::String> = []
+        public var representables: Swift::Set<Swift::String> = []
 
-        package var observables: Swift::Set<Swift::String> = []
+        public var observables: Swift::Set<Swift::String> = []
 
-        package var features: Swift::Set<Swift::String> = []
+        public var features: Swift::Set<Swift::String> = []
 
-        package init() {}
+        public init() {}
     }
 }
 
 extension Lint.Scope.Index {
 
-    package static let viewProtocols: Swift::Set<Swift::String> = ["View"]
+    public static let viewProtocols: Swift::Set<Swift::String> = ["View"]
 
     /// Macros that make the type they are attached to a view, as TCA26's `@View(Feature.self)` does.
-    package static let viewMacros: Swift::Set<Swift::String> = ["View"]
+    public static let viewMacros: Swift::Set<Swift::String> = ["View"]
 
-    package static let representableProtocols: Swift::Set<Swift::String> = [
+    public static let representableProtocols: Swift::Set<Swift::String> = [
         "UIViewRepresentable", "NSViewRepresentable",
     ]
 
-    package mutating func formUnion(_ other: Self) {
+    public mutating func formUnion(_ other: Self) {
         views.formUnion(other.views)
         representables.formUnion(other.representables)
         observables.formUnion(other.observables)
         features.formUnion(other.features)
     }
 
-    package init(tree: SourceFileSyntax) {
+    public init(tree: SourceFileSyntax) {
         let collector = Collector()
         collector.walk(tree)
         self = collector.index
     }
 
-    package static func matches(
+    public static func matches(
         _ name: Swift::String,
         in names: Swift::Set<Swift::String>
     ) -> Swift::Bool {
@@ -56,7 +56,7 @@ extension Lint.Scope.Index {
         return false
     }
 
-    package static func of(_ source: borrowing Lint.Source.Parsed) -> Self {
+    public static func of(_ source: borrowing Lint.Source.Parsed) -> Self {
         var index = Self(tree: source.tree)
         if let root = Lint.Scope.File.root(of: source) {
             index.formUnion(cached(root: root))
@@ -80,7 +80,7 @@ extension Lint.Scope.Index {
 
 extension Lint.Scope.Index {
 
-    package static func conforms(
+    public static func conforms(
         _ clause: InheritanceClauseSyntax?,
         to protocols: Swift::Set<Swift::String>
     ) -> Swift::Bool {
@@ -102,7 +102,7 @@ extension Lint.Scope.Index {
         return false
     }
 
-    package static func attributed(
+    public static func attributed(
         _ attributes: AttributeListSyntax,
         _ names: Swift::Set<Swift::String>
     ) -> Swift::Bool {

@@ -1,13 +1,13 @@
-package import Lint
+public import Lint
 
 extension Lint.Scope {
 
-    package enum Target {}
+    public enum Target {}
 }
 
 extension Lint.Scope.Target {
 
-    package static func name(of path: Lint.Source.Path) -> Swift::String? {
+    public static func name(of path: Lint.Source.Path) -> Swift::String? {
         let components = path.underlying.split(separator: "/", omittingEmptySubsequences: true)
         let directories = components.dropLast()
         guard let anchor = directories.firstIndex(where: { $0 == "Sources" || $0 == "Tests" }) else {
@@ -18,7 +18,7 @@ extension Lint.Scope.Target {
         return Swift::String(directories[target])
     }
 
-    package static func named(
+    public static func named(
         _ path: Lint.Source.Path,
         suffix: Swift::String
     ) -> Swift::Bool {
@@ -27,7 +27,7 @@ extension Lint.Scope.Target {
     }
 
     /// Whether `path` is in a test target: its first directory is `Tests`.
-    package static func isTest(_ path: Lint.Source.Path) -> Swift::Bool {
+    public static func isTest(_ path: Lint.Source.Path) -> Swift::Bool {
         path.underlying.split(separator: "/", omittingEmptySubsequences: true).dropLast().first == "Tests"
     }
 }

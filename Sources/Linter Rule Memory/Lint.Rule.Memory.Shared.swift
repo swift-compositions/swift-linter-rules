@@ -1,21 +1,54 @@
 internal import SwiftSyntax
 
-internal func hasPositiveCopyable(
+internal func memoryWhereClauseHasPositiveCopyable(
     _ clause: GenericWhereClauseSyntax?
-) -> Swift::Bool {
+)
+    -> Swift::Bool
+{
     guard let clause else { return false }
     for requirement in clause.requirements {
         guard let conformance = requirement.requirement.as(ConformanceRequirementSyntax.self) else {
             continue
         }
-        if isPositiveCopyableMentioned(conformance.rightType) {
+        if memoryTypeMentionsPositiveCopyable(conformance.rightType) {
             return true
         }
     }
     return false
 }
 
-internal func isPositiveCopyableMentioned(_ type: TypeSyntax) -> Swift::Bool {
+internal func memoryWhereClauseHasNoncopyable(
+    _ clause: GenericWhereClauseSyntax?
+)
+    -> Swift::Bool
+{
+    guard let clause else { return false }
+    for requirement in clause.requirements {
+        guard let conformance = requirement.requirement.as(ConformanceRequirementSyntax.self) else {
+            continue
+        }
+        if memoryTypeMentionsSuppressedCopyable(conformance.rightType) {
+            return true
+        }
+    }
+    return false
+}
+
+private func memoryTypeMentionsSuppressedCopyable(_ type: TypeSyntax) -> Swift::Bool {
+    if let suppressed = type.as(SuppressedTypeSyntax.self) {
+        return memoryTypeMentionsPositiveCopyable(suppressed.type)
+    }
+    if let composition = type.as(CompositionTypeSyntax.self) {
+        for element in composition.elements {
+            if memoryTypeMentionsSuppressedCopyable(element.type) {
+                return true
+            }
+        }
+    }
+    return false
+}
+
+internal func memoryTypeMentionsPositiveCopyable(_ type: TypeSyntax) -> Swift::Bool {
     if let identifier = type.as(IdentifierTypeSyntax.self),
         identifier.name.text == "Copyable"
     {
@@ -30,7 +63,7 @@ internal func isPositiveCopyableMentioned(_ type: TypeSyntax) -> Swift::Bool {
     }
     if let composition = type.as(CompositionTypeSyntax.self) {
         for element in composition.elements {
-            if isPositiveCopyableMentioned(element.type) {
+            if memoryTypeMentionsPositiveCopyable(element.type) {
                 return true
             }
         }

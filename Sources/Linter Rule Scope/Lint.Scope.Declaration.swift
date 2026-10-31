@@ -1,16 +1,16 @@
-internal import Lint
-package import SwiftSyntax
+public import Lint
+public import SwiftSyntax
 
 extension Lint.Scope {
 
-    package enum Declaration {}
+    public enum Declaration {}
 }
 
 extension Lint.Scope.Declaration {
 
-    package static let topLevel: Swift::String = "(top level)"
+    public static let topLevel: Swift::String = "(top level)"
 
-    package static func identity(of node: some SyntaxProtocol) -> Swift::String {
+    public static func identity(of node: some SyntaxProtocol) -> Swift::String {
         var components: [Swift::String] = []
         var current: Syntax? = Syntax(node).parent
         while let ancestor = current {
@@ -23,7 +23,7 @@ extension Lint.Scope.Declaration {
         return components.reversed().joined(separator: ".")
     }
 
-    package static func qualified(type node: Syntax) -> Swift::String? {
+    public static func qualified(type node: Syntax) -> Swift::String? {
         guard let own = typeComponent(of: node) else { return nil }
         var components: [Swift::String] = [own]
         var current: Syntax? = node.parent
@@ -36,7 +36,7 @@ extension Lint.Scope.Declaration {
         return components.reversed().joined(separator: ".")
     }
 
-    package static func typeComponent(of node: Syntax) -> Swift::String? {
+    public static func typeComponent(of node: Syntax) -> Swift::String? {
         if let decl = node.as(StructDeclSyntax.self) { return unescaped(decl.name.text) }
         if let decl = node.as(ClassDeclSyntax.self) { return unescaped(decl.name.text) }
         if let decl = node.as(EnumDeclSyntax.self) { return unescaped(decl.name.text) }
@@ -46,7 +46,7 @@ extension Lint.Scope.Declaration {
         return nil
     }
 
-    package static func typeName(_ type: TypeSyntax) -> Swift::String {
+    public static func typeName(_ type: TypeSyntax) -> Swift::String {
         if let identifier = type.as(IdentifierTypeSyntax.self) {
             return unescaped(identifier.name.text)
         }
@@ -56,7 +56,7 @@ extension Lint.Scope.Declaration {
         return type.trimmedDescription
     }
 
-    package static func leaf(_ type: TypeSyntax) -> Swift::String {
+    public static func leaf(_ type: TypeSyntax) -> Swift::String {
         var current = type
         while true {
             if let attributed = current.as(AttributedTypeSyntax.self) {

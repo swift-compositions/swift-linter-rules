@@ -1,21 +1,21 @@
 internal import Byte
 internal import File_System
-package import Lint
+public import Lint
 
 private typealias FilePath = File.Path
 
 extension Lint.Scope {
 
-    package enum File {}
+    public enum File {}
 }
 
 extension Lint.Scope.File {
 
-    package static let skipped: Swift::Set<Swift::String> = [
+    public static let skipped: Swift::Set<Swift::String> = [
         ".build", ".git", ".swiftpm", ".claude", "node_modules", "checkouts", "DerivedData",
     ]
 
-    package static func swiftFiles(under directory: Swift::String) -> [Swift::String] {
+    public static func swiftFiles(under directory: Swift::String) -> [Swift::String] {
         var out: [Swift::String] = []
         for name in entries(in: directory) {
             let child = directory + "/" + name
@@ -32,7 +32,7 @@ extension Lint.Scope.File {
 
 extension Lint.Scope.File {
 
-    package static func text(at raw: Swift::String) -> Swift::String? {
+    public static func text(at raw: Swift::String) -> Swift::String? {
         guard let path = try? FilePath(raw) else { return nil }
         return try? File.System.Read.Full.read(from: path) { span -> Swift::String in
             var bytes: [Swift::UInt8] = []
@@ -44,19 +44,19 @@ extension Lint.Scope.File {
         }
     }
 
-    package static func isDirectory(_ raw: Swift::String) -> Swift::Bool {
+    public static func isDirectory(_ raw: Swift::String) -> Swift::Bool {
         guard let path = try? FilePath(raw), let info = try? File.System.Stat.info(at: path) else { return false }
         if case .directory = info.type { return true }
         return false
     }
 
-    package static func isFile(_ raw: Swift::String) -> Swift::Bool {
+    public static func isFile(_ raw: Swift::String) -> Swift::Bool {
         guard let path = try? FilePath(raw), let info = try? File.System.Stat.info(at: path) else { return false }
         if case .regular = info.type { return true }
         return false
     }
 
-    package static func entries(in directory: Swift::String) -> [Swift::String] {
+    public static func entries(in directory: Swift::String) -> [Swift::String] {
         guard let path = try? FilePath(directory),
             let listing = try? File.Directory.Contents.list(at: File.Directory(path))
         else { return [] }
@@ -68,7 +68,7 @@ extension Lint.Scope.File {
 
     /// Whether `path`'s last component is a package manifest: exactly `Package.swift`, or `Package@swift-<version>.swift`
     /// with a non-empty version. `MyPackage.swift` is not.
-    package static func isManifest(_ path: Lint.Source.Path) -> Swift::Bool {
+    public static func isManifest(_ path: Lint.Source.Path) -> Swift::Bool {
         guard let name = path.underlying.split(separator: "/", omittingEmptySubsequences: true).last else { return false }
         if name == "Package.swift" { return true }
         let prefix = "Package@swift-"
@@ -76,7 +76,7 @@ extension Lint.Scope.File {
         return name.hasPrefix(prefix) && name.hasSuffix(suffix) && name.count > prefix.count + suffix.count
     }
 
-    package static func root(of source: borrowing Lint.Source.Parsed) -> Swift::String? {
+    public static func root(of source: borrowing Lint.Source.Parsed) -> Swift::String? {
         let relative = source.path.underlying
         let absolute = Swift::String(source.file.filePath.map { $0 == "\\" ? "/" : $0 })
         guard !relative.isEmpty, isAbsolute(absolute), absolute.hasSuffix("/" + relative) else {

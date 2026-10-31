@@ -1,8 +1,8 @@
-internal import Lint
+public import Lint
 
 extension Lint.SwiftUI {
 
-    package enum Kind: Sendable, Hashable {
+    public enum Kind: Sendable, Hashable {
         case withAnimation
         case animationModifier
         case stateIdentity
