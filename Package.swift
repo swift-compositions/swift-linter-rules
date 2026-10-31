@@ -63,13 +63,6 @@ let package = Package(
             targets: ["Linter Rule Package"]
         ),
 
-
-
-
-
-
-
-
         .library(
             name: "Linter Rules Test Support",
             targets: ["Linter Rules Test Support"]
@@ -91,11 +84,9 @@ let package = Package(
         ),
         .package(url: "https://github.com/swift-atoms/swift-byte", branch: "main"),
         .package(url: "https://github.com/swift-compositions/swift-file-system.git", branch: "main"),
-        .package(url: "https://github.com/swift-standards/swift-spm-standard.git", branch: "main"),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "604.0.0"..<"605.0.0"),
     ],
     targets: [
-
 
         .target(
             name: "Linter Rule Structure",
@@ -157,10 +148,8 @@ let package = Package(
         .target(
             name: "Linter Rule Package",
             dependencies: [
-                .product(name: "Byte", package: "swift-byte"),
                 .product(name: "Lint", package: "swift-lint"),
                 .target(name: "Linter Rule Scope"),
-                .product(name: "SPM Standard", package: "swift-spm-standard"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
             ]
@@ -177,8 +166,6 @@ let package = Package(
             ]
         ),
 
-
-
         .target(
             name: "Linter Rule SwiftUI",
             dependencies: [
@@ -187,7 +174,6 @@ let package = Package(
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
             ]
         ),
-
 
         .target(
             name: "Linter Rules",
@@ -204,9 +190,6 @@ let package = Package(
             ]
         ),
 
-
-
-
         .target(
             name: "Linter Rules Test Support",
             dependencies: [
@@ -219,7 +202,6 @@ let package = Package(
             ],
             path: "Tests/Support"
         ),
-
 
         .testTarget(
             name: "Linter Rule Structure Tests",
@@ -266,8 +248,6 @@ let package = Package(
             ]
         ),
 
-
-
         .testTarget(
             name: "Linter Rule SwiftUI Tests",
             dependencies: [
@@ -277,7 +257,6 @@ let package = Package(
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),
-
 
         .testTarget(
             name: "Linter Rule Platform Tests",
