@@ -5,8 +5,9 @@ internal import SwiftSyntax
 extension Lint.SwiftUI {
 
     public static let scope: Swift::String =
-        "in types conforming to `View` and in extensions of them (types conforming to "
-        + "`UIViewRepresentable` or `NSViewRepresentable`, and their `Coordinator`, are exempt)"
+        "in types conforming to `View`, `ViewModifier` or a SwiftUI style protocol and in extensions of them "
+        + "(types conforming to `UIViewRepresentable` or `NSViewRepresentable`, and their `Coordinator`, are "
+        + "exempt)"
 
     public static func observe(
         _ kind: Kind,

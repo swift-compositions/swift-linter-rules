@@ -255,6 +255,7 @@ let package = Package(
                 .target(name: "Linter Rule Scope"),
                 .target(name: "Linter Rules Test Support"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
             ]
         ),
 

@@ -21,7 +21,11 @@ extension Lint.Scope {
 
 extension Lint.Scope.Index {
 
-    public static let viewProtocols: Swift::Set<Swift::String> = ["View"]
+    /// Views, and the modifiers and styles that draw views, which are held to the same rules.
+    public static let viewProtocols: Swift::Set<Swift::String> = [
+        "View", "ViewModifier", "ButtonStyle", "PrimitiveButtonStyle", "DisclosureGroupStyle", "ToggleStyle",
+        "LabelStyle", "LabeledContentStyle", "GroupBoxStyle", "MenuStyle", "ProgressViewStyle", "ControlGroupStyle",
+    ]
 
     /// Macros that make the type they are attached to a view, as TCA26's `@View(Feature.self)` does.
     public static let viewMacros: Swift::Set<Swift::String> = ["View"]
