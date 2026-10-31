@@ -58,7 +58,7 @@ extension Lint.SwiftUI {
             let name = Lint.Scope.Declaration.qualified(type: Syntax(node)) ?? ""
             let isView =
                 Lint.Scope.Index.conforms(inheritance, to: Lint.Scope.Index.viewProtocols)
-                || (extending && Lint.Scope.Index.matches(name, in: index.views))
+                || Lint.Scope.Index.matches(name, in: index.views)
             let isRepresentable =
                 Lint.Scope.Index.conforms(inheritance, to: Lint.Scope.Index.representableProtocols)
                 || (extending && Lint.Scope.Index.matches(name, in: index.representables))

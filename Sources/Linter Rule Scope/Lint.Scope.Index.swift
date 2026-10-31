@@ -23,6 +23,9 @@ extension Lint.Scope.Index {
 
     package static let viewProtocols: Swift::Set<Swift::String> = ["View"]
 
+    /// Macros that make the type they are attached to a view, as TCA26's `@View(Feature.self)` does.
+    package static let viewMacros: Swift::Set<Swift::String> = ["View"]
+
     package static let representableProtocols: Swift::Set<Swift::String> = [
         "UIViewRepresentable", "NSViewRepresentable",
     ]
@@ -128,7 +131,9 @@ extension Lint.Scope.Index {
             isClass: Swift::Bool
         ) {
             guard let name = Lint.Scope.Declaration.qualified(type: Syntax(node)) else { return }
-            if Lint.Scope.Index.conforms(inheritance, to: Lint.Scope.Index.viewProtocols) {
+            if Lint.Scope.Index.conforms(inheritance, to: Lint.Scope.Index.viewProtocols)
+                || Lint.Scope.Index.attributed(attributes, Lint.Scope.Index.viewMacros)
+            {
                 index.views.insert(name)
             }
             if Lint.Scope.Index.conforms(inheritance, to: Lint.Scope.Index.representableProtocols) {

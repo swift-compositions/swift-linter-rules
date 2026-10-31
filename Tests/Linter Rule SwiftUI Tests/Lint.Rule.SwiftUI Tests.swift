@@ -59,6 +59,28 @@ extension `SwiftUI Tests`.Scope {
     }
 
     @Test
+    func `a type made a view by TCA26's View macro fires, with its extensions`() {
+        let source = """
+            extension Laurie {
+              @View(Laurie.self)
+              struct View { @State private var sweep = false; let close: () -> Void }
+            }
+            extension Laurie.View { var body: some SwiftUI.View { Text("A").onAppear { } } }
+            """
+        #expect(`SwiftUI Tests`.findings(.`view state`, source).count == 2)
+        #expect(`SwiftUI Tests`.findings(.`view logic`, source).count == 1)
+    }
+
+    @Test
+    func `a type under another macro is not a view`() {
+        let source = """
+            @Feature struct Row { @State var expanded = false; func run() { _ = items.filter { $0 } } }
+            """
+        #expect(`SwiftUI Tests`.findings(.`view state`, source).isEmpty)
+        #expect(`SwiftUI Tests`.findings(.`view logic`, source).isEmpty)
+    }
+
+    @Test
     func `extension of a view in the same file fires`() {
         let source = """
             extension Laurie { struct Row: View { var body: some View { header } } }
