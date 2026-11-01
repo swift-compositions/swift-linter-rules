@@ -53,10 +53,6 @@ let package = Package(
             targets: ["Linter Rule Scope"]
         ),
 
-        .library(
-            name: "Linter Rule SwiftUI",
-            targets: ["Linter Rule SwiftUI"]
-        ),
 
         .library(
             name: "Linter Rule Package",
@@ -166,14 +162,6 @@ let package = Package(
             ]
         ),
 
-        .target(
-            name: "Linter Rule SwiftUI",
-            dependencies: [
-                .product(name: "Lint", package: "swift-lint"),
-                .target(name: "Linter Rule Scope"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-            ]
-        ),
 
         .target(
             name: "Linter Rules",
@@ -248,16 +236,6 @@ let package = Package(
             ]
         ),
 
-        .testTarget(
-            name: "Linter Rule SwiftUI Tests",
-            dependencies: [
-                .target(name: "Linter Rule SwiftUI"),
-                .target(name: "Linter Rule Scope"),
-                .target(name: "Linter Rules Test Support"),
-                .product(name: "SwiftParser", package: "swift-syntax"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-            ]
-        ),
 
         .testTarget(
             name: "Linter Rule Platform Tests",
