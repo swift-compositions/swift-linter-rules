@@ -1,4 +1,5 @@
 public import Lint
+internal import SwiftParser
 
 extension Lint.Rule {
 
@@ -20,10 +21,17 @@ extension Lint.Rule {
 
     public func outcomes() -> [Outcome] {
         controls.map { control in
+            var index = Lint.Source.Index.collect(from: Parser.parse(source: control.source), path: control.path.underlying)
+            for (path, source) in control.files {
+                index.merge(.collect(from: Parser.parse(source: source), path: path))
+            }
+            index.license = control.license
+            index.documents = control.documents
             let parsed = Lint.Source.parsed(
                 from: control.source,
                 file: control.path.underlying,
-                path: control.path
+                path: control.path,
+                index: index
             )
             let observation = observe(parsed, .warning)
             return Outcome(
