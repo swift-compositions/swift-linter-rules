@@ -263,3 +263,91 @@ extension `conflicting dependency url Tests`.`Edge Case` {
         #expect(findings.map(`conflicting dependency url Tests`.line) == ["7", "8"])
     }
 }
+
+extension `conflicting dependency url Tests` {
+    /// A checkout `tca` whose product `Feature` builds target `Feature`; `uses` are that target's dependencies,
+    /// and `Helpers`, which no product names, depends on `helpers`.
+    static func checkout(uses: Swift::String, helpers: Swift::String = "") -> Swift::String {
+        """
+        // swift-tools-version: 6.4
+        import PackageDescription
+
+        let package = Package(
+            name: "tca",
+            products: [.library(name: "Feature", targets: ["Feature"])],
+            traits: [.trait(name: "Dependencies")],
+            dependencies: [
+                .package(url: "https://github.com/pointfreeco/swift-dependencies", branch: "main"),
+            ],
+            targets: [
+                .target(name: "Feature", dependencies: [\(uses)]),
+                .target(name: "Helpers", dependencies: [\(helpers)]),
+            ]
+        )
+        """
+    }
+
+    static func graph(root traits: Swift::String, checkout: Swift::String) throws -> Lint.Source.Fixture {
+        try Lint.Source.Fixture(files: [
+            "Package.swift": manifest(
+                """
+                        .package(url: "https://github.com/swift-compositions/swift-dependencies.git", branch: "main"),
+                        .package(url: "https://github.com/pointfreeco/tca", branch: "main", traits: [\(traits)]),
+                """
+            ),
+            "Package.resolved": resolved([
+                ("swift-dependencies", "https://github.com/swift-compositions/swift-dependencies.git"),
+                ("tca", "https://github.com/pointfreeco/tca"),
+            ]),
+            ".build/checkouts/tca/Package.swift": checkout,
+            ".build/checkouts/swift-dependencies/Package.swift": manifest(""),
+        ])
+    }
+}
+
+extension `conflicting dependency url Tests`.Exemption {
+    @Test
+    func `a checkout's spelling used only under a trait no one enables is clean`() throws {
+        let fixture = try `conflicting dependency url Tests`.graph(
+            root: "",
+            checkout: `conflicting dependency url Tests`.checkout(
+                uses: #".product(name: "Dependencies", package: "swift-dependencies", condition: .when(traits: ["Dependencies"]))"#
+            )
+        )
+        #expect(`conflicting dependency url Tests`.findings(fixture).isEmpty)
+    }
+
+    @Test
+    func `a checkout's spelling used only by a target no product reaches is clean`() throws {
+        let fixture = try `conflicting dependency url Tests`.graph(
+            root: "",
+            checkout: `conflicting dependency url Tests`.checkout(
+                uses: "",
+                helpers: #".product(name: "Dependencies", package: "swift-dependencies")"#
+            )
+        )
+        #expect(`conflicting dependency url Tests`.findings(fixture).isEmpty)
+    }
+
+    @Test
+    func `a checkout's spelling a product's target uses is flagged`() throws {
+        let fixture = try `conflicting dependency url Tests`.graph(
+            root: "",
+            checkout: `conflicting dependency url Tests`.checkout(
+                uses: #".product(name: "Dependencies", package: "swift-dependencies")"#
+            )
+        )
+        #expect(`conflicting dependency url Tests`.findings(fixture).count == 1)
+    }
+
+    @Test
+    func `a checkout's spelling used under a trait the graph enables is flagged`() throws {
+        let fixture = try `conflicting dependency url Tests`.graph(
+            root: #""Dependencies""#,
+            checkout: `conflicting dependency url Tests`.checkout(
+                uses: #".product(name: "Dependencies", package: "swift-dependencies", condition: .when(traits: ["Dependencies"]))"#
+            )
+        )
+        #expect(`conflicting dependency url Tests`.findings(fixture).count == 1)
+    }
+}

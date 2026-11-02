@@ -10,7 +10,8 @@ extension Lint.Rule {
     /// Reads the `Package.resolved` beside a root `Package.swift`, and the manifests SwiftPM checked
     /// out for its pins under `.build/checkouts`. Every `.package(url:)` in the root and in those
     /// checkouts whose identity is pinned must canonicalise to the pin's location. Unpinned
-    /// identities are never loaded, so they are not checked. The rule sees only what is on disk: a
+    /// identities are never loaded, so they are not checked; nor is a checkout's spelling of a package that
+    /// none of its products' targets uses with the traits the graph asks of it on. The rule sees only what is on disk: a
     /// package without `Package.resolved` or checkouts contributes nothing, and an Xcode workspace's
     /// own resolution (`xcshareddata/swiftpm`, DerivedData checkouts) is not read.
     public static let `conflicting dependency url` = Lint.Rule(
@@ -141,7 +142,9 @@ package func packageConflictingDependencyURLFindings(
     let rootSpellings: [Spelling] = rootVisitor.urls.map { dependency in
         (dependency.url, source.converter.location(for: dependency.position).line)
     }
-    var manifests: [(relative: Swift::String, urls: [Spelling])] = [("Package.swift", rootSpellings)]
+    var manifests: [(relative: Swift::String, identity: Swift::String?, model: Lint.Rule.Package.Manifest, urls: [Spelling])] = [
+        ("Package.swift", nil, Lint.Rule.Package.Manifest(source.tree), rootSpellings)
+    ]
 
     let checkouts = root + "/.build/checkouts"
     var directories: [Swift::String: Swift::String] = [:]
@@ -161,7 +164,12 @@ package func packageConflictingDependencyURLFindings(
         let spellings: [Spelling] = visitor.urls.map { dependency in
             (dependency.url, converter.location(for: dependency.position).line)
         }
-        manifests.append((relative, spellings))
+        manifests.append((relative, identity, Lint.Rule.Package.Manifest(tree), spellings))
+    }
+
+    var requests: [Swift::String: [Lint.Rule.Package.Manifest.Request]] = [:]
+    for manifest in manifests {
+        for (identity, request) in manifest.model.requests { requests[identity, default: []].append(request) }
     }
 
     var rootPositions: [Swift::String: AbsolutePosition] = [:]
@@ -178,6 +186,11 @@ package func packageConflictingDependencyURLFindings(
                 packageConflictingDependencyURLCanonical(dependency.url)
                     != packageConflictingDependencyURLCanonical(pinned)
             else { continue }
+            if let owner = manifest.identity,
+                manifest.model.loads(identity, enabled: manifest.model.enabled(requests[owner] ?? [])) == false
+            {
+                continue
+            }
             let position: AbsolutePosition
             let spelledBy: Swift::String
             if index == 0 {
