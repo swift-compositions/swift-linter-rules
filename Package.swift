@@ -49,6 +49,11 @@ let package = Package(
         ),
 
         .library(
+            name: "Linter Rule Concurrency",
+            targets: ["Linter Rule Concurrency"]
+        ),
+
+        .library(
             name: "Linter Rule Scope",
             targets: ["Linter Rule Scope"]
         ),
@@ -134,6 +139,15 @@ let package = Package(
         ),
 
         .target(
+            name: "Linter Rule Concurrency",
+            dependencies: [
+                .product(name: "Lint", package: "swift-lint"),
+                .target(name: "Linter Rule Scope"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+            ]
+        ),
+
+        .target(
             name: "Linter Rule Suppression",
             dependencies: [
                 .product(name: "Lint", package: "swift-lint"),
@@ -175,6 +189,7 @@ let package = Package(
                 .target(name: "Linter Rule Suppression"),
                 .target(name: "Linter Rule Testing"),
                 .target(name: "Linter Rule Throws"),
+                .target(name: "Linter Rule Concurrency"),
             ]
         ),
 
@@ -241,6 +256,15 @@ let package = Package(
             name: "Linter Rule Platform Tests",
             dependencies: [
                 .target(name: "Linter Rule Platform"),
+                .target(name: "Linter Rules Test Support"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+
+        .testTarget(
+            name: "Linter Rule Concurrency Tests",
+            dependencies: [
+                .target(name: "Linter Rule Concurrency"),
                 .target(name: "Linter Rules Test Support"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]

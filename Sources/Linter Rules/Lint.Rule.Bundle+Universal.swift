@@ -1,4 +1,5 @@
 public import Lint
+import Linter_Rule_Concurrency
 import Linter_Rule_Idiom
 import Linter_Rule_Memory
 import Linter_Rule_Package
@@ -30,6 +31,8 @@ extension Lint.Rule.Bundle {
         .enable(.`convention c representability`, severity: .error),
 
         .enable(.`typed throws cannot use self error`, severity: .error),
+
+        .enable(.`blocking call in async`),
 
         .enable(.`inlinable internal access`, severity: .warning),
 
