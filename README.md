@@ -1,152 +1,21 @@
 # swift-linter-rules
 
-![Development Status](https://img.shields.io/badge/status-active--development-blue.svg)
+Use this package when you want ready-made lint rules for Swift packages, to run with swift-linter or another runner built on swift-lint. Start from `Lint.Rule.Bundle.universal` to enable the whole set, or depend on one `Linter Rule` product and enable its rules by ID. To write rules of your own, use swift-lint. To run rules over a package, use swift-linter.
 
-Catalog of SwiftSyntax-based AST lint rules consumable by
-[`swift-linter`](https://github.com/swift-compositions/swift-linter) or any
-third-party tool that imports the `Linter` protocol surface.
-Each rule ships as its own SwiftPM library product so consumers activate
-exactly the rules they want.
+## Laws
 
-## Quick Start
-
-In your `Lint/` nested SwiftPM package (per `swift-linter`'s adoption
-recipe), depend on this package and import the rule packs you want
-active:
-
-```swift
-// Lint/Package.swift
-.package(url: "https://github.com/swift-compositions/swift-linter-rules.git", branch: "main"),
-```
-
-> Pre-1.0: no version tags yet. APIs may change; pin a commit for reproducible builds.
-
-```swift
-// Lint/Sources/Lint/main.swift
-import Linter
-import Linter_Rule_Unchecked
-import Linter_Rule_Cardinal
-
-let manifest = Lint.Manifest(
-    enabledRuleIDs: [
-        Lint.Rule.Unchecked.id,
-        Lint.Rule.Cardinal.Count.id,
-    ]
-)
-```
-
-`swift run swift-linter <package>` builds the `Lint/` package and runs
-the activated rules against your sources.
-
-## Installation
-
-```swift
-dependencies: [
-    .package(url: "https://github.com/swift-compositions/swift-linter-rules.git", branch: "main"),
-]
-```
-
-> Pre-1.0: no version tags yet. APIs may change; pin a commit for reproducible builds.
-
-```swift
-.target(
-    name: "Lint",
-    dependencies: [
-        .product(name: "Linter Rule Cardinal", package: "swift-linter-rules"),
-        // ... additional rule pack products
-    ]
-)
-```
-
-## Rule catalog
-
-Each pack ships as its own SwiftPM product. Activate per-rule via the
-`Lint.Manifest`'s `enabledRuleIDs` list.
-
-| Pack product | Rule ID | What it catches |
-|---|---|---|
-| `Linter Rule Unchecked` | `` `unchecked call site` `` | `__unchecked:` argument labels at call sites that bypass the typed-system contract |
-| `Linter Rule Cardinal` | `` `zero or one literal` `` | `Cardinal(0)` / `Cardinal(1)` constructor calls (use the typed `.zero` / `.one` accessors instead) |
-| `Linter Rule Cardinal` | `` `count minus one` `` | `count - 1` and its semantically-equivalent rewrites — operand-reorder, paren-wrap, cast-outside |
-| `Linter Rule RawValue` | `` `chained rawvalue access` `` | Chained `.rawValue.method()` patterns that escape the typed wrapper |
-| `Linter Rule RawValue` | `` `bitpattern rawvalue chain` `` | Bit-pattern conversions chaining `.rawValue` |
-| `Linter Rule ResultBuilder` | `` `for loop in result builder` `` | `for i in 0..<N { i }` style integer loops in builder bodies |
-| `Linter Rule Package` | `` `conflicting dependency url` `` | A pinned package identity that a root `Package.swift`, or a manifest under its `.build/checkouts`, spells with a location other than its `Package.resolved` pin (after lowercasing and dropping scheme, `.git` and trailing `/`): two spellings of one package make SwiftPM walk every dependency path to reconcile them (swiftlang/swift-package-manager#10744). Unpinned identities and Xcode workspace resolution are not checked |
-| `Linter Rule Try` | `` `try optional` `` | `try?` sites that swallow typed-throws errors silently |
-| `Linter Rule Throws` | `` `untyped throws` `` | `throws` declarations without a typed-throws clause |
-| `Linter Rule Throws` | `` `existential throws` `` | `throws(any Error)` existential-error declarations |
-| `Linter Rule Naming` | `` `variable named impl` `` | Local bindings named `impl` (use the type's own name) |
-| `Linter Rule Naming` | `` `property named flags` `` | `OptionSet` types named `*.Flags` (use `*.Options`) |
-| `Linter Rule Naming` | `` `compound identifier` `` | Compound type, method, or property names that should decompose into nested forms |
-| `Linter Rule Naming` | `` `tag suffix` `` | Phantom-type tags suffixed with `Tag` (use the bare concept name) |
-
-## App rules
-
-Rules about apps (SwiftUI views, TCA features, Apple framework adapters, SQL) and the build-errors plugin are
-not universal Swift rules: they live in coenttb's own tooling, coenttb/coenttb-cli, which runs them with
-`coenttb lint`.
-
-## Authoring third-party rule packs
-
-Every rule pack — institute-canonical or third-party — implements the
-same protocol surface from
-[`swift-linter`](https://github.com/swift-molecules/swift-linter).
-A minimal third-party rule pack is one library product with a type
-conforming to `Lint.Rule.Protocol`:
-
-```swift
-// Sources/MyRule/MyRule.swift
-public import Linter
-internal import SwiftSyntax
-
-extension Lint.Rule {
-    public struct MyRule: Lint.Rule.`Protocol` {
-        public static let id: Lint.Rule.ID = "my_rule"
-        public static let defaultSeverity: Diagnostic.Severity = .warning
-
-        public let severity: Diagnostic.Severity
-
-        public init(severity: Diagnostic.Severity = .warning) {
-            self.severity = severity
-        }
-
-        public func findings(in source: Lint.Source.Parsed) -> [Lint.Finding] {
-            // Walk the AST, return findings for matching sites.
-            return []
-        }
-    }
-}
-```
-
-Consumers depend on your package alongside `swift-linter-rules` and
-import your rule pack the same way:
-
-```swift
-// Lint/Sources/Lint/main.swift
-import Linter
-import Linter_Rule_Cardinal       // institute-canonical pack
-import MyRule                      // third-party pack
-
-let manifest = Lint.Manifest(
-    enabledRuleIDs: [
-        Lint.Rule.Cardinal.Count.id,
-        Lint.Rule.MyRule.id,
-    ]
-)
-```
-
-The `swift-linter` driver makes no distinction between canonical and
-third-party packs — both flow through the same `Lint.Manifest`
-activation mechanism.
-
-## Consumers
-
-- [`swift-linter`](https://github.com/swift-compositions/swift-linter) —
-  the CLI driver and reporter shell.
-- Any third-party tooling that wants the same rule predicates without the
-  swift-linter executable (the predicates are pure functions over a
-  `SourceFileSyntax`).
-
-## License
-
-Apache 2.0. See [LICENSE.md](LICENSE.md).
+- Rules read syntax only, with no type checking, and most see one file at a time. A conformance, class or associated type declared in another file is not seen. The rules "conflicting dependency url" and "undeclared module import" are the exceptions: they read other files of the package on disk.
+- `Lint.Rule.Bundle.universal` enables every rule in this package except "comment". Some rules are enabled at a higher severity than their own default.
+- "blocking call in async" skips files whose path starts with `Tests/`. It counts a call as async when it sits in an async function, initializer or accessor, in a closure marked async, in a closure passed to `Task` or `Task.detached`, or in a closure that contains an await. Any other closure is synchronous, even inside an async function, so work handed to a thread pool in a plain closure is not flagged. An awaited call is never flagged, and `@concurrent` does not exempt a function.
+- "mock factory zero collision" applies only to files whose path contains `/Tests/`.
+- "extension noncopyable constraint" skips a file whose path contains " where ", an extension on a type written without generic arguments or a where clause, an extension on one of a fixed list of standard library types such as `Array` and `Optional`, an extension that uses a parameter pack, and one that requires `Copyable` explicitly.
+- "sendable struct with class member" knows a type is a class only when the class is declared in the same file or is one of a few well-known system classes. Computed and observed properties are ignored.
+- "unchecked sendable noncopyable" flags every noncopyable struct that conforms to `@unchecked Sendable`, without looking at its stored properties.
+- "usable from inline internal import" considers only imports written with `internal`. It flags such an import when any identifier inside a `@usableFromInline` declaration in the file is the module's name.
+- "redundant refinement" compares the last component of each type name against a fixed table of standard library refinements, so a qualified name matches by its leaf.
+- "conflicting dependency url" runs only on a `Package.swift`. It reads the `Package.resolved` beside it, in format 1, 2 or 3, and the manifests under `.build/checkouts`, whose directories are matched case-insensitively. Two locations are the same when they agree after lowercasing and dropping the scheme, the user, `.git` and trailing slashes, with an scp-style `host:path` read as `host/path`. A checkout's spelling counts only when a target one of its products reaches uses it with the traits the graph enables. Without a `Package.resolved`, or for an unpinned identity, nothing is reported. A conflict found in a checkout is reported at the root manifest's own spelling of that package.
+- "undeclared module import" runs only on the package manifest. It checks imports in `Sources` and `Tests`, skipping nested packages, and only module names that contain an underscore and don't start with one. Each module is reported once, at the `Package` call.
+- "comment" flags every comment, documentation comments included. It admits only `// swift-linter:` directives, the `// swift-tools-version:` line, and one `// REASON:` line directly under a disable directive.
+- "malformed suppression directive" accepts exactly `// swift-linter:disable:next` or `// swift-linter:disable:line` followed by a rule ID. Any other line comment that starts with `swift-linter:` is flagged. Documentation comments are not scanned.
+- `Lint.Scope.Index.of(_:)` reads every Swift file under the package root once per process and caches the result by root. Changes on disk after that are not seen. Folders such as `.build`, `.git` and `checkouts`, and `.docc` catalogs, are skipped.
+- `Lint.License.Header.recognize(in:)` looks only at comment blocks before the first line of code. A block counts as a license header when it mentions both "copyright" and "licensed under". A block that mentions a license without both is refused, and so is a license marker in a comment after the code starts.
