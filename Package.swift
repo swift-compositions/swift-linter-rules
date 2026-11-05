@@ -80,10 +80,10 @@ let package = Package(
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-atoms/swift-cardinal",
+            url: "https://github.com/swift-atoms/swift-cardinal.git",
             branch: "main"
         ),
-        .package(url: "https://github.com/swift-atoms/swift-byte", branch: "main"),
+        .package(url: "https://github.com/swift-atoms/swift-byte.git", branch: "main"),
         .package(url: "https://github.com/swift-compositions/swift-file-system.git", branch: "main"),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "604.0.0"..<"605.0.0"),
     ],
