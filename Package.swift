@@ -58,7 +58,6 @@ let package = Package(
             targets: ["Linter Rule Scope"]
         ),
 
-
         .library(
             name: "Linter Rule Package",
             targets: ["Linter Rule Package"]
@@ -177,7 +176,6 @@ let package = Package(
             ]
         ),
 
-
         .target(
             name: "Linter Rules",
             dependencies: [
@@ -251,7 +249,6 @@ let package = Package(
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]
         ),
-
 
         .testTarget(
             name: "Linter Rule Platform Tests",
