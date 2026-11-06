@@ -100,7 +100,7 @@ extension Lint.Rule.Comment {
 
     @usableFromInline
     internal static let message: Swift::String =
-        "[comment]: Swift carries no comments, `///` and `/* */` included; a name says what, a type or a test "
+        "[comment] Research/no-source-comments.md: Swift carries no comments, `///` and `/* */` included; a name says what, a type or a test "
         + "whose name states it says why, an issue link in a name records a workaround, and history is dropped. "
         + "Admitted: `// swift-linter:` directives and the one `// REASON:` line directly under one."
 
