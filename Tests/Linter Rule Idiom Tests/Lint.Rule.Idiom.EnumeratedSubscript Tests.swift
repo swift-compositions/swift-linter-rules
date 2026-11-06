@@ -17,7 +17,9 @@ import Testing
 
 @testable import Linter_Rule_Idiom
 
-extension Lint.Rule {
+enum `Lint.Rule Tests` {}
+
+extension `Lint.Rule Tests` {
     @Suite
     struct `enumerated with subscript Tests` {
         @Suite struct Unit {}
@@ -26,14 +28,14 @@ extension Lint.Rule {
     }
 }
 
-extension Lint.Rule.`enumerated with subscript Tests` {
+extension `Lint.Rule Tests`.`enumerated with subscript Tests` {
     static func findings(in source: String, file: String = "test.swift") -> [Diagnostic.Record] {
         let parsed = Lint.Source.parsed(from: source, file: file)
         return Lint.Rule.`enumerated with subscript`.observe(parsed, .warning).findings
     }
 }
 
-extension Lint.Rule.`enumerated with subscript Tests`.Unit {
+extension `Lint.Rule Tests`.`enumerated with subscript Tests`.Unit {
     @Test
     func `enumerated subscript pattern is flagged`() {
         let source = """
@@ -43,7 +45,7 @@ extension Lint.Rule.`enumerated with subscript Tests`.Unit {
                 }
             }
             """
-        let findings = Lint.Rule.`enumerated with subscript Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`enumerated with subscript Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "enumerated with subscript")
@@ -65,7 +67,7 @@ extension Lint.Rule.`enumerated with subscript Tests`.Unit {
                 }
             }
             """
-        let findings = Lint.Rule.`enumerated with subscript Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`enumerated with subscript Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -81,7 +83,7 @@ extension Lint.Rule.`enumerated with subscript Tests`.Unit {
                 }
             }
             """
-        let findings = Lint.Rule.`enumerated with subscript Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`enumerated with subscript Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -94,12 +96,12 @@ extension Lint.Rule.`enumerated with subscript Tests`.Unit {
                 }
             }
             """
-        let findings = Lint.Rule.`enumerated with subscript Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`enumerated with subscript Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.`enumerated with subscript Tests`.`Edge Case` {
+extension `Lint.Rule Tests`.`enumerated with subscript Tests`.`Edge Case` {
     @Test
     func `enumerated without subscript-by-i is NOT flagged`() {
         let source = """
@@ -109,7 +111,7 @@ extension Lint.Rule.`enumerated with subscript Tests`.`Edge Case` {
                 }
             }
             """
-        let findings = Lint.Rule.`enumerated with subscript Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`enumerated with subscript Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -122,7 +124,7 @@ extension Lint.Rule.`enumerated with subscript Tests`.`Edge Case` {
                 }
             }
             """
-        let findings = Lint.Rule.`enumerated with subscript Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`enumerated with subscript Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -133,7 +135,7 @@ extension Lint.Rule.`enumerated with subscript Tests`.`Edge Case` {
                 items.forEach { use($0) }
             }
             """
-        let findings = Lint.Rule.`enumerated with subscript Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`enumerated with subscript Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

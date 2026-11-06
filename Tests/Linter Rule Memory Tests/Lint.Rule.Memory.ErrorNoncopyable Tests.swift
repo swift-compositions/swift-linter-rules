@@ -17,7 +17,7 @@ import Testing
 
 @testable import Linter_Rule_Memory
 
-extension Lint.Rule {
+extension `Lint.Rule Tests` {
     @Suite
     struct `noncopyable error Tests` {
         @Suite struct Unit {}
@@ -26,7 +26,7 @@ extension Lint.Rule {
     }
 }
 
-extension Lint.Rule.`noncopyable error Tests` {
+extension `Lint.Rule Tests`.`noncopyable error Tests` {
     static func findings(
         in source: Swift::String,
         file: Swift::String = "Sources/X/Test.swift"
@@ -38,13 +38,13 @@ extension Lint.Rule.`noncopyable error Tests` {
     }
 }
 
-extension Lint.Rule.`noncopyable error Tests`.Unit {
+extension `Lint.Rule Tests`.`noncopyable error Tests`.Unit {
     @Test
     func `Error and noncopyable struct is flagged`() {
         let source = """
             struct MyError: Error, ~Copyable {}
             """
-        let findings = Lint.Rule.`noncopyable error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`noncopyable error Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -53,7 +53,7 @@ extension Lint.Rule.`noncopyable error Tests`.Unit {
         let source = """
             struct MyError: Error {}
             """
-        let findings = Lint.Rule.`noncopyable error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`noncopyable error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -62,7 +62,7 @@ extension Lint.Rule.`noncopyable error Tests`.Unit {
         let source = """
             struct Token: ~Copyable {}
             """
-        let findings = Lint.Rule.`noncopyable error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`noncopyable error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -73,7 +73,7 @@ extension Lint.Rule.`noncopyable error Tests`.Unit {
                 case oops
             }
             """
-        let findings = Lint.Rule.`noncopyable error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`noncopyable error Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -82,7 +82,7 @@ extension Lint.Rule.`noncopyable error Tests`.Unit {
         let source = """
             struct MyError: Swift.Error, ~Copyable {}
             """
-        let findings = Lint.Rule.`noncopyable error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`noncopyable error Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -91,7 +91,7 @@ extension Lint.Rule.`noncopyable error Tests`.Unit {
         let source = """
             struct Token: Sendable, ~Copyable {}
             """
-        let findings = Lint.Rule.`noncopyable error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`noncopyable error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -102,7 +102,7 @@ extension Lint.Rule.`noncopyable error Tests`.Unit {
         let source = """
             protocol Failure: Error, ~Copyable {}
             """
-        let findings = Lint.Rule.`noncopyable error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`noncopyable error Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -112,7 +112,7 @@ extension Lint.Rule.`noncopyable error Tests`.Unit {
             struct E: ~Copyable {}
             extension E: Error {}
             """
-        let findings = Lint.Rule.`noncopyable error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`noncopyable error Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -121,7 +121,7 @@ extension Lint.Rule.`noncopyable error Tests`.Unit {
         let source = """
             struct E: MyModule.Error, ~Copyable {}
             """
-        let findings = Lint.Rule.`noncopyable error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`noncopyable error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -130,7 +130,7 @@ extension Lint.Rule.`noncopyable error Tests`.Unit {
         let source = """
             final class MyError: Error, ~Copyable {}
             """
-        let findings = Lint.Rule.`noncopyable error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`noncopyable error Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -139,7 +139,7 @@ extension Lint.Rule.`noncopyable error Tests`.Unit {
         let source = """
             struct MyError: Error, ~Swift.Copyable {}
             """
-        let findings = Lint.Rule.`noncopyable error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`noncopyable error Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }

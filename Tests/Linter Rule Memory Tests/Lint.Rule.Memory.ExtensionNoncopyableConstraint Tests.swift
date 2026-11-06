@@ -17,7 +17,7 @@ import Testing
 
 @testable import Linter_Rule_Memory
 
-extension Lint.Rule {
+extension `Lint.Rule Tests` {
     @Suite
     struct `extension noncopyable constraint Tests` {
         @Suite struct Unit {}
@@ -26,7 +26,7 @@ extension Lint.Rule {
     }
 }
 
-extension Lint.Rule.`extension noncopyable constraint Tests` {
+extension `Lint.Rule Tests`.`extension noncopyable constraint Tests` {
     static func findings(
         in source: Swift::String,
         file: Swift::String = "Sources/X/Test.swift"
@@ -38,7 +38,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests` {
     }
 }
 
-extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
+extension `Lint.Rule Tests`.`extension noncopyable constraint Tests`.Unit {
     @Test
     func `extension with consuming method but no constraint is flagged`() {
         let source = """
@@ -46,7 +46,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 consuming func transfer() {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -57,7 +57,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 consuming func transfer() {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -68,7 +68,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 func describe() -> String { "" }
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -79,7 +79,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 borrowing func peek() {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -90,7 +90,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 func push(_ token: consuming Token) {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -104,7 +104,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 consuming func split() {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -118,7 +118,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 consuming func transfer() {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -131,7 +131,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 }
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -144,7 +144,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 }
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -161,7 +161,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 consuming func transfer() {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -183,7 +183,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 func consume<T>(_ value: consuming T) {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -194,7 +194,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 func inspect<T>(_ value: borrowing T) {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -205,7 +205,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 init<T>(consuming value: consuming T) {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -216,7 +216,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 func take<T>(_ resource: consuming Resource) {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -227,7 +227,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 public consuming func consume<T>(_ type: T.Type) -> T { fatalError() }
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -238,7 +238,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 public borrowing func inspect<T>(_ type: T.Type) -> Bool { false }
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -253,7 +253,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 public consuming func replace<T>(_ next: consuming Resource, tag: T) {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -264,7 +264,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 consuming func transfer() {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -280,7 +280,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 consuming func transfer() {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -291,7 +291,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 consuming func transfer() {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -302,7 +302,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 consuming func transfer() {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -322,7 +322,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 consuming func transfer() {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -333,7 +333,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 consuming func transfer() {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -348,7 +348,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 borrowing func visibility(at position: Int) -> Int { 0 }
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -359,7 +359,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 consuming func transfer() {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -374,7 +374,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 consuming func transfer() {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -388,7 +388,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 func combine<each T>(_ value: consuming Element, _ values: repeat each T) {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -406,7 +406,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 func combine<each T>(_ value: consuming Element) {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -417,7 +417,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 consuming func transfer() {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -428,7 +428,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 consuming func transfer() {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(
             in: source,
             file: "Sources/X/Container where Element is Sendable.swift"
         )
@@ -442,7 +442,7 @@ extension Lint.Rule.`extension noncopyable constraint Tests`.Unit {
                 consuming func transfer() {}
             }
             """
-        let findings = Lint.Rule.`extension noncopyable constraint Tests`.findings(
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(
             in: source,
             file: "Sources/X/Container.swift"
         )

@@ -17,7 +17,9 @@ import Testing
 
 @testable import Linter_Rule_Memory
 
-extension Lint.Rule {
+enum `Lint.Rule Tests` {}
+
+extension `Lint.Rule Tests` {
     @Suite
     struct `borrowing self short circuit Tests` {
         @Suite struct Unit {}
@@ -26,7 +28,7 @@ extension Lint.Rule {
     }
 }
 
-extension Lint.Rule.`borrowing self short circuit Tests` {
+extension `Lint.Rule Tests`.`borrowing self short circuit Tests` {
     static func findings(
         in source: Swift::String,
         file: Swift::String = "test.swift"
@@ -38,7 +40,7 @@ extension Lint.Rule.`borrowing self short circuit Tests` {
     }
 }
 
-extension Lint.Rule.`borrowing self short circuit Tests`.Unit {
+extension `Lint.Rule Tests`.`borrowing self short circuit Tests`.Unit {
     @Test
     func `less-than operator with borrowing Self and OR is flagged`() {
         let source = """
@@ -46,7 +48,7 @@ extension Lint.Rule.`borrowing self short circuit Tests`.Unit {
                 lhs.priority < rhs.priority || (lhs.priority == rhs.priority && lhs.sequence < rhs.sequence)
             }
             """
-        let findings = Lint.Rule.`borrowing self short circuit Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`borrowing self short circuit Tests`.findings(in: source)
         // Two operators in the body: `||` and `&&` — both flagged.
         #expect(findings.count == 2)
         if findings.count >= 1 {
@@ -62,7 +64,7 @@ extension Lint.Rule.`borrowing self short circuit Tests`.Unit {
                 lhs.x == rhs.x && lhs.y == rhs.y
             }
             """
-        let findings = Lint.Rule.`borrowing self short circuit Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`borrowing self short circuit Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -78,12 +80,12 @@ extension Lint.Rule.`borrowing self short circuit Tests`.Unit {
                 return compare()
             }
             """
-        let findings = Lint.Rule.`borrowing self short circuit Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`borrowing self short circuit Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }
 
-extension Lint.Rule.`borrowing self short circuit Tests`.`Edge Case` {
+extension `Lint.Rule Tests`.`borrowing self short circuit Tests`.`Edge Case` {
     @Test
     func `tuple comparison alternative is NOT flagged`() {
         let source = """
@@ -91,7 +93,7 @@ extension Lint.Rule.`borrowing self short circuit Tests`.`Edge Case` {
                 (lhs.a, lhs.b) < (rhs.a, rhs.b)
             }
             """
-        let findings = Lint.Rule.`borrowing self short circuit Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`borrowing self short circuit Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -108,7 +110,7 @@ extension Lint.Rule.`borrowing self short circuit Tests`.`Edge Case` {
                 return lb < rb
             }
             """
-        let findings = Lint.Rule.`borrowing self short circuit Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`borrowing self short circuit Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -119,7 +121,7 @@ extension Lint.Rule.`borrowing self short circuit Tests`.`Edge Case` {
                 self.a < rhs.a || self.b < rhs.b
             }
             """
-        let findings = Lint.Rule.`borrowing self short circuit Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`borrowing self short circuit Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -130,7 +132,7 @@ extension Lint.Rule.`borrowing self short circuit Tests`.`Edge Case` {
                 lhs > 0 && rhs > 0 ? lhs + rhs : 0
             }
             """
-        let findings = Lint.Rule.`borrowing self short circuit Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`borrowing self short circuit Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -141,7 +143,7 @@ extension Lint.Rule.`borrowing self short circuit Tests`.`Edge Case` {
                 Self(rawValue: lhs.rawValue + rhs.rawValue)
             }
             """
-        let findings = Lint.Rule.`borrowing self short circuit Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`borrowing self short circuit Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

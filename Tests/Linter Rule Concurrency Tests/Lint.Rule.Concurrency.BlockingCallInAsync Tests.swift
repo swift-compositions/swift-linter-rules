@@ -6,12 +6,14 @@ import Testing
 
 @testable import Linter_Rule_Concurrency
 
-extension Lint.Rule {
+enum `Lint.Rule Tests` {}
+
+extension `Lint.Rule Tests` {
     @Suite
     struct `blocking call in async Tests` {}
 }
 
-extension Lint.Rule.`blocking call in async Tests` {
+extension `Lint.Rule Tests`.`blocking call in async Tests` {
     static func count(_ source: Swift::String, file: Swift::String = "Sources/Fetch/Fetch.swift") -> Swift::Int {
         Lint.Rule.`blocking call in async`.observe(Lint.Source.parsed(from: source, file: file), .warning).findings.count
     }

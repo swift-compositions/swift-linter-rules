@@ -17,7 +17,7 @@ import Testing
 
 @testable import Linter_Rule_Memory
 
-extension Lint.Rule {
+extension `Lint.Rule Tests` {
     @Suite
     struct `sendable struct with class member Tests` {
         @Suite struct Unit {}
@@ -26,7 +26,7 @@ extension Lint.Rule {
     }
 }
 
-extension Lint.Rule.`sendable struct with class member Tests` {
+extension `Lint.Rule Tests`.`sendable struct with class member Tests` {
     static func findings(
         in source: Swift::String,
         file: Swift::String = "test.swift"
@@ -38,7 +38,7 @@ extension Lint.Rule.`sendable struct with class member Tests` {
     }
 }
 
-extension Lint.Rule.`sendable struct with class member Tests`.Unit {
+extension `Lint.Rule Tests`.`sendable struct with class member Tests`.Unit {
     @Test
     func `struct unchecked Sendable with NSObject member is flagged`() {
         let source = """
@@ -46,7 +46,7 @@ extension Lint.Rule.`sendable struct with class member Tests`.Unit {
                 var inner: NSObject
             }
             """
-        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "sendable struct with class member")
@@ -61,7 +61,7 @@ extension Lint.Rule.`sendable struct with class member Tests`.Unit {
                 var storage: Storage
             }
             """
-        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -73,7 +73,7 @@ extension Lint.Rule.`sendable struct with class member Tests`.Unit {
                 var storage: Storage
             }
             """
-        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -87,12 +87,12 @@ extension Lint.Rule.`sendable struct with class member Tests`.Unit {
                 var storage: Foo.Storage
             }
             """
-        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.`sendable struct with class member Tests`.`Edge Case` {
+extension `Lint.Rule Tests`.`sendable struct with class member Tests`.`Edge Case` {
     @Test
     func `plain Sendable struct is NOT flagged`() {
         let source = """
@@ -100,7 +100,7 @@ extension Lint.Rule.`sendable struct with class member Tests`.`Edge Case` {
                 var inner: NSObject
             }
             """
-        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -111,7 +111,7 @@ extension Lint.Rule.`sendable struct with class member Tests`.`Edge Case` {
                 var inner: NSObject
             }
             """
-        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -123,7 +123,7 @@ extension Lint.Rule.`sendable struct with class member Tests`.`Edge Case` {
                 var name: String
             }
             """
-        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -137,7 +137,7 @@ extension Lint.Rule.`sendable struct with class member Tests`.`Edge Case` {
                 var r: ValueReference
             }
             """
-        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -149,7 +149,7 @@ extension Lint.Rule.`sendable struct with class member Tests`.`Edge Case` {
                 var storage: Storage { Storage() }
             }
             """
-        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -165,7 +165,7 @@ extension Lint.Rule.`sendable struct with class member Tests`.`Edge Case` {
                 }
             }
             """
-        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -179,7 +179,7 @@ extension Lint.Rule.`sendable struct with class member Tests`.`Edge Case` {
                 }
             }
             """
-        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -194,7 +194,7 @@ extension Lint.Rule.`sendable struct with class member Tests`.`Edge Case` {
                 }
             }
             """
-        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -208,7 +208,7 @@ extension Lint.Rule.`sendable struct with class member Tests`.`Edge Case` {
                 var connection: NetworkConnection
             }
             """
-        let findings = Lint.Rule.`sendable struct with class member Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`sendable struct with class member Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

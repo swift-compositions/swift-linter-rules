@@ -17,7 +17,9 @@ import Testing
 
 @testable import Linter_Rule_Throws
 
-extension Lint.Rule {
+enum `Lint.Rule Tests` {}
+
+extension `Lint.Rule Tests` {
     @Suite
     struct `typed throws cannot use self error Tests` {
         @Suite struct Unit {}
@@ -26,7 +28,7 @@ extension Lint.Rule {
     }
 }
 
-extension Lint.Rule.`typed throws cannot use self error Tests` {
+extension `Lint.Rule Tests`.`typed throws cannot use self error Tests` {
     static func findings(
         in source: Swift::String,
         file: Swift::String = "test.swift"
@@ -46,7 +48,7 @@ extension Lint.Rule.`typed throws cannot use self error Tests` {
 // associatedtype Error) `Self.Error` resolves correctly to a nested or
 // associated type and the rule stays silent.
 
-extension Lint.Rule.`typed throws cannot use self error Tests`.Unit {
+extension `Lint.Rule Tests`.`typed throws cannot use self error Tests`.Unit {
     @Test
     func `throws Self dot Error inside protocol WITHOUT associatedtype Error is flagged`() {
         let source = """
@@ -54,7 +56,7 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.Unit {
                 func f() throws(Self.Error)
             }
             """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         let count = findings.count
         #expect(count == 1)
         if count == 1 {
@@ -71,7 +73,7 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.Unit {
                 func b() throws(Self.Error)
             }
             """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.count == 2)
     }
 
@@ -82,7 +84,7 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.Unit {
                 func f() async throws(Self.Error)
             }
             """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -93,14 +95,14 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.Unit {
                 init() throws(Self.Error)
             }
             """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }
 
 // MARK: - Edge Case: contexts where Self.Error is well-defined
 
-extension Lint.Rule.`typed throws cannot use self error Tests`.`Edge Case` {
+extension `Lint.Rule Tests`.`typed throws cannot use self error Tests`.`Edge Case` {
     @Test
     func `throws Self dot Error inside protocol declaring associatedtype Error is NOT flagged`() {
         let source = """
@@ -109,7 +111,7 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.`Edge Case` {
                 func f() throws(Self.Error)
             }
             """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -120,7 +122,7 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.`Edge Case` {
                 func f() throws(Self.Error) -> Int { 0 }
             }
             """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -131,7 +133,7 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.`Edge Case` {
                 func f() throws(Self.Error) -> Int { 0 }
             }
             """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -142,7 +144,7 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.`Edge Case` {
                 func f() throws(Self.Error) -> Int { 0 }
             }
             """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -153,7 +155,7 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.`Edge Case` {
                 func f() throws(Self.Error) -> Int { 0 }
             }
             """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -164,7 +166,7 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.`Edge Case` {
                 func generate() throws(Self.Error) -> UInt64 { 0 }
             }
             """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -175,7 +177,7 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.`Edge Case` {
                 consuming func release() throws(Self.Error) { }
             }
             """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -186,7 +188,7 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.`Edge Case` {
                 func generate() throws(Random.Error) -> UInt64 { 0 }
             }
             """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -197,21 +199,21 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.`Edge Case` {
                 func acquire() throws(Storage.Pool.Error) { }
             }
             """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `bare throws is NOT flagged`() {
         let source = "func f() throws -> Int { 0 }"
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `non-throwing function is NOT flagged`() {
         let source = "func f() -> Int { 0 }"
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -219,7 +221,7 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.`Edge Case` {
     func `throws any Error is NOT flagged by this rule`() {
         // swiftlint:disable:next no_existential_throws
         let source = "func f() throws(any Error) -> Int { 0 }"
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -230,7 +232,7 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.`Edge Case` {
                 func f() throws(Self.OtherError) -> Int { 0 }
             }
             """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -241,14 +243,14 @@ extension Lint.Rule.`typed throws cannot use self error Tests`.`Edge Case` {
                 func f() throws(Foo.Error) -> Int { 0 }
             }
             """
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
     @Test
     func `Self dot Error in a string literal is NOT flagged`() {
         let source = "let s = \"throws(Self.Error)\""
-        let findings = Lint.Rule.`typed throws cannot use self error Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`typed throws cannot use self error Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 }

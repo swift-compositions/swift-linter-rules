@@ -17,7 +17,7 @@ import Testing
 
 @testable import Linter_Rule_Memory
 
-extension Lint.Rule {
+extension `Lint.Rule Tests` {
     @Suite
     struct `sending return conditional sendable state Tests` {
         @Suite struct Unit {}
@@ -27,7 +27,7 @@ extension Lint.Rule {
     }
 }
 
-extension Lint.Rule.`sending return conditional sendable state Tests` {
+extension `Lint.Rule Tests`.`sending return conditional sendable state Tests` {
     static func findings(
         in source: Swift::String,
         file: Swift::String = "Sources/X/Test.swift"
@@ -39,7 +39,7 @@ extension Lint.Rule.`sending return conditional sendable state Tests` {
     }
 }
 
-extension Lint.Rule.`sending return conditional sendable state Tests`.Unit {
+extension `Lint.Rule Tests`.`sending return conditional sendable state Tests`.Unit {
     @Test
     func `sending Base optional return on unchecked-Sendable-conditional-on-Base type is flagged`() {
         // The reproduction shape from swift-property#7: `State`
@@ -52,7 +52,7 @@ extension Lint.Rule.`sending return conditional sendable state Tests`.Unit {
             }
             extension State: @unchecked Sendable where Base: Sendable {}
             """
-        let findings = Lint.Rule.`sending return conditional sendable state Tests`.findings(
+        let findings = `Lint.Rule Tests`.`sending return conditional sendable state Tests`.findings(
             in: source
         )
         #expect(findings.count == 1)
@@ -69,7 +69,7 @@ extension Lint.Rule.`sending return conditional sendable state Tests`.Unit {
             }
             extension State: @unchecked Sendable where Base: Sendable {}
             """
-        let findings = Lint.Rule.`sending return conditional sendable state Tests`.findings(
+        let findings = `Lint.Rule Tests`.`sending return conditional sendable state Tests`.findings(
             in: source
         )
         #expect(findings.count == 1)
@@ -83,7 +83,7 @@ extension Lint.Rule.`sending return conditional sendable state Tests`.Unit {
             }
             extension State: @unchecked Sendable where Base: Sendable {}
             """
-        let findings = Lint.Rule.`sending return conditional sendable state Tests`.findings(
+        let findings = `Lint.Rule Tests`.`sending return conditional sendable state Tests`.findings(
             in: source
         )
         #expect(findings.count == 1)
@@ -100,7 +100,7 @@ extension Lint.Rule.`sending return conditional sendable state Tests`.Unit {
             }
             extension State: @unchecked Sendable where Base: Sendable {}
             """
-        let findings = Lint.Rule.`sending return conditional sendable state Tests`.findings(
+        let findings = `Lint.Rule Tests`.`sending return conditional sendable state Tests`.findings(
             in: source
         )
         #expect(findings.count == 1)
@@ -116,7 +116,7 @@ extension Lint.Rule.`sending return conditional sendable state Tests`.Unit {
                 public func borrow() -> sending Base? { fatalError() }
             }
             """
-        let findings = Lint.Rule.`sending return conditional sendable state Tests`.findings(
+        let findings = `Lint.Rule Tests`.`sending return conditional sendable state Tests`.findings(
             in: source
         )
         #expect(findings.count == 1)
@@ -130,7 +130,7 @@ extension Lint.Rule.`sending return conditional sendable state Tests`.Unit {
             }
             extension State: @unchecked Sendable where Base: Sendable {}
             """
-        let findings = Lint.Rule.`sending return conditional sendable state Tests`.findings(
+        let findings = `Lint.Rule Tests`.`sending return conditional sendable state Tests`.findings(
             in: source
         )
         #expect(findings.count == 1)
@@ -144,14 +144,14 @@ extension Lint.Rule.`sending return conditional sendable state Tests`.Unit {
             }
             extension State: @unchecked Sendable where Base: Sendable {}
             """
-        let findings = Lint.Rule.`sending return conditional sendable state Tests`.findings(
+        let findings = `Lint.Rule Tests`.`sending return conditional sendable state Tests`.findings(
             in: source
         )
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.`sending return conditional sendable state Tests`.`Edge Case` {
+extension `Lint.Rule Tests`.`sending return conditional sendable state Tests`.`Edge Case` {
     @Test
     func `sending return mentioning an unrelated type is NOT flagged`() {
         // The `sending` return here doesn't mention the gated parameter
@@ -162,7 +162,7 @@ extension Lint.Rule.`sending return conditional sendable state Tests`.`Edge Case
             }
             extension State: @unchecked Sendable where Base: Sendable {}
             """
-        let findings = Lint.Rule.`sending return conditional sendable state Tests`.findings(
+        let findings = `Lint.Rule Tests`.`sending return conditional sendable state Tests`.findings(
             in: source
         )
         #expect(findings.isEmpty)
@@ -181,14 +181,14 @@ extension Lint.Rule.`sending return conditional sendable state Tests`.`Edge Case
             }
             extension Bad: @unchecked Sendable where Base: Sendable {}
             """
-        let findings = Lint.Rule.`sending return conditional sendable state Tests`.findings(
+        let findings = `Lint.Rule Tests`.`sending return conditional sendable state Tests`.findings(
             in: source
         )
         #expect(findings.count == 1)
     }
 }
 
-extension Lint.Rule.`sending return conditional sendable state Tests`.Negative {
+extension `Lint.Rule Tests`.`sending return conditional sendable state Tests`.Negative {
     @Test
     func `plain Base optional return (no sending) is NOT flagged`() {
         let source = """
@@ -197,7 +197,7 @@ extension Lint.Rule.`sending return conditional sendable state Tests`.Negative {
             }
             extension State: @unchecked Sendable where Base: Sendable {}
             """
-        let findings = Lint.Rule.`sending return conditional sendable state Tests`.findings(
+        let findings = `Lint.Rule Tests`.`sending return conditional sendable state Tests`.findings(
             in: source
         )
         #expect(findings.isEmpty)
@@ -210,7 +210,7 @@ extension Lint.Rule.`sending return conditional sendable state Tests`.Negative {
                 public func borrow() -> sending Base? { fatalError() }
             }
             """
-        let findings = Lint.Rule.`sending return conditional sendable state Tests`.findings(
+        let findings = `Lint.Rule Tests`.`sending return conditional sendable state Tests`.findings(
             in: source
         )
         #expect(findings.isEmpty)
@@ -228,7 +228,7 @@ extension Lint.Rule.`sending return conditional sendable state Tests`.Negative {
             }
             extension State: Sendable where Base: Sendable {}
             """
-        let findings = Lint.Rule.`sending return conditional sendable state Tests`.findings(
+        let findings = `Lint.Rule Tests`.`sending return conditional sendable state Tests`.findings(
             in: source
         )
         #expect(findings.isEmpty)
@@ -242,7 +242,7 @@ extension Lint.Rule.`sending return conditional sendable state Tests`.Negative {
             }
             extension State: @unchecked Sendable where Base: Sendable {}
             """
-        let findings = Lint.Rule.`sending return conditional sendable state Tests`.findings(
+        let findings = `Lint.Rule Tests`.`sending return conditional sendable state Tests`.findings(
             in: source
         )
         #expect(findings.isEmpty)
@@ -260,7 +260,7 @@ extension Lint.Rule.`sending return conditional sendable state Tests`.Negative {
             }
             extension Storage: @unchecked Sendable {}
             """
-        let findings = Lint.Rule.`sending return conditional sendable state Tests`.findings(
+        let findings = `Lint.Rule Tests`.`sending return conditional sendable state Tests`.findings(
             in: source
         )
         #expect(findings.isEmpty)
@@ -268,7 +268,7 @@ extension Lint.Rule.`sending return conditional sendable state Tests`.Negative {
 
     @Test
     func `empty file produces no findings`() {
-        let findings = Lint.Rule.`sending return conditional sendable state Tests`.findings(in: "")
+        let findings = `Lint.Rule Tests`.`sending return conditional sendable state Tests`.findings(in: "")
         #expect(findings.isEmpty)
     }
 }

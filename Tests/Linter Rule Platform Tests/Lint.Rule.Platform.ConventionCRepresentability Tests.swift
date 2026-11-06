@@ -17,7 +17,9 @@ import Testing
 
 @testable import Linter_Rule_Platform
 
-extension Lint.Rule {
+enum `Lint.Rule Tests` {}
+
+extension `Lint.Rule Tests` {
     @Suite
     struct `convention c representability Tests` {
         @Suite struct Unit {}
@@ -26,7 +28,7 @@ extension Lint.Rule {
     }
 }
 
-extension Lint.Rule.`convention c representability Tests` {
+extension `Lint.Rule Tests`.`convention c representability Tests` {
     static func findings(
         in source: Swift::String,
         file: Swift::String = "test.swift"
@@ -38,13 +40,13 @@ extension Lint.Rule.`convention c representability Tests` {
     }
 }
 
-extension Lint.Rule.`convention c representability Tests`.Unit {
+extension `Lint.Rule Tests`.`convention c representability Tests`.Unit {
     @Test
     func `convention c with UnsafeMutablePointer to qualified type is flagged`() {
         let source = """
             let cb: @convention(c) (UnsafeMutablePointer<Kernel.Signal.Information>?) -> Void = { _ in }
             """
-        let findings = Lint.Rule.`convention c representability Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`convention c representability Tests`.findings(in: source)
         #expect(findings.count == 1)
         if findings.count == 1 {
             #expect(findings[0].identifier == "convention c representability")
@@ -57,7 +59,7 @@ extension Lint.Rule.`convention c representability Tests`.Unit {
         let source = """
             let cb: @convention(c) (UnsafePointer<Foo.Bar>?) -> Void = { _ in }
             """
-        let findings = Lint.Rule.`convention c representability Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`convention c representability Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -69,7 +71,7 @@ extension Lint.Rule.`convention c representability Tests`.Unit {
         let source = """
             let cb: @convention(c) (UnsafeMutablePointer<MyStruct>?) -> Void = { _ in }
             """
-        let findings = Lint.Rule.`convention c representability Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`convention c representability Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -78,18 +80,18 @@ extension Lint.Rule.`convention c representability Tests`.Unit {
         let source = """
             let cb: @convention(c) (UnsafeMutablePointer<Foo.Bar>?, UnsafeMutablePointer<Baz.Qux>?) -> Void = { _, _ in }
             """
-        let findings = Lint.Rule.`convention c representability Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`convention c representability Tests`.findings(in: source)
         #expect(findings.count == 2)
     }
 }
 
-extension Lint.Rule.`convention c representability Tests`.`Edge Case` {
+extension `Lint.Rule Tests`.`convention c representability Tests`.`Edge Case` {
     @Test
     func `convention c with OpaquePointer is NOT flagged`() {
         let source = """
             let cb: @convention(c) (OpaquePointer?) -> Void = { _ in }
             """
-        let findings = Lint.Rule.`convention c representability Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`convention c representability Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -98,7 +100,7 @@ extension Lint.Rule.`convention c representability Tests`.`Edge Case` {
         let source = """
             let cb: @convention(c) (UnsafeMutableRawPointer?) -> Void = { _ in }
             """
-        let findings = Lint.Rule.`convention c representability Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`convention c representability Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -107,7 +109,7 @@ extension Lint.Rule.`convention c representability Tests`.`Edge Case` {
         let source = """
             let cb: @convention(c) (UnsafeMutablePointer<Int32>?) -> Void = { _ in }
             """
-        let findings = Lint.Rule.`convention c representability Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`convention c representability Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -120,7 +122,7 @@ extension Lint.Rule.`convention c representability Tests`.`Edge Case` {
         let source = """
             let cb: @convention(c) (UnsafeMutablePointer<Int32Wrapper>?) -> Void = { _ in }
             """
-        let findings = Lint.Rule.`convention c representability Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`convention c representability Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 
@@ -129,7 +131,7 @@ extension Lint.Rule.`convention c representability Tests`.`Edge Case` {
         let source = """
             let cb: (UnsafeMutablePointer<Foo.Bar>?) -> Void = { _ in }
             """
-        let findings = Lint.Rule.`convention c representability Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`convention c representability Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -138,7 +140,7 @@ extension Lint.Rule.`convention c representability Tests`.`Edge Case` {
         let source = """
             let cb: @convention(swift) (UnsafeMutablePointer<Foo.Bar>?) -> Void = { _ in }
             """
-        let findings = Lint.Rule.`convention c representability Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`convention c representability Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -152,7 +154,7 @@ extension Lint.Rule.`convention c representability Tests`.`Edge Case` {
         let source = """
             let cb: @convention(c) (UnsafeMutablePointer<Darwin.kevent>?) -> Void = { _ in }
             """
-        let findings = Lint.Rule.`convention c representability Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`convention c representability Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -161,7 +163,7 @@ extension Lint.Rule.`convention c representability Tests`.`Edge Case` {
         let source = """
             let cb: @convention(c) (UnsafeMutablePointer<Glibc.stat>?) -> Void = { _ in }
             """
-        let findings = Lint.Rule.`convention c representability Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`convention c representability Tests`.findings(in: source)
         #expect(findings.isEmpty)
     }
 
@@ -170,7 +172,7 @@ extension Lint.Rule.`convention c representability Tests`.`Edge Case` {
         let source = """
             let cb: @convention(c, cType: "void (*)(int *)") (UnsafeMutablePointer<Foo.Bar>?) -> Void = { _ in }
             """
-        let findings = Lint.Rule.`convention c representability Tests`.findings(in: source)
+        let findings = `Lint.Rule Tests`.`convention c representability Tests`.findings(in: source)
         #expect(findings.count == 1)
     }
 }

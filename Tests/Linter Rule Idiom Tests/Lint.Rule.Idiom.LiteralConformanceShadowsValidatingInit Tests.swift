@@ -4,7 +4,7 @@ import Testing
 
 @testable import Linter_Rule_Idiom
 
-extension Lint.Rule {
+extension `Lint.Rule Tests` {
     @Suite
     struct `literal conformance shadows validating init Tests` {
         @Suite struct Unit {}
@@ -12,7 +12,7 @@ extension Lint.Rule {
     }
 }
 
-extension Lint.Rule.`literal conformance shadows validating init Tests` {
+extension `Lint.Rule Tests`.`literal conformance shadows validating init Tests` {
     static func findings(in source: Swift::String) -> [Diagnostic.Record] {
         Lint.Rule.`literal conformance shadows validating init`
             .observe(Lint.Source.parsed(from: source, file: "Sources/Fixture/Value.swift"), .warning)
@@ -20,10 +20,10 @@ extension Lint.Rule.`literal conformance shadows validating init Tests` {
     }
 }
 
-extension Lint.Rule.`literal conformance shadows validating init Tests`.Unit {
+extension `Lint.Rule Tests`.`literal conformance shadows validating init Tests`.Unit {
     @Test
     func `literal conformance alongside a throwing string protocol initializer is flagged`() {
-        let findings = Lint.Rule.`literal conformance shadows validating init Tests`.findings(
+        let findings = `Lint.Rule Tests`.`literal conformance shadows validating init Tests`.findings(
             in: """
                 struct Value: ExpressibleByStringLiteral {
                     init(_ value: some StringProtocol) throws {}
@@ -37,7 +37,7 @@ extension Lint.Rule.`literal conformance shadows validating init Tests`.Unit {
 
     @Test
     func `each half of the predicate alone is lawful`() {
-        let findings = Lint.Rule.`literal conformance shadows validating init Tests`.findings(
+        let findings = `Lint.Rule Tests`.`literal conformance shadows validating init Tests`.findings(
             in: """
                 struct Validated {
                     init(_ value: some StringProtocol) throws {}
@@ -51,10 +51,10 @@ extension Lint.Rule.`literal conformance shadows validating init Tests`.Unit {
     }
 }
 
-extension Lint.Rule.`literal conformance shadows validating init Tests`.`Edge Case` {
+extension `Lint.Rule Tests`.`literal conformance shadows validating init Tests`.`Edge Case` {
     @Test
     func `qualified conformance and typed initializer in separate extensions still fire`() {
-        let findings = Lint.Rule.`literal conformance shadows validating init Tests`.findings(
+        let findings = `Lint.Rule Tests`.`literal conformance shadows validating init Tests`.findings(
             in: """
                 struct Value {}
                 extension Value: Swift.ExpressibleByStringLiteral {}
