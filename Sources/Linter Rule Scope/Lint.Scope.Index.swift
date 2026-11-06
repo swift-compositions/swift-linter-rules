@@ -1,3 +1,4 @@
+internal import File_System
 public import Lint
 internal import SwiftParser
 public import SwiftSyntax
@@ -73,7 +74,8 @@ extension Lint.Scope.Index {
     fileprivate static func cached(root: Swift::String) -> Self {
         if let hit = cache.withLock({ $0[root] }) { return hit }
         var index = Self()
-        for path in Lint.Scope.File.swiftFiles(under: root) {
+        guard let directory = try? File.Directory(validating: root) else { return index }
+        for path in Lint.Scope.File.swiftFiles(under: directory) {
             guard let text = Lint.Scope.File.text(at: path) else { continue }
             index.formUnion(Self(tree: Parser.parse(source: text)))
         }

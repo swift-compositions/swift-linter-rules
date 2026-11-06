@@ -158,6 +158,7 @@ let package = Package(
         .target(
             name: "Linter Rule Package",
             dependencies: [
+                .product(name: "File System", package: "swift-file-system"),
                 .product(name: "Lint", package: "swift-lint"),
                 .target(name: "Linter Rule Scope"),
                 .product(name: "SwiftParser", package: "swift-syntax"),

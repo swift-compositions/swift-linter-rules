@@ -1,3 +1,4 @@
+internal import File_System
 public import Lint
 internal import Linter_Rule_Scope
 internal import SwiftParser
@@ -146,10 +147,11 @@ package func packageConflictingDependencyURLFindings(
         ("Package.swift", nil, Lint.Rule.Package.Manifest(source.tree), rootSpellings)
     ]
 
-    let checkouts = root + "/.build/checkouts"
     var directories: [Swift::String: Swift::String] = [:]
-    for name in Lint.Scope.File.entries(in: checkouts) {
-        directories[name.lowercased()] = name
+    if let checkouts = try? File.Directory(validating: root + "/.build/checkouts") {
+        for name in Lint.Scope.File.entries(in: checkouts) {
+            directories[name.lowercased()] = name
+        }
     }
     for identity in pins.keys.sorted() {
         guard let location = pins[identity] else { continue }

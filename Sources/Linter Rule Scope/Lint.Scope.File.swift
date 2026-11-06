@@ -1,5 +1,5 @@
 internal import Byte
-internal import File_System
+public import File_System
 public import Lint
 
 private typealias FilePath = File.Path
@@ -15,13 +15,15 @@ extension Lint.Scope.File {
         ".build", ".git", ".swiftpm", ".claude", "node_modules", "checkouts", "DerivedData",
     ]
 
-    public static func swiftFiles(under directory: Swift::String) -> [Swift::String] {
+    public static func swiftFiles(under directory: File.Directory) -> [Swift::String] {
         var out: [Swift::String] = []
         for name in entries(in: directory) {
-            let child = directory + "/" + name
+            let child = directory.path.string + "/" + name
             if isDirectory(child) {
-                guard !skipped.contains(name), !name.hasSuffix(".docc") else { continue }
-                out.append(contentsOf: swiftFiles(under: child))
+                guard !skipped.contains(name), !name.hasSuffix(".docc"),
+                    let subdirectory = try? File.Directory(validating: child)
+                else { continue }
+                out.append(contentsOf: swiftFiles(under: subdirectory))
             } else if isFile(child), name.hasSuffix(".swift") {
                 out.append(child)
             }
@@ -56,10 +58,8 @@ extension Lint.Scope.File {
         return false
     }
 
-    public static func entries(in directory: Swift::String) -> [Swift::String] {
-        guard let path = try? FilePath(directory),
-            let listing = try? File.Directory.Contents.list(at: File.Directory(path))
-        else { return [] }
+    public static func entries(in directory: File.Directory) -> [Swift::String] {
+        guard let listing = try? File.Directory.Contents.list(at: directory) else { return [] }
         return listing.compactMap { Swift::String($0.name) }.sorted()
     }
 }
