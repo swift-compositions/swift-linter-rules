@@ -52,6 +52,11 @@ extension `Lint.Rule Tests`.`blocking call in async Tests` {
         #expect(Self.count("func f() async throws { let o = try await Kernel.Thread.Pool.shared.run { Result { try Process.Spawn.run(c) } } }") == 0)
     }
 
+    @Test func `an enum case named wait is not a blocking call`() {
+        #expect(Self.count("func f() async { send(.wait(id)); let a = Action.wait(for: d); let b = Effect.Kind.wait(x) }") == 0)
+        #expect(Self.count("func f() async { _ = semaphore.wait(timeout: .now() + 1) }") == 1)
+    }
+
     @Test func `an awaited call of the same name is not blocking`() {
         #expect(Self.count("func f() async { await gate.wait(); try await Task.sleep(for: .seconds(1)); await clock.sleep(until: d) }") == 0)
     }

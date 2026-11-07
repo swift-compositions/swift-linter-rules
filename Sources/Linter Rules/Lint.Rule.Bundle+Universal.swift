@@ -34,10 +34,6 @@ extension Lint.Rule.Bundle {
 
         .enable(.`blocking call in async`),
 
-        .enable(.`inlinable internal access`, severity: .warning),
-
-        .enable(.`usable from inline internal import`),
-
         .enable(.`malformed suppression directive`, severity: .error),
 
         .enable(.`mock factory zero collision`, severity: .error),

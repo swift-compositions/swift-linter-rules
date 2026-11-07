@@ -58,8 +58,9 @@ internal let blockingCallInAsyncMessage: Swift::String =
 
 internal final class BlockingCallInAsyncVisitor: SyntaxVisitor {
     static let members: Swift::Set<Swift::String> = [
-        "waitUntilExit", "readDataToEndOfFile", "readToEnd", "readData", "wait",
+        "waitUntilExit", "readDataToEndOfFile", "readToEnd", "readData",
     ]
+    static let waitLabels: Swift::Set<Swift::String> = ["timeout", "wallTimeout"]
     static let functions: Swift::Set<Swift::String> = ["usleep", "sleep", "nanosleep"]
     static let contents: Swift::Set<Swift::String> = ["contentsOf", "contentsOfFile"]
     static let readers: Swift::Set<Swift::String> = ["Data", "String", "NSData", "NSString"]
@@ -101,6 +102,7 @@ internal final class BlockingCallInAsyncVisitor: SyntaxVisitor {
             let base = member.base?.trimmedDescription ?? ""
             if name == "sleep" { return base == "Thread" }
             if name == "run" { return base == "Process.Spawn" || base.hasSuffix("::Process.Spawn") }
+            if name == "wait" { return waits(call, base: base) }
             return Self.members.contains(name)
         }
         if let reference = call.calledExpression.as(DeclReferenceExprSyntax.self) {
@@ -111,6 +113,14 @@ internal final class BlockingCallInAsyncVisitor: SyntaxVisitor {
             }
         }
         return false
+    }
+
+    /// `semaphore.wait()` and `group.wait(timeout:)` block; `.wait(x)` and `Action.wait(id)` construct an enum case.
+    private func waits(_ call: FunctionCallExprSyntax, base: Swift::String) -> Swift::Bool {
+        guard let first = base.split(separator: ".").last?.first, !first.isUppercase else { return false }
+        return call.arguments.allSatisfy { argument in
+            argument.label.map { Self.waitLabels.contains($0.text) } ?? false
+        }
     }
 
     private func awaited(_ call: FunctionCallExprSyntax) -> Swift::Bool {
