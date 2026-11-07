@@ -7,6 +7,18 @@ extension Lint.Rule {
         default: .warning,
         controls: [
             .init(
+                id: "extension noncopyable constraint copyable implying where",
+                source: "extension Container where Element: SignedNumeric { consuming func transfer() {} }",
+                path: "Sources/X/Container+Numeric.swift",
+                expectation: .clean
+            ),
+            .init(
+                id: "extension noncopyable constraint same type where",
+                source: "extension Container where Element == UInt { consuming func transfer() {} }",
+                path: "Sources/X/Container+UInt.swift",
+                expectation: .clean
+            ),
+            .init(
                 id: "extension noncopyable constraint missing",
                 source: "extension Container<Element> { consuming func transfer() {} }",
                 path: "Sources/Memory Core/MissingNoncopyableConstraint.swift",
@@ -168,6 +180,9 @@ internal final class MemoryExtensionNoncopyableConstraintVisitor: SyntaxVisitor 
         guard !memoryWhereClauseHasPositiveCopyable(node.genericWhereClause) else {
             return .visitChildren
         }
+        guard !memoryExtensionWhereClauseExcludesNoncopyable(node.genericWhereClause) else {
+            return .visitChildren
+        }
         let location = converter.location(for: node.extendedType.positionAfterSkippingLeadingTrivia)
         matches.append(
             Diagnostic.Record(
@@ -184,4 +199,41 @@ internal final class MemoryExtensionNoncopyableConstraintVisitor: SyntaxVisitor 
         )
         return .visitChildren
     }
+}
+
+/// Protocols whose conformers are always `Copyable`, so a requirement on one
+/// already rules out `~Copyable` and the extension has nothing to relax.
+/// `Equatable`, `Hashable` and `Comparable` are left out: they admit `~Copyable`.
+private let memoryExtensionCopyableImplyingProtocols: Swift::Set<Swift::String> = [
+    "AdditiveArithmetic", "Numeric", "SignedNumeric", "BinaryInteger", "FixedWidthInteger",
+    "SignedInteger", "UnsignedInteger", "FloatingPoint", "BinaryFloatingPoint", "Strideable",
+    "RawRepresentable", "Sequence", "Collection", "BidirectionalCollection",
+    "RandomAccessCollection", "MutableCollection", "RangeReplaceableCollection",
+    "StringProtocol", "Codable", "Encodable", "Decodable", "CaseIterable", "AnyObject",
+]
+
+/// A where clause that requires a `Copyable`-implying protocol, or pins a
+/// parameter to a concrete type with `==`, leaves no `~Copyable` to add.
+private func memoryExtensionWhereClauseExcludesNoncopyable(
+    _ clause: GenericWhereClauseSyntax?
+) -> Swift::Bool {
+    guard let clause else { return false }
+    for requirement in clause.requirements {
+        if requirement.requirement.is(SameTypeRequirementSyntax.self) {
+            return true
+        }
+        guard let conformance = requirement.requirement.as(ConformanceRequirementSyntax.self) else {
+            continue
+        }
+        let types: [TypeSyntax] =
+            conformance.rightType.as(CompositionTypeSyntax.self).map { $0.elements.map(\.type) }
+            ?? [conformance.rightType]
+        let names = types.map { type in
+            Swift::String(type.trimmedDescription.split(separator: ".").last ?? "")
+        }
+        if names.contains(where: memoryExtensionCopyableImplyingProtocols.contains) {
+            return true
+        }
+    }
+    return false
 }

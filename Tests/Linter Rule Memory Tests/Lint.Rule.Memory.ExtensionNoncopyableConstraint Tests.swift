@@ -285,6 +285,50 @@ extension `Lint.Rule Tests`.`extension noncopyable constraint Tests`.Unit {
     }
 
     @Test
+    func `extension requiring a Copyable-implying protocol is exempt`() {
+        let source = """
+            extension Container where Element: SignedNumeric {
+                consuming func transfer() {}
+            }
+            """
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `extension requiring a Copyable-implying protocol in a composition is exempt`() {
+        let source = """
+            extension Container where Element: Sendable & Swift.RawRepresentable {
+                consuming func transfer() {}
+            }
+            """
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `extension pinning a parameter with a same-type requirement is exempt`() {
+        let source = """
+            extension Container where Element == UInt {
+                consuming func transfer() {}
+            }
+            """
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `extension requiring Equatable alone still fires`() {
+        let source = """
+            extension Container where Element: Equatable {
+                consuming func transfer() {}
+            }
+            """
+        let findings = `Lint.Rule Tests`.`extension noncopyable constraint Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
+
+    @Test
     func `extension with composition positive Copyable constraint is exempt per RULE-EXEMPT-1`() {
         let source = """
             extension Container where Element: SomeProtocol & Copyable {
