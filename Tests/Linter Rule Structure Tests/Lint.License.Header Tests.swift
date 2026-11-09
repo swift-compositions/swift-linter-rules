@@ -61,6 +61,25 @@ struct `License header` {
     }
 
     @Test
+    func `manifest tools directive directly above the header is preserved on removal`() {
+        let source = """
+            // swift-tools-version: 6.4
+            // Copyright (c) 2026 Example
+            // Licensed under Apache License v2.0
+
+            import PackageDescription
+            """
+        guard case .complete(let header) = Lint.License.Header.recognize(in: source) else {
+            Issue.record("expected a complete header after the tools directive")
+            return
+        }
+        #expect(
+            header.removing(from: source)
+                == "// swift-tools-version: 6.4\n\nimport PackageDescription"
+        )
+    }
+
+    @Test
     func `partial leading license block refuses removal`() {
         #expect(
             Lint.License.Header.recognize(

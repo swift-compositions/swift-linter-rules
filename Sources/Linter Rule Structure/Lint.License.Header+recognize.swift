@@ -12,6 +12,10 @@ extension Lint.License.Header {
 
         for (index, line) in lines.enumerated() {
             let trimmed = line.drop(while: { $0 == " " || $0 == "\t" })
+            if index == 0, Self.isToolsDirective(trimmed) {
+                blocks.append((index, [line]))
+                continue
+            }
             if !reachedCode, trimmed.hasPrefix("//") {
                 if current == nil { current = (index, []) }
                 current?.lines.append(line)
@@ -58,5 +62,12 @@ extension Lint.License.Header {
         guard !laterLicenseMarker else { return .refused(.interleaved) }
         if let recognized { return .complete(recognized) }
         return .absent
+    }
+
+    /// Whether `line` is a SwiftPM `// swift-tools-version:` directive, which is never part of a license block.
+    fileprivate static func isToolsDirective(_ line: Swift::Substring) -> Swift::Bool {
+        guard line.hasPrefix("//") else { return false }
+        let rest = line.dropFirst(2).drop(while: { $0 == " " || $0 == "\t" })
+        return rest.lowercased().hasPrefix("swift-tools-version:")
     }
 }
