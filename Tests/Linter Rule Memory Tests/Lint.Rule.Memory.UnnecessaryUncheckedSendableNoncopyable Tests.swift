@@ -80,3 +80,54 @@ extension `unchecked sendable noncopyable Tests`.Unit {
         #expect(findings.isEmpty)
     }
 }
+
+extension `unchecked sendable noncopyable Tests`.`Edge Case` {
+    @Test
+    func `noncopyable struct storing only Sendable values is flagged`() {
+        let source = """
+            struct Reader: ~Copyable, @unchecked Sendable {
+                let count: Int
+                var name: String
+                var handler: @Sendable () -> Void
+            }
+            """
+        let findings = `unchecked sendable noncopyable Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
+
+    @Test
+    func `noncopyable struct storing an unsafe pointer is not flagged`() {
+        let source = """
+            struct Arena: ~Copyable, @unchecked Sendable {
+                let base: UnsafeMutableRawPointer
+                let count: Int
+            }
+            """
+        let findings = `unchecked sendable noncopyable Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `noncopyable struct storing a non-Sendable closure is not flagged`() {
+        let source = """
+            struct Callback: ~Copyable, @unchecked Sendable {
+                let body: (() -> Void)?
+            }
+            """
+        let findings = `unchecked sendable noncopyable Tests`.findings(in: source)
+        #expect(findings.isEmpty)
+    }
+
+    @Test
+    func `static and computed pointer properties do not exempt the struct`() {
+        let source = """
+            struct Reader: ~Copyable, @unchecked Sendable {
+                static let shared: OpaquePointer? = nil
+                var address: UnsafeRawPointer? { nil }
+                let count: Int
+            }
+            """
+        let findings = `unchecked sendable noncopyable Tests`.findings(in: source)
+        #expect(findings.count == 1)
+    }
+}

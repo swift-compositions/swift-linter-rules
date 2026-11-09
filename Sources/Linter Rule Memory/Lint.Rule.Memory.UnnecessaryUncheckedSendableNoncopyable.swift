@@ -33,7 +33,8 @@ internal let `unchecked sendable noncopyable message`: Swift::String =
     + "The compiler synthesises and checks `Sendable` for `~Copyable` structs the "
     + "same way as for `Copyable` ones — there is no inference gap. `@unchecked "
     + "Sendable` here is a misleading safety claim. Drop `@unchecked` and let the "
-    + "checker verify."
+    + "checker verify. (Structs storing an unsafe pointer, `OpaquePointer`, "
+    + "`Unmanaged`, `AnyObject` or a non-`@Sendable` function are not flagged.)"
 
 internal final class MemoryUnnecessaryUncheckedSendableNoncopyableVisitor: SyntaxVisitor {
     let source: Source.File
@@ -88,6 +89,23 @@ internal final class MemoryUnnecessaryUncheckedSendableNoncopyableVisitor: Synta
         return nil
     }
 
+    private func storesNonSendable(_ memberBlock: MemberBlockSyntax) -> Bool {
+        for member in memberBlock.members {
+            guard let variable = member.decl.as(VariableDeclSyntax.self) else { continue }
+            let isTypeLevel = variable.modifiers.contains { modifier in
+                modifier.name.tokenKind == .keyword(.static) || modifier.name.tokenKind == .keyword(.class)
+            }
+            guard !isTypeLevel, !memoryStructSendableClassMemberIsComputed(variable) else { continue }
+            for binding in variable.bindings {
+                guard let type = binding.typeAnnotation?.type else { continue }
+                let finder = MemoryNonSendableStorageTypeFinder(viewMode: .sourceAccurate)
+                finder.walk(type)
+                if finder.found { return true }
+            }
+        }
+        return false
+    }
+
     override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
         guard let inheritanceClause = node.inheritanceClause else {
             return .visitChildren
@@ -96,6 +114,9 @@ internal final class MemoryUnnecessaryUncheckedSendableNoncopyableVisitor: Synta
             return .visitChildren
         }
         guard let position = uncheckedSendablePosition(inheritanceClause) else {
+            return .visitChildren
+        }
+        guard !storesNonSendable(node.memberBlock) else {
             return .visitChildren
         }
         let location = converter.location(for: position)
