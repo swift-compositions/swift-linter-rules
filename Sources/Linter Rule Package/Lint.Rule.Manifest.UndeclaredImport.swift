@@ -80,7 +80,6 @@ extension Lint.Rule {
             for root in ["Sources", "Tests"] {
                 for (path, entry) in source.index.imports(under: root) {
                     guard !nested.contains(where: { path.hasPrefix($0) }) else { continue }
-                    // Fixture sources are test data, compiled by no target.
                     guard !path.split(separator: "/").contains(where: { $0 == "Fixtures" || $0 == "fixtures" })
                     else { continue }
                     let module = entry.module.split(separator: ".").first.map(Swift::String.init) ?? entry.module
