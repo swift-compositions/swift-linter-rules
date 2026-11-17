@@ -27,6 +27,7 @@ extension Lint.Rule {
             }
             index.license = control.license
             index.documents = control.documents
+            index.packages = control.packages
             let parsed = Lint.Source.parsed(
                 from: control.source,
                 file: control.path.underlying,
